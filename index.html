@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ANAND MELAVA — Crimson Stardust & Ruby Cinematic Intro</title>
+  <!-- Tailwind CSS for cinema HUD and control buttons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Bebas Neue & Inter for pristine modern typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --red-primary: #e6194b;
+      --red-glow: #ff2a5f;
+      --red-deep: #8b0024;
+      --crimson-core: #ff3b69;
+      --ruby-light: #ffe5ec;
+      --ruby-accent: #ff0055;
+      --ruby-gold: #ffb4a2;
+      --speed-mult: 1;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background-color: #070204;
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+      color: #ffffff;
+    }
+
+    /* ==========================================================================
+       CINEMA STAGE & RED AMBIENT GLOW VIGNETTE
+       ========================================================================== */
+    #cinema-viewport {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background:
+        radial-gradient(ellipse at 50% 50%, rgba(225, 29, 72, 0.22) 0%, rgba(136, 19, 55, 0.12) 40%, rgba(7, 2, 4, 0.95) 75%, rgba(4, 1, 2, 1) 100%);
+      perspective: 1400px;
+      overflow: hidden;
+    }
+
+    /* Anamorphic ruby light streak across the horizon */
+    .anamorphic-beam {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 140vw;
+      height: 3px;
+      background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(255, 42, 95, 0.05) 15%, 
+        rgba(255, 42, 95, 0.5) 45%, 
+        rgba(255, 255, 255, 0.85) 50%, 
+        rgba(255, 42, 95, 0.5) 55%, 
+        rgba(255, 42, 95, 0.05) 85%, 
+        transparent 100%
+      );
+      filter: blur(1.5px) drop-shadow(0 0 16px rgba(255, 42, 95, 0.8));
+      opacity: 0.45;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Glowing crimson radial core */
+    .crimson-nebula-core {
+      position: absolute;
+      width: 700px;
+      height: 500px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(255, 42, 95, 0.16) 0%, rgba(159, 18, 57, 0.08) 50%, transparent 75%);
+      filter: blur(50px);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Stardust & Ember particle background canvas */
+    #starfield-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    /* ==========================================================================
+       ORIGINAL STAGE 1 & 2: RADIANT "AM" MONOGRAM & RUBY ENERGY CORE
+       ========================================================================== */
+    .am-stage-wrapper {
+      position: absolute;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: clamp(16px, 2.8vw, 36px);
+      transform-origin: 50% 50%;
+      will-change: transform, opacity, filter;
+      z-index: 20;
+      animation: original-am-zoom-burst calc(4.2s / var(--speed-mult)) cubic-bezier(0.45, 0, 0.85, 0.35) forwards;
+    }
+
+    .monogram-char-box {
+      position: relative;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(7rem, 21vw, 17rem);
+      line-height: 1;
+      font-weight: 700;
+      background: linear-gradient(180deg, #ffffff 0%, #ffe3e8 25%, #ff2a5f 60%, #b3002d 90%, #660018 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 35px rgba(255, 42, 95, 0.75)) drop-shadow(0 0 75px rgba(179, 0, 45, 0.5));
+      opacity: 0;
+      transform: scale(0.3) translateY(30px);
+      animation: monogram-ignite calc(3.2s / var(--speed-mult)) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .monogram-char-box:nth-child(2) {
+      animation-delay: calc(0.18s / var(--speed-mult));
+    }
+
+    @keyframes monogram-ignite {
+      0% {
+        opacity: 0;
+        transform: scale(0.3) translateY(40px);
+        filter: blur(15px) brightness(2.5);
+      }
+      38% {
+        opacity: 1;
+        transform: scale(1.12) translateY(-6px);
+        filter: blur(0px) brightness(1.6);
+      }
+      65% {
+        opacity: 1;
+        transform: scale(1) translateY(0px);
+        filter: blur(0px) brightness(1.2);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0px);
+        filter: blur(0px) brightness(1);
+      }
+    }
+
+    @keyframes original-am-zoom-burst {
+      0%, 55% {
+        transform: scale(1) translateZ(0);
+        opacity: 1;
+        filter: drop-shadow(0 0 45px rgba(255, 42, 95, 0.75));
+      }
+      72% {
+        transform: scale(1.45) translateZ(0);
+        opacity: 1;
+        filter: drop-shadow(0 0 95px rgba(255, 117, 143, 0.95)) brightness(1.6);
+      }
+      90% {
+        transform: scale(12.5) translateZ(0);
+        opacity: 0.85;
+        filter: brightness(2.2);
+      }
+      100% {
+        transform: scale(18.0) translateZ(0);
+        opacity: 0;
+        pointer-events: none;
+      }
+    }
+
+    /* ==========================================================================
+       STAGE 3: "A" AND "M" GLIDE INTO THEIR SPOTS & UNFURL "ANAND MELAVA"
+       ========================================================================== */
+    #wordmark-stage {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+      z-index: 25;
+      opacity: 0;
+      will-change: transform, opacity, filter;
+      animation: wordmark-stage-entry calc(6.2s / var(--speed-mult)) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes wordmark-stage-entry {
+      0%, 54% {
+        opacity: 0;
+        transform: scale(1.85);
+        filter: blur(14px) brightness(2.4);
+      }
+      66% {
+        opacity: 1;
+        transform: scale(1.06);
+        filter: blur(0px) brightness(1.4);
+      }
+      85% {
+        opacity: 1;
+        transform: scale(1.0);
+        filter: blur(0px) brightness(1.08);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(0.97);
+        filter: blur(0px) brightness(1);
+      }
+    }
+
+    .wordmark-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: clamp(2px, 0.55vw, 9px);
+      padding: 0 24px;
+      position: relative;
+      transform-style: preserve-3d;
+    }
+
+    .char-slot {
+      display: inline-flex;
+      align-items: flex-end;
+      position: relative;
+      will-change: transform, opacity, filter;
+    }
+
+    .char-slot.hero-lead {
+      z-index: 5;
+      animation: hero-am-glide-to-spot calc(6.2s / var(--speed-mult)) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes hero-am-glide-to-spot {
+      0%, 56% {
+        transform: translate3d(var(--start-x, 0px), 0px, 0px) scale(1.45);
+        filter: drop-shadow(0 0 42px rgba(255, 42, 95, 0.95)) brightness(1.5);
+      }
+      66% {
+        transform: translate3d(var(--start-x, 0px), 0px, 0px) scale(1.3);
+        filter: drop-shadow(0 0 35px rgba(225, 29, 72, 0.9)) brightness(1.3);
+      }
+      82% {
+        transform: translate3d(0px, 0px, 0px) scale(1);
+        filter: drop-shadow(0 0 22px rgba(255, 42, 95, 0.6)) brightness(1.06);
+      }
+      100% {
+        transform: translate3d(0px, 0px, 0px) scale(1);
+        filter: drop-shadow(0 0 14px rgba(255, 42, 95, 0.45)) brightness(1);
+      }
+    }
+
+    .char-slot.follower-char {
+      z-index: 2;
+      opacity: 0;
+      animation: follower-unfurl calc(6.2s / var(--speed-mult)) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes follower-unfurl {
+      0%, 68% {
+        opacity: 0;
+        transform: translate3d(var(--unfurl-from-x, -28px), 10px, 0px) scaleX(0.3);
+        filter: blur(10px) brightness(1.9);
+      }
+      76% {
+        opacity: 0;
+        transform: translate3d(calc(var(--unfurl-from-x, -28px) * 0.5), 5px, 0px) scaleX(0.6);
+        filter: blur(5px) brightness(1.5);
+      }
+      89% {
+        opacity: 1;
+        transform: translate3d(0px, 0px, 0px) scaleX(1);
+        filter: blur(0px) brightness(1.1);
+      }
+      100% {
+        opacity: 1;
+        transform: translate3d(0px, 0px, 0px) scaleX(1);
+        filter: blur(0px) brightness(1);
+      }
+    }
+
+    .arch-char {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3.3rem, 9.6vw, 9.2rem);
+      line-height: 0.88;
+      background: linear-gradient(180deg, #ffffff 0%, #ffd0d9 42%, #ff2a5f 80%, #9e0128 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+      position: relative;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      text-shadow: 0 16px 36px rgba(0, 0, 0, 0.9);
+      transform-origin: 50% 100%;
+    }
+
+    .arch-space {
+      width: clamp(16px, 2.8vw, 44px);
+      display: inline-block;
+    }
+
+    .arch-char.anchor-am {
+      background: linear-gradient(180deg, #fffcfd 0%, #ffe3e8 35%, #ff2a5f 75%, #b3002d 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 25px rgba(255, 42, 95, 0.65));
+    }
+
+    /* Ambient warm crimson floor reflection */
+    .wordmark-glow-floor {
+      width: min(85vw, 980px);
+      height: 48px;
+      margin-top: -12px;
+      background: radial-gradient(ellipse at 50% 0%, rgba(255, 42, 95, 0.45) 0%, rgba(179, 0, 45, 0.18) 45%, rgba(0, 0, 0, 0) 78%);
+      filter: blur(14px);
+      transform: scaleY(0.55);
+      opacity: 0;
+      animation: badge-fade-in calc(6.2s / var(--speed-mult)) ease forwards;
+    }
+
+    .presents-badge {
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 0.48em;
+      font-size: clamp(0.65rem, 1.1vw, 0.88rem);
+      color: rgba(255, 230, 235, 0.8);
+      text-transform: uppercase;
+      margin-bottom: 1.4rem;
+      opacity: 0;
+      animation: badge-fade-in calc(6.2s / var(--speed-mult)) ease forwards;
+      text-shadow: 0 0 12px rgba(255, 42, 95, 0.4);
+    }
+
+    @keyframes badge-fade-in {
+      0%, 80% {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .paused * {
+      animation-play-state: paused !important;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- MAIN CINEMA VIEWPORT -->
+  <main id="cinema-viewport">
+
+    <!-- Anamorphic Ruby Beam & Core Glow -->
+    <div class="anamorphic-beam"></div>
+    <div class="crimson-nebula-core"></div>
+
+    <!-- Starfield / Ember canvas background -->
+    <canvas id="starfield-canvas"></canvas>
+
+    <!-- ======================================================================
+         STAGE 1 & 2: RADIANT "AM" MONOGRAM & RUBY ENERGY CORE
+         ====================================================================== -->
+    <div id="am-wrapper" class="am-stage-wrapper">
+      <div class="monogram-char-box">A</div>
+      <div class="monogram-char-box">M</div>
+    </div>
+
+    <!-- ======================================================================
+         STAGE 3: "A" AND "M" GLIDE INTO THEIR SPOTS & REVEAL "ANAND MELAVA"
+         ====================================================================== -->
+    <div id="wordmark-stage">
+      <div class="presents-badge">An Original Cinematic Experience</div>
+      <div id="arched-wordmark" class="wordmark-row" aria-label="ANAND MELAVA">
+        <!-- Populated dynamically -->
+      </div>
+      <div class="wordmark-glow-floor"></div>
+    </div>
+
+    <!-- ======================================================================
+         TOP ARCHITECTURAL TELEMETRY BAR
+         ====================================================================== -->
+    <div id="hud-top" class="fixed top-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3 z-40 pointer-events-none transition-opacity duration-500">
+      <div class="pointer-events-auto flex items-center gap-3 bg-neutral-950/85 border border-red-500/25 backdrop-blur-md px-3.5 py-2 rounded-full shadow-2xl">
+        <span class="inline-block w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_#ff2a5f]"></span>
+        <span class="text-xs font-medium tracking-wider uppercase text-neutral-300">
+          Theme: <strong class="text-rose-400">Crimson Stardust & Ruby Monogram</strong>
+        </span>
+        <span id="phase-indicator" class="text-xs px-2.5 py-0.5 rounded-full bg-red-950/80 border border-red-500/35 text-rose-200 font-medium">
+          Phase 1: Radiant "AM" Ruby Ignition
+        </span>
+      </div>
+
+      <div class="pointer-events-auto hidden md:flex items-center gap-2 bg-neutral-950/85 border border-red-500/20 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs text-neutral-400 shadow-2xl">
+        <span class="text-rose-400 font-semibold">AM Ruby Ignition</span>
+        <span>→</span>
+        <span class="text-red-400">Crimson Nova Burst</span>
+        <span>→</span>
+        <span class="text-white font-semibold">A</span><span>NAND</span>
+        <span class="text-white font-semibold">M</span><span>ELAVA</span>
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         BOTTOM INTERACTIVE DIRECTOR BAR
+         ====================================================================== -->
+    <div id="hud-bottom" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 flex flex-wrap items-center justify-center gap-2.5 bg-neutral-950/90 border border-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-2xl transition-opacity duration-500 w-[92vw] max-w-2xl">
+      <button id="btn-replay" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 active:scale-95 text-xs sm:text-sm font-medium text-white transition">
+        <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        <span>Replay Intro</span>
+      </button>
+
+      <button id="btn-sound" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 active:scale-95 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-red-950/70 border border-red-400/30 transition">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" />
+        </svg>
+        <span>Play Cinematic Audio</span>
+      </button>
+
+      <button id="btn-pause" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition">
+        Pause
+      </button>
+
+      <div class="flex items-center gap-1 bg-black/60 border border-white/10 rounded-xl p-1">
+        <button data-speed="0.45" class="speed-btn px-2.5 py-1 rounded-lg text-xs text-neutral-400 hover:text-white transition">0.45x Slow-Mo</button>
+        <button data-speed="1" class="speed-btn px-2.5 py-1 rounded-lg text-xs bg-white/15 text-white font-medium transition">1x Normal</button>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    /**
+     * ========================================================================
+     * 1. CRIMSON EMBERS & RUBY STARDUST PARTICLE ENGINE
+     * ========================================================================
+     */
+    const canvas = document.getElementById('starfield-canvas');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    let animationFrameId = null;
+
+    const emberColors = [
+      '#ff2a5f', // vibrant ruby glow
+      '#ff1e56', // incandescent crimson
+      '#ff758f', // warm rose
+      '#ffb4a2', // ruby-gold spark
+      '#ffffff'  // white specular highlight
+    ];
+
+    function initStarfield() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      stars = [];
+      const count = Math.floor((canvas.width * canvas.height) / 7500);
+      for (let i = 0; i < count; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 1.8 + 0.4,
+          alpha: Math.random() * 0.8 + 0.2,
+          speed: Math.random() * 0.007 + 0.002,
+          vy: -(Math.random() * 0.35 + 0.1), // gentle upward floating embers
+          vx: (Math.random() - 0.5) * 0.18,
+          color: emberColors[Math.floor(Math.random() * emberColors.length)],
+          isEmber: Math.random() > 0.4
+        });
+      }
+    }
+
+    function renderStarfield() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach(s => {
+        s.alpha += s.speed;
+        if (s.alpha > 0.95 || s.alpha < 0.15) s.speed = -s.speed;
+
+        // Floating motion
+        s.y += s.vy;
+        s.x += s.vx;
+        if (s.y < -10) s.y = canvas.height + 10;
+        if (s.x < -10) s.x = canvas.width + 10;
+        if (s.x > canvas.width + 10) s.x = -10;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+        ctx.fillStyle = s.color;
+        ctx.globalAlpha = Math.abs(s.alpha);
+
+        if (s.isEmber) {
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = s.color;
+        }
+
+        ctx.fill();
+        ctx.restore();
+      });
+      animationFrameId = requestAnimationFrame(renderStarfield);
+    }
+
+    window.addEventListener('resize', () => {
+      initStarfield();
+    });
+
+    /**
+     * ========================================================================
+     * 2. BUILD ARCHED 3D "ANAND MELAVA" WORDMARK WITH DYNAMIC A & M SLOT GLIDE
+     * ========================================================================
+     */
+    function buildArchedWordmark() {
+      const text = 'ANAND MELAVA';
+      const container = document.getElementById('arched-wordmark');
+      container.innerHTML = '';
+
+      const chars = text.split('');
+      const midIndex = (chars.length - 1) / 2;
+      const slotElements = [];
+
+      chars.forEach((ch, idx) => {
+        if (ch === ' ') {
+          const spacer = document.createElement('span');
+          spacer.className = 'arch-space';
+          container.appendChild(spacer);
+          slotElements.push(null);
+          return;
+        }
+
+        const slot = document.createElement('span');
+        slot.className = 'char-slot';
+
+        const span = document.createElement('span');
+        span.className = 'arch-char';
+        span.textContent = ch;
+
+        const normDist = (idx - midIndex) / midIndex;
+        const absDist = Math.abs(normDist);
+
+        const scaleY = 1 + Math.pow(absDist, 1.85) * 0.22;
+        const translateY = Math.pow(absDist, 2) * 14;
+        const rotateZ = normDist * -4.2;
+
+        span.style.transform = `translateY(${translateY.toFixed(1)}px) scaleY(${scaleY.toFixed(3)}) rotateZ(${rotateZ.toFixed(2)}deg)`;
+
+        if (idx === 0 || idx === 6) {
+          slot.classList.add('hero-lead');
+          span.classList.add('anchor-am');
+        } else {
+          slot.classList.add('follower-char');
+          const distFromLead = idx < 5 ? idx : idx - 6;
+          slot.style.setProperty('--unfurl-from-x', `${-22 * distFromLead}px`);
+        }
+
+        slot.appendChild(span);
+        container.appendChild(slot);
+        slotElements.push(slot);
+      });
+
+      requestAnimationFrame(() => {
+        updateHeroAMOffsets(slotElements);
+      });
+    }
+
+    function updateHeroAMOffsets(slotElements) {
+      const container = document.getElementById('arched-wordmark');
+      if (!container) return;
+
+      const slots = slotElements || Array.from(container.querySelectorAll('.char-slot'));
+      const slotA = slots[0];
+      const slotM = container.querySelectorAll('.hero-lead')[1];
+      if (!slotA || !slotM) return;
+
+      const prevAnimA = slotA.style.animation;
+      const prevAnimM = slotM.style.animation;
+      slotA.style.animation = 'none';
+      slotM.style.animation = 'none';
+
+      const rowRect = container.getBoundingClientRect();
+      const rowCenterX = rowRect.left + rowRect.width / 2;
+
+      const rectA = slotA.getBoundingClientRect();
+      const rectM = slotM.getBoundingClientRect();
+
+      const finalCenterA = rectA.left + rectA.width / 2;
+      const finalCenterM = rectM.left + rectM.width / 2;
+
+      const pairHalfGap = (rectA.width + rectM.width) * 0.34;
+      const targetStartCenterA = rowCenterX - pairHalfGap;
+      const targetStartCenterM = rowCenterX + pairHalfGap;
+
+      const deltaA = targetStartCenterA - finalCenterA;
+      const deltaM = targetStartCenterM - finalCenterM;
+
+      slotA.style.setProperty('--start-x', `${deltaA.toFixed(1)}px`);
+      slotM.style.setProperty('--start-x', `${deltaM.toFixed(1)}px`);
+
+      slotA.style.animation = prevAnimA;
+      slotM.style.animation = prevAnimM;
+    }
+
+    /**
+     * ========================================================================
+     * 3. CINEMATIC WEB AUDIO SYNTHESIZER
+     * ========================================================================
+     */
+    let audioCtx = null;
+
+    function playCinematicAudio(speedMult = 1) {
+      try {
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          audioCtx = new AudioContextClass();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+
+        const now = audioCtx.currentTime;
+        const invSpeed = 1 / speedMult;
+
+        function triggerBell(startTime, freq, duration) {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, startTime);
+
+          gain.gain.setValueAtTime(0.0001, startTime);
+          gain.gain.linearRampToValueAtTime(0.55, startTime + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+          osc.connect(gain).connect(audioCtx.destination);
+          osc.start(startTime);
+          osc.stop(startTime + duration + 0.05);
+        }
+
+        triggerBell(now + 0.2 * invSpeed, 220, 2.5 * invSpeed);
+        triggerBell(now + 0.8 * invSpeed, 330, 3.2 * invSpeed);
+
+        const swellStart = now + 1.4 * invSpeed;
+        const swellDur = 3.5 * invSpeed;
+        const chordFreqs = [146.83, 220.00, 293.66, 369.99, 440.00, 587.33];
+
+        chordFreqs.forEach((freq, idx) => {
+          const osc = audioCtx.createOscillator();
+          const filter = audioCtx.createBiquadFilter();
+          const gain = audioCtx.createGain();
+
+          osc.type = idx % 2 === 0 ? 'triangle' : 'sawtooth';
+          osc.frequency.setValueAtTime(freq, swellStart);
+
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(400, swellStart);
+          filter.frequency.exponentialRampToValueAtTime(3200, swellStart + 1.5 * invSpeed);
+          filter.frequency.exponentialRampToValueAtTime(800, swellStart + swellDur);
+
+          gain.gain.setValueAtTime(0.0001, swellStart);
+          gain.gain.linearRampToValueAtTime(0.07 / Math.sqrt(idx + 1), swellStart + 1.2 * invSpeed);
+          gain.gain.exponentialRampToValueAtTime(0.0001, swellStart + swellDur);
+
+          osc.connect(filter).connect(gain).connect(audioCtx.destination);
+          osc.start(swellStart);
+          osc.stop(swellStart + swellDur + 0.1);
+        });
+      } catch (err) {
+        console.warn('Audio context skipped:', err);
+      }
+    }
+
+    /**
+     * ========================================================================
+     * 4. ANIMATION CONTROLLER & HUD EVENTS
+     * ========================================================================
+     */
+    const viewport = document.getElementById('cinema-viewport');
+    const phaseIndicator = document.getElementById('phase-indicator');
+    const btnReplay = document.getElementById('btn-replay');
+    const btnSound = document.getElementById('btn-sound');
+    const btnPause = document.getElementById('btn-pause');
+    const speedBtns = document.querySelectorAll('.speed-btn');
+
+    let currentSpeed = 1;
+    let isPaused = false;
+    let phaseTimers = [];
+
+    function clearPhaseTimers() {
+      phaseTimers.forEach((id) => clearTimeout(id));
+      phaseTimers = [];
+    }
+
+    function schedulePhaseUpdates() {
+      clearPhaseTimers();
+      const inv = 1 / currentSpeed;
+
+      phaseIndicator.textContent = 'Phase 1: Radiant "AM" Ruby Ignition';
+
+      phaseTimers.push(
+        setTimeout(() => {
+          if (!isPaused) {
+            phaseIndicator.textContent = 'Phase 2: Crimson Nova Burst & Glide';
+          }
+        }, 1800 * inv)
+      );
+
+      phaseTimers.push(
+        setTimeout(() => {
+          if (!isPaused) {
+            phaseIndicator.textContent = 'Phase 3: "A" & "M" Slot into ANAND MELAVA';
+          }
+        }, 3400 * inv)
+      );
+    }
+
+    function restartAnimation(withAudio = false) {
+      isPaused = false;
+      viewport.classList.remove('paused');
+      btnPause.textContent = 'Pause';
+
+      const amWrapper = document.getElementById('am-wrapper');
+      const wordmarkStage = document.getElementById('wordmark-stage');
+
+      const newAMWrapper = amWrapper.cloneNode(true);
+      amWrapper.parentNode.replaceChild(newAMWrapper, amWrapper);
+
+      const newWordmarkStage = wordmarkStage.cloneNode(true);
+      wordmarkStage.parentNode.replaceChild(newWordmarkStage, wordmarkStage);
+
+      updateHeroAMOffsets();
+      schedulePhaseUpdates();
+
+      if (withAudio) {
+        playCinematicAudio(currentSpeed);
+      }
+    }
+
+    btnReplay.addEventListener('click', () => restartAnimation(false));
+    btnSound.addEventListener('click', () => restartAnimation(true));
+
+    btnPause.addEventListener('click', () => {
+      isPaused = !isPaused;
+      viewport.classList.toggle('paused', isPaused);
+      btnPause.textContent = isPaused ? 'Resume' : 'Pause';
+    });
+
+    speedBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        currentSpeed = parseFloat(btn.getAttribute('data-speed'));
+        document.documentElement.style.setProperty('--speed-mult', currentSpeed);
+
+        speedBtns.forEach((b) => {
+          b.className = 'speed-btn px-2.5 py-1 rounded-lg text-xs text-neutral-400 hover:text-white transition';
+        });
+        btn.className = 'speed-btn px-2.5 py-1 rounded-lg text-xs bg-white/15 text-white font-medium transition';
+
+        restartAnimation(false);
+      });
+    });
+
+    window.addEventListener('resize', () => {
+      updateHeroAMOffsets();
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initStarfield();
+      renderStarfield();
+      buildArchedWordmark();
+      schedulePhaseUpdates();
+    });
+  </script>
+</body>
+</html>
