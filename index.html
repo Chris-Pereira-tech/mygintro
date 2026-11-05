@@ -16,11 +16,16 @@
       --red-primary: #e6194b;
       --red-glow: #ff2a5f;
       --red-deep: #8b0024;
-      --crimson-core: #ff3b69;
+      --crimson-core: #ff1e56;
       --ruby-light: #ffe5ec;
       --ruby-accent: #ff0055;
       --ruby-gold: #ffb4a2;
       --speed-mult: 1;
+
+      /* Dynamic glide offsets calculated via JS */
+      --glide-x-a: 0px;
+      --glide-x-m: 0px;
+      --hero-scale: 1.58;
     }
 
     * {
@@ -50,7 +55,7 @@
       justify-content: center;
       align-items: center;
       background:
-        radial-gradient(ellipse at 50% 50%, rgba(225, 29, 72, 0.22) 0%, rgba(136, 19, 55, 0.12) 40%, rgba(7, 2, 4, 0.95) 75%, rgba(4, 1, 2, 1) 100%);
+        radial-gradient(ellipse at 50% 50%, rgba(225, 29, 72, 0.24) 0%, rgba(136, 19, 55, 0.12) 38%, rgba(7, 2, 4, 0.95) 75%, rgba(4, 1, 2, 1) 100%);
       perspective: 1400px;
       overflow: hidden;
     }
@@ -67,7 +72,7 @@
         transparent 0%, 
         rgba(255, 42, 95, 0.05) 15%, 
         rgba(255, 42, 95, 0.5) 45%, 
-        rgba(255, 255, 255, 0.85) 50%, 
+        rgba(255, 255, 255, 0.9) 50%, 
         rgba(255, 42, 95, 0.5) 55%, 
         rgba(255, 42, 95, 0.05) 85%, 
         transparent 100%
@@ -78,16 +83,54 @@
       z-index: 2;
     }
 
+    /* Transition Shockwave Pulse Ring */
+    #shockwave-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 320px;
+      height: 320px;
+      margin-left: -160px;
+      margin-top: -160px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 42, 95, 0.85);
+      box-shadow: 0 0 45px rgba(255, 30, 86, 0.7), inset 0 0 35px rgba(255, 42, 95, 0.5);
+      pointer-events: none;
+      z-index: 12;
+      opacity: 0;
+      transform: scale(0.2);
+      animation: shockwave-burst calc(5.5s / var(--speed-mult)) cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+    }
+
+    @keyframes shockwave-burst {
+      0%, 36% {
+        opacity: 0;
+        transform: scale(0.2);
+      }
+      38% {
+        opacity: 0.95;
+        transform: scale(0.35);
+      }
+      52% {
+        opacity: 0;
+        transform: scale(3.6);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(4.0);
+      }
+    }
+
     /* Glowing crimson radial core */
     .crimson-nebula-core {
       position: absolute;
-      width: 700px;
-      height: 500px;
+      width: 750px;
+      height: 520px;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: radial-gradient(circle, rgba(255, 42, 95, 0.16) 0%, rgba(159, 18, 57, 0.08) 50%, transparent 75%);
-      filter: blur(50px);
+      background: radial-gradient(circle, rgba(255, 42, 95, 0.18) 0%, rgba(159, 18, 57, 0.08) 50%, transparent 75%);
+      filter: blur(55px);
       pointer-events: none;
       z-index: 2;
     }
@@ -103,87 +146,7 @@
     }
 
     /* ==========================================================================
-       ORIGINAL STAGE 1 & 2: RADIANT "AM" MONOGRAM & RUBY ENERGY CORE
-       ========================================================================== */
-    .am-stage-wrapper {
-      position: absolute;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: clamp(16px, 2.8vw, 36px);
-      transform-origin: 50% 50%;
-      will-change: transform, opacity, filter;
-      z-index: 20;
-      animation: original-am-zoom-burst calc(4.2s / var(--speed-mult)) cubic-bezier(0.45, 0, 0.85, 0.35) forwards;
-    }
-
-    .monogram-char-box {
-      position: relative;
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(7rem, 21vw, 17rem);
-      line-height: 1;
-      font-weight: 700;
-      background: linear-gradient(180deg, #ffffff 0%, #ffe3e8 25%, #ff2a5f 60%, #b3002d 90%, #660018 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 0 35px rgba(255, 42, 95, 0.75)) drop-shadow(0 0 75px rgba(179, 0, 45, 0.5));
-      opacity: 0;
-      transform: scale(0.3) translateY(30px);
-      animation: monogram-ignite calc(3.2s / var(--speed-mult)) cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    .monogram-char-box:nth-child(2) {
-      animation-delay: calc(0.18s / var(--speed-mult));
-    }
-
-    @keyframes monogram-ignite {
-      0% {
-        opacity: 0;
-        transform: scale(0.3) translateY(40px);
-        filter: blur(15px) brightness(2.5);
-      }
-      38% {
-        opacity: 1;
-        transform: scale(1.12) translateY(-6px);
-        filter: blur(0px) brightness(1.6);
-      }
-      65% {
-        opacity: 1;
-        transform: scale(1) translateY(0px);
-        filter: blur(0px) brightness(1.2);
-      }
-      100% {
-        opacity: 1;
-        transform: scale(1) translateY(0px);
-        filter: blur(0px) brightness(1);
-      }
-    }
-
-    @keyframes original-am-zoom-burst {
-      0%, 55% {
-        transform: scale(1) translateZ(0);
-        opacity: 1;
-        filter: drop-shadow(0 0 45px rgba(255, 42, 95, 0.75));
-      }
-      72% {
-        transform: scale(1.45) translateZ(0);
-        opacity: 1;
-        filter: drop-shadow(0 0 95px rgba(255, 117, 143, 0.95)) brightness(1.6);
-      }
-      90% {
-        transform: scale(12.5) translateZ(0);
-        opacity: 0.85;
-        filter: brightness(2.2);
-      }
-      100% {
-        transform: scale(18.0) translateZ(0);
-        opacity: 0;
-        pointer-events: none;
-      }
-    }
-
-    /* ==========================================================================
-       STAGE 3: "A" AND "M" GLIDE INTO THEIR SPOTS & UNFURL "ANAND MELAVA"
+       UNIFIED WORDMARK STAGE: SEAMLESS AM GLIDE & WORDMARK UNFURL
        ========================================================================== */
     #wordmark-stage {
       position: absolute;
@@ -193,32 +156,27 @@
       justify-content: center;
       align-items: center;
       pointer-events: none;
-      z-index: 25;
-      opacity: 0;
-      will-change: transform, opacity, filter;
-      animation: wordmark-stage-entry calc(6.2s / var(--speed-mult)) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      z-index: 20;
+      will-change: transform, opacity;
+      animation: stage-reveal calc(5.5s / var(--speed-mult)) ease-out forwards;
     }
 
-    @keyframes wordmark-stage-entry {
-      0%, 54% {
-        opacity: 0;
-        transform: scale(1.85);
-        filter: blur(14px) brightness(2.4);
-      }
-      66% {
+    @keyframes stage-reveal {
+      0% {
         opacity: 1;
-        transform: scale(1.06);
-        filter: blur(0px) brightness(1.4);
+        transform: scale(1.05);
       }
-      85% {
+      40% {
+        opacity: 1;
+        transform: scale(1.02);
+      }
+      70% {
         opacity: 1;
         transform: scale(1.0);
-        filter: blur(0px) brightness(1.08);
       }
       100% {
         opacity: 1;
-        transform: scale(0.97);
-        filter: blur(0px) brightness(1);
+        transform: scale(1.0);
       }
     }
 
@@ -230,6 +188,7 @@
       padding: 0 24px;
       position: relative;
       transform-style: preserve-3d;
+      will-change: transform;
     }
 
     .char-slot {
@@ -239,64 +198,145 @@
       will-change: transform, opacity, filter;
     }
 
-    .char-slot.hero-lead {
-      z-index: 5;
-      animation: hero-am-glide-to-spot calc(6.2s / var(--speed-mult)) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    /* ==========================================================================
+       HERO ANCHORS: "A" (INDEX 0) AND "M" (INDEX 6)
+       Phase 1: Center stage as Monogram
+       Phase 2: Glide cleanly outwards into title anchor slots
+       ========================================================================== */
+    .char-slot.hero-lead-a {
+      z-index: 10;
+      animation: hero-a-glide calc(5.5s / var(--speed-mult)) cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
     }
 
-    @keyframes hero-am-glide-to-spot {
-      0%, 56% {
-        transform: translate3d(var(--start-x, 0px), 0px, 0px) scale(1.45);
-        filter: drop-shadow(0 0 42px rgba(255, 42, 95, 0.95)) brightness(1.5);
+    .char-slot.hero-lead-m {
+      z-index: 10;
+      animation: hero-m-glide calc(5.5s / var(--speed-mult)) cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
+    }
+
+    @keyframes hero-a-glide {
+      0% {
+        opacity: 0;
+        transform: translate3d(var(--glide-x-a, 0px), 0px, 0px) scale(calc(var(--hero-scale) * 0.45));
+        filter: blur(14px) brightness(2.6);
       }
-      66% {
-        transform: translate3d(var(--start-x, 0px), 0px, 0px) scale(1.3);
-        filter: drop-shadow(0 0 35px rgba(225, 29, 72, 0.9)) brightness(1.3);
+      18% {
+        opacity: 1;
+        transform: translate3d(var(--glide-x-a, 0px), 0px, 0px) scale(calc(var(--hero-scale) * 1.05));
+        filter: blur(0px) brightness(1.5) drop-shadow(0 0 35px rgba(255, 42, 95, 0.95));
       }
-      82% {
-        transform: translate3d(0px, 0px, 0px) scale(1);
-        filter: drop-shadow(0 0 22px rgba(255, 42, 95, 0.6)) brightness(1.06);
+      36% {
+        /* Hold position as Monogram center */
+        opacity: 1;
+        transform: translate3d(var(--glide-x-a, 0px), 0px, 0px) scale(var(--hero-scale));
+        filter: blur(0px) brightness(1.3) drop-shadow(0 0 45px rgba(255, 42, 95, 0.9));
+      }
+      40% {
+        /* Glide begins with energy pulse */
+        opacity: 1;
+        transform: translate3d(var(--glide-x-a, 0px), -2px, 0px) scale(calc(var(--hero-scale) * 1.04));
+        filter: blur(0px) brightness(1.6) drop-shadow(0 0 55px rgba(255, 42, 95, 1));
+      }
+      68% {
+        /* Arrives at title slot smoothly */
+        opacity: 1;
+        transform: translate3d(0px, 0px, 0px) scale(1.0);
+        filter: blur(0px) brightness(1.15) drop-shadow(0 0 26px rgba(255, 42, 95, 0.7));
+      }
+      85% {
+        opacity: 1;
+        transform: translate3d(0px, 0px, 0px) scale(1.0);
+        filter: blur(0px) brightness(1.05) drop-shadow(0 0 18px rgba(255, 42, 95, 0.55));
       }
       100% {
-        transform: translate3d(0px, 0px, 0px) scale(1);
-        filter: drop-shadow(0 0 14px rgba(255, 42, 95, 0.45)) brightness(1);
+        opacity: 1;
+        transform: translate3d(0px, 0px, 0px) scale(1.0);
+        filter: blur(0px) brightness(1.0) drop-shadow(0 0 14px rgba(255, 42, 95, 0.4));
       }
     }
 
+    @keyframes hero-m-glide {
+      0% {
+        opacity: 0;
+        transform: translate3d(var(--glide-x-m, 0px), 0px, 0px) scale(calc(var(--hero-scale) * 0.45));
+        filter: blur(14px) brightness(2.6);
+      }
+      20% {
+        opacity: 1;
+        transform: translate3d(var(--glide-x-m, 0px), 0px, 0px) scale(calc(var(--hero-scale) * 1.05));
+        filter: blur(0px) brightness(1.5) drop-shadow(0 0 35px rgba(255, 42, 95, 0.95));
+      }
+      36% {
+        /* Hold position as Monogram center */
+        opacity: 1;
+        transform: translate3d(var(--glide-x-m, 0px), 0px, 0px) scale(var(--hero-scale));
+        filter: blur(0px) brightness(1.3) drop-shadow(0 0 45px rgba(255, 42, 95, 0.9));
+      }
+      40% {
+        /* Glide begins with energy pulse */
+        opacity: 1;
+        transform: translate3d(var(--glide-x-m, 0px), -2px, 0px) scale(calc(var(--hero-scale) * 1.04));
+        filter: blur(0px) brightness(1.6) drop-shadow(0 0 55px rgba(255, 42, 95, 1));
+      }
+      68% {
+        /* Arrives at title slot smoothly */
+        opacity: 1;
+        transform: translate3d(0px, 0px, 0px) scale(1.0);
+        filter: blur(0px) brightness(1.15) drop-shadow(0 0 26px rgba(255, 42, 95, 0.7));
+      }
+      85% {
+        opacity: 1;
+        transform: translate3d(0px, 0px, 0px) scale(1.0);
+        filter: blur(0px) brightness(1.05) drop-shadow(0 0 18px rgba(255, 42, 95, 0.55));
+      }
+      100% {
+        opacity: 1;
+        transform: translate3d(0px, 0px, 0px) scale(1.0);
+        filter: blur(0px) brightness(1.0) drop-shadow(0 0 14px rgba(255, 42, 95, 0.4));
+      }
+    }
+
+    /* ==========================================================================
+       FOLLOWER CHARACTERS ("NAND" & "ELAVA")
+       Unfurl smoothly in the wake of A and M during Phase 2
+       ========================================================================== */
     .char-slot.follower-char {
-      z-index: 2;
+      z-index: 4;
       opacity: 0;
-      animation: follower-unfurl calc(6.2s / var(--speed-mult)) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation: follower-unfurl calc(5.5s / var(--speed-mult)) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation-delay: calc(var(--char-delay, 0s) / var(--speed-mult));
     }
 
     @keyframes follower-unfurl {
-      0%, 68% {
+      0%, 42% {
         opacity: 0;
-        transform: translate3d(var(--unfurl-from-x, -28px), 10px, 0px) scaleX(0.3);
-        filter: blur(10px) brightness(1.9);
+        transform: translate3d(var(--unfurl-from-x, -20px), 8px, 0px) scale(0.65);
+        filter: blur(8px) brightness(2.0);
       }
-      76% {
-        opacity: 0;
-        transform: translate3d(calc(var(--unfurl-from-x, -28px) * 0.5), 5px, 0px) scaleX(0.6);
-        filter: blur(5px) brightness(1.5);
+      55% {
+        opacity: 0.75;
+        transform: translate3d(calc(var(--unfurl-from-x, -20px) * 0.4), 3px, 0px) scale(0.9);
+        filter: blur(3px) brightness(1.4);
       }
-      89% {
+      72% {
         opacity: 1;
-        transform: translate3d(0px, 0px, 0px) scaleX(1);
+        transform: translate3d(0px, 0px, 0px) scale(1.0);
         filter: blur(0px) brightness(1.1);
       }
       100% {
         opacity: 1;
-        transform: translate3d(0px, 0px, 0px) scaleX(1);
-        filter: blur(0px) brightness(1);
+        transform: translate3d(0px, 0px, 0px) scale(1.0);
+        filter: blur(0px) brightness(1.0);
       }
     }
 
+    /* ==========================================================================
+       ARCHED TYPOGRAPHY STYLING & SHIMMER
+       ========================================================================== */
     .arch-char {
       font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(3.3rem, 9.6vw, 9.2rem);
+      font-size: clamp(3.5rem, 9.8vw, 9.4rem);
       line-height: 0.88;
-      background: linear-gradient(180deg, #ffffff 0%, #ffd0d9 42%, #ff2a5f 80%, #9e0128 100%);
+      background: linear-gradient(180deg, #ffffff 0%, #ffd0d9 38%, #ff2a5f 75%, #9e0128 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       display: inline-block;
@@ -308,45 +348,62 @@
     }
 
     .arch-space {
-      width: clamp(16px, 2.8vw, 44px);
+      width: clamp(18px, 3.2vw, 48px);
       display: inline-block;
     }
 
     .arch-char.anchor-am {
-      background: linear-gradient(180deg, #fffcfd 0%, #ffe3e8 35%, #ff2a5f 75%, #b3002d 100%);
+      background: linear-gradient(180deg, #ffffff 0%, #ffe3e8 32%, #ff2a5f 70%, #b3002d 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 0 25px rgba(255, 42, 95, 0.65));
+      filter: drop-shadow(0 0 28px rgba(255, 42, 95, 0.75));
     }
 
     /* Ambient warm crimson floor reflection */
     .wordmark-glow-floor {
-      width: min(85vw, 980px);
-      height: 48px;
-      margin-top: -12px;
-      background: radial-gradient(ellipse at 50% 0%, rgba(255, 42, 95, 0.45) 0%, rgba(179, 0, 45, 0.18) 45%, rgba(0, 0, 0, 0) 78%);
-      filter: blur(14px);
+      width: min(88vw, 1020px);
+      height: 52px;
+      margin-top: -10px;
+      background: radial-gradient(ellipse at 50% 0%, rgba(255, 42, 95, 0.5) 0%, rgba(179, 0, 45, 0.18) 45%, rgba(0, 0, 0, 0) 78%);
+      filter: blur(15px);
       transform: scaleY(0.55);
       opacity: 0;
-      animation: badge-fade-in calc(6.2s / var(--speed-mult)) ease forwards;
+      animation: badge-fade-in calc(5.5s / var(--speed-mult)) ease forwards;
+    }
+
+    .presents-badge-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 1.4rem;
+      opacity: 0;
+      animation: badge-fade-in calc(5.5s / var(--speed-mult)) ease forwards;
+    }
+
+    .badge-line {
+      width: clamp(24px, 4vw, 56px);
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 42, 95, 0.8), transparent);
     }
 
     .presents-badge {
       font-family: 'Inter', sans-serif;
       letter-spacing: 0.48em;
       font-size: clamp(0.65rem, 1.1vw, 0.88rem);
-      color: rgba(255, 230, 235, 0.8);
+      color: rgba(255, 230, 235, 0.85);
       text-transform: uppercase;
-      margin-bottom: 1.4rem;
-      opacity: 0;
-      animation: badge-fade-in calc(6.2s / var(--speed-mult)) ease forwards;
-      text-shadow: 0 0 12px rgba(255, 42, 95, 0.4);
+      font-weight: 500;
+      text-shadow: 0 0 14px rgba(255, 42, 95, 0.45);
     }
 
     @keyframes badge-fade-in {
-      0%, 80% {
+      0%, 65% {
         opacity: 0;
-        transform: translateY(8px);
+        transform: translateY(10px);
+      }
+      82% {
+        opacity: 0.8;
+        transform: translateY(2px);
       }
       100% {
         opacity: 1;
@@ -375,25 +432,22 @@
     <!-- Anamorphic Ruby Beam & Core Glow -->
     <div class="anamorphic-beam"></div>
     <div class="crimson-nebula-core"></div>
+    <div id="shockwave-ring"></div>
 
     <!-- Starfield / Ember canvas background -->
     <canvas id="starfield-canvas"></canvas>
 
     <!-- ======================================================================
-         STAGE 1 & 2: RADIANT "AM" MONOGRAM & RUBY ENERGY CORE
-         ====================================================================== -->
-    <div id="am-wrapper" class="am-stage-wrapper">
-      <div class="monogram-char-box">A</div>
-      <div class="monogram-char-box">M</div>
-    </div>
-
-    <!-- ======================================================================
-         STAGE 3: "A" AND "M" GLIDE INTO THEIR SPOTS & REVEAL "ANAND MELAVA"
+         UNIFIED WORDMARK STAGE: HERO "AM" GLIDES SEAMLESSLY INTO "ANAND MELAVA"
          ====================================================================== -->
     <div id="wordmark-stage">
-      <div class="presents-badge">An Original Cinematic Experience</div>
+      <div class="presents-badge-wrapper">
+        <span class="badge-line"></span>
+        <span class="presents-badge">An Original Cinematic Experience</span>
+        <span class="badge-line"></span>
+      </div>
       <div id="arched-wordmark" class="wordmark-row" aria-label="ANAND MELAVA">
-        <!-- Populated dynamically -->
+        <!-- Populated dynamically with mathematically aligned glide coords -->
       </div>
       <div class="wordmark-glow-floor"></div>
     </div>
@@ -413,12 +467,11 @@
       </div>
 
       <div class="pointer-events-auto hidden md:flex items-center gap-2 bg-neutral-950/85 border border-red-500/20 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs text-neutral-400 shadow-2xl">
-        <span class="text-rose-400 font-semibold">AM Ruby Ignition</span>
+        <span class="text-rose-400 font-semibold">AM Ruby Monogram</span>
         <span>→</span>
-        <span class="text-red-400">Crimson Nova Burst</span>
+        <span class="text-red-400">Clean Glide Transition</span>
         <span>→</span>
-        <span class="text-white font-semibold">A</span><span>NAND</span>
-        <span class="text-white font-semibold">M</span><span>ELAVA</span>
+        <span class="text-white font-semibold">ANAND MELAVA</span>
       </div>
     </div>
 
@@ -483,7 +536,7 @@
           radius: Math.random() * 1.8 + 0.4,
           alpha: Math.random() * 0.8 + 0.2,
           speed: Math.random() * 0.007 + 0.002,
-          vy: -(Math.random() * 0.35 + 0.1), // gentle upward floating embers
+          vy: -(Math.random() * 0.35 + 0.1),
           vx: (Math.random() - 0.5) * 0.18,
           color: emberColors[Math.floor(Math.random() * emberColors.length)],
           isEmber: Math.random() > 0.4
@@ -497,7 +550,6 @@
         s.alpha += s.speed;
         if (s.alpha > 0.95 || s.alpha < 0.15) s.speed = -s.speed;
 
-        // Floating motion
         s.y += s.vy;
         s.x += s.vx;
         if (s.y < -10) s.y = canvas.height + 10;
@@ -527,7 +579,7 @@
 
     /**
      * ========================================================================
-     * 2. BUILD ARCHED 3D "ANAND MELAVA" WORDMARK WITH DYNAMIC A & M SLOT GLIDE
+     * 2. ARCHED 3D WORDMARK WITH UNIFIED SEAMLESS "AM" GLIDE TRANSITION
      * ========================================================================
      */
     function buildArchedWordmark() {
@@ -558,19 +610,28 @@
         const normDist = (idx - midIndex) / midIndex;
         const absDist = Math.abs(normDist);
 
+        // Elegant cinema arch curvature
         const scaleY = 1 + Math.pow(absDist, 1.85) * 0.22;
         const translateY = Math.pow(absDist, 2) * 14;
         const rotateZ = normDist * -4.2;
 
         span.style.transform = `translateY(${translateY.toFixed(1)}px) scaleY(${scaleY.toFixed(3)}) rotateZ(${rotateZ.toFixed(2)}deg)`;
 
-        if (idx === 0 || idx === 6) {
-          slot.classList.add('hero-lead');
+        if (idx === 0) {
+          // 'A' Hero Anchor
+          slot.classList.add('hero-lead-a');
+          span.classList.add('anchor-am');
+        } else if (idx === 6) {
+          // 'M' Hero Anchor
+          slot.classList.add('hero-lead-m');
           span.classList.add('anchor-am');
         } else {
+          // Follower letters: N, A, N, D & E, L, A, V, A
           slot.classList.add('follower-char');
-          const distFromLead = idx < 5 ? idx : idx - 6;
-          slot.style.setProperty('--unfurl-from-x', `${-22 * distFromLead}px`);
+          const distFromLead = idx < 5 ? idx : (idx - 6);
+          const unfurlOffset = idx < 5 ? (-18 * distFromLead) : (18 * distFromLead);
+          slot.style.setProperty('--unfurl-from-x', `${unfurlOffset}px`);
+          slot.style.setProperty('--char-delay', `${0.04 * distFromLead}s`);
         }
 
         slot.appendChild(span);
@@ -578,46 +639,44 @@
         slotElements.push(slot);
       });
 
+      // Compute exact glide coordinates
       requestAnimationFrame(() => {
-        updateHeroAMOffsets(slotElements);
+        computeGlideOffsets(slotElements);
       });
     }
 
-    function updateHeroAMOffsets(slotElements) {
+    /**
+     * Compute exact pixel coordinates for the central "AM" monogram
+     * relative to their final rest positions in the wordmark row.
+     */
+    function computeGlideOffsets(slotElements) {
       const container = document.getElementById('arched-wordmark');
       if (!container) return;
 
       const slots = slotElements || Array.from(container.querySelectorAll('.char-slot'));
       const slotA = slots[0];
-      const slotM = container.querySelectorAll('.hero-lead')[1];
+      const slotM = slots[6]; // index 6 is 'M'
       if (!slotA || !slotM) return;
 
-      const prevAnimA = slotA.style.animation;
-      const prevAnimM = slotM.style.animation;
-      slotA.style.animation = 'none';
-      slotM.style.animation = 'none';
+      const containerWidth = container.offsetWidth;
+      const centerX = containerWidth / 2;
 
-      const rowRect = container.getBoundingClientRect();
-      const rowCenterX = rowRect.left + rowRect.width / 2;
+      const widthA = slotA.offsetWidth || 80;
+      const widthM = slotM.offsetWidth || 80;
 
-      const rectA = slotA.getBoundingClientRect();
-      const rectM = slotM.getBoundingClientRect();
+      // Centered monogram pair with visually balanced cinema gap
+      const monogramGap = Math.max(16, widthA * 0.22);
+      const targetCenterA = centerX - (widthA / 2) - (monogramGap / 2);
+      const targetCenterM = centerX + (widthM / 2) + (monogramGap / 2);
 
-      const finalCenterA = rectA.left + rectA.width / 2;
-      const finalCenterM = rectM.left + rectM.width / 2;
+      const finalCenterA = slotA.offsetLeft + (widthA / 2);
+      const finalCenterM = slotM.offsetLeft + (widthM / 2);
 
-      const pairHalfGap = (rectA.width + rectM.width) * 0.34;
-      const targetStartCenterA = rowCenterX - pairHalfGap;
-      const targetStartCenterM = rowCenterX + pairHalfGap;
+      const deltaA = targetCenterA - finalCenterA;
+      const deltaM = targetCenterM - finalCenterM;
 
-      const deltaA = targetStartCenterA - finalCenterA;
-      const deltaM = targetStartCenterM - finalCenterM;
-
-      slotA.style.setProperty('--start-x', `${deltaA.toFixed(1)}px`);
-      slotM.style.setProperty('--start-x', `${deltaM.toFixed(1)}px`);
-
-      slotA.style.animation = prevAnimA;
-      slotM.style.animation = prevAnimM;
+      document.documentElement.style.setProperty('--glide-x-a', `${deltaA.toFixed(1)}px`);
+      document.documentElement.style.setProperty('--glide-x-m', `${deltaM.toFixed(1)}px`);
     }
 
     /**
@@ -713,22 +772,22 @@
       clearPhaseTimers();
       const inv = 1 / currentSpeed;
 
-      phaseIndicator.textContent = 'Phase 1: Radiant "AM" Ruby Ignition';
+      phaseIndicator.textContent = 'Phase 1: Radiant "AM" Ruby Monogram';
 
       phaseTimers.push(
         setTimeout(() => {
           if (!isPaused) {
-            phaseIndicator.textContent = 'Phase 2: Crimson Nova Burst & Glide';
+            phaseIndicator.textContent = 'Phase 2: Crimson Stardust Glide Transition';
           }
-        }, 1800 * inv)
+        }, 2000 * inv)
       );
 
       phaseTimers.push(
         setTimeout(() => {
           if (!isPaused) {
-            phaseIndicator.textContent = 'Phase 3: "A" & "M" Slot into ANAND MELAVA';
+            phaseIndicator.textContent = 'Phase 3: Grand "ANAND MELAVA" Reveal';
           }
-        }, 3400 * inv)
+        }, 3600 * inv)
       );
     }
 
@@ -737,16 +796,17 @@
       viewport.classList.remove('paused');
       btnPause.textContent = 'Pause';
 
-      const amWrapper = document.getElementById('am-wrapper');
       const wordmarkStage = document.getElementById('wordmark-stage');
+      const shockwave = document.getElementById('shockwave-ring');
 
-      const newAMWrapper = amWrapper.cloneNode(true);
-      amWrapper.parentNode.replaceChild(newAMWrapper, amWrapper);
+      // Re-trigger CSS animations cleanly by re-rendering wordmark
+      buildArchedWordmark();
 
-      const newWordmarkStage = wordmarkStage.cloneNode(true);
-      wordmarkStage.parentNode.replaceChild(newWordmarkStage, wordmarkStage);
+      // Reset shockwave animation
+      shockwave.style.animation = 'none';
+      void shockwave.offsetWidth; // trigger reflow
+      shockwave.style.animation = '';
 
-      updateHeroAMOffsets();
       schedulePhaseUpdates();
 
       if (withAudio) {
@@ -778,7 +838,7 @@
     });
 
     window.addEventListener('resize', () => {
-      updateHeroAMOffsets();
+      computeGlideOffsets();
     });
 
     window.addEventListener('DOMContentLoaded', () => {
