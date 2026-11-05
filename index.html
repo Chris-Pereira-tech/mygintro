@@ -487,14 +487,18 @@
       </button>
 
       <button id="btn-sound" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 active:scale-95 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-red-950/70 border border-red-400/30 transition">
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+        <svg id="sound-icon-on" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
           <path d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" />
         </svg>
-        <span>Play Cinematic Audio</span>
+        <span id="sound-btn-text">Play Cinematic Audio</span>
       </button>
 
       <button id="btn-pause" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition">
         Pause
+      </button>
+
+      <button id="btn-cinema" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden sm:inline-flex items-center gap-1.5" title="Toggle Cinema Mode (H)">
+        <span>Cinema Mode</span>
       </button>
 
       <div class="flex items-center gap-1 bg-black/60 border border-white/10 rounded-xl p-1">
@@ -685,6 +689,7 @@
      * ========================================================================
      */
     let audioCtx = null;
+    let isAudioPlaying = false;
 
     function playCinematicAudio(speedMult = 1) {
       try {
@@ -696,52 +701,104 @@
           audioCtx.resume();
         }
 
+        isAudioPlaying = true;
+        const soundBtnText = document.getElementById('sound-btn-text');
+        if (soundBtnText) soundBtnText.textContent = 'Audio Playing...';
+
         const now = audioCtx.currentTime;
         const invSpeed = 1 / speedMult;
 
-        function triggerBell(startTime, freq, duration) {
+        // 1. Sub-Bass Cinema Boom (Monogram Ignition)
+        const subOsc = audioCtx.createOscillator();
+        const subGain = audioCtx.createGain();
+        subOsc.type = 'sine';
+        subOsc.frequency.setValueAtTime(115, now + 0.08 * invSpeed);
+        subOsc.frequency.exponentialRampToValueAtTime(36, now + 1.9 * invSpeed);
+        subGain.gain.setValueAtTime(0.0001, now + 0.08 * invSpeed);
+        subGain.gain.linearRampToValueAtTime(0.68, now + 0.14 * invSpeed);
+        subGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.3 * invSpeed);
+        subOsc.connect(subGain).connect(audioCtx.destination);
+        subOsc.start(now + 0.08 * invSpeed);
+        subOsc.stop(now + 2.4 * invSpeed);
+
+        // 2. Crystal Ruby Chimes
+        function triggerChime(startTime, freq, duration) {
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
           osc.type = 'sine';
           osc.frequency.setValueAtTime(freq, startTime);
-
           gain.gain.setValueAtTime(0.0001, startTime);
-          gain.gain.linearRampToValueAtTime(0.55, startTime + 0.02);
+          gain.gain.linearRampToValueAtTime(0.38, startTime + 0.02);
           gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
-
           osc.connect(gain).connect(audioCtx.destination);
           osc.start(startTime);
           osc.stop(startTime + duration + 0.05);
         }
+        triggerChime(now + 0.2 * invSpeed, 523.25, 2.2 * invSpeed); // C5
+        triggerChime(now + 0.7 * invSpeed, 659.25, 2.5 * invSpeed); // E5
 
-        triggerBell(now + 0.2 * invSpeed, 220, 2.5 * invSpeed);
-        triggerBell(now + 0.8 * invSpeed, 330, 3.2 * invSpeed);
+        // 3. Transition Stardust Whoosh (Noise glide)
+        const bufferSize = audioCtx.sampleRate * 1.5;
+        const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          output[i] = Math.random() * 2 - 1;
+        }
+        const whiteNoise = audioCtx.createBufferSource();
+        whiteNoise.buffer = noiseBuffer;
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.Q.value = 3.2;
+        const whooshGain = audioCtx.createGain();
 
-        const swellStart = now + 1.4 * invSpeed;
-        const swellDur = 3.5 * invSpeed;
-        const chordFreqs = [146.83, 220.00, 293.66, 369.99, 440.00, 587.33];
+        const whooshStart = now + 1.85 * invSpeed;
+        const whooshDur = 1.35 * invSpeed;
+
+        filter.frequency.setValueAtTime(280, whooshStart);
+        filter.frequency.exponentialRampToValueAtTime(2600, whooshStart + whooshDur * 0.55);
+        filter.frequency.exponentialRampToValueAtTime(500, whooshStart + whooshDur);
+
+        whooshGain.gain.setValueAtTime(0.0001, whooshStart);
+        whooshGain.gain.linearRampToValueAtTime(0.19, whooshStart + whooshDur * 0.45);
+        whooshGain.gain.exponentialRampToValueAtTime(0.0001, whooshStart + whooshDur);
+
+        whiteNoise.connect(filter).connect(whooshGain).connect(audioCtx.destination);
+        whiteNoise.start(whooshStart);
+        whiteNoise.stop(whooshStart + whooshDur + 0.1);
+
+        // 4. Orchestral Warm Swell on Wordmark Lock
+        const swellStart = now + 2.05 * invSpeed;
+        const swellDur = 3.6 * invSpeed;
+        const chordFreqs = [73.42, 110.00, 146.83, 220.00, 293.66, 369.99, 440.00, 587.33];
 
         chordFreqs.forEach((freq, idx) => {
           const osc = audioCtx.createOscillator();
-          const filter = audioCtx.createBiquadFilter();
+          const lpf = audioCtx.createBiquadFilter();
           const gain = audioCtx.createGain();
 
           osc.type = idx % 2 === 0 ? 'triangle' : 'sawtooth';
           osc.frequency.setValueAtTime(freq, swellStart);
+          osc.detune.setValueAtTime((idx % 3 - 1) * 6, swellStart);
 
-          filter.type = 'lowpass';
-          filter.frequency.setValueAtTime(400, swellStart);
-          filter.frequency.exponentialRampToValueAtTime(3200, swellStart + 1.5 * invSpeed);
-          filter.frequency.exponentialRampToValueAtTime(800, swellStart + swellDur);
+          lpf.type = 'lowpass';
+          lpf.frequency.setValueAtTime(320, swellStart);
+          lpf.frequency.exponentialRampToValueAtTime(3400, swellStart + 1.4 * invSpeed);
+          lpf.frequency.exponentialRampToValueAtTime(950, swellStart + swellDur);
 
           gain.gain.setValueAtTime(0.0001, swellStart);
-          gain.gain.linearRampToValueAtTime(0.07 / Math.sqrt(idx + 1), swellStart + 1.2 * invSpeed);
+          gain.gain.linearRampToValueAtTime(0.065 / Math.sqrt(idx + 1), swellStart + 1.3 * invSpeed);
           gain.gain.exponentialRampToValueAtTime(0.0001, swellStart + swellDur);
 
-          osc.connect(filter).connect(gain).connect(audioCtx.destination);
+          osc.connect(lpf).connect(gain).connect(audioCtx.destination);
           osc.start(swellStart);
           osc.stop(swellStart + swellDur + 0.1);
         });
+
+        setTimeout(() => {
+          isAudioPlaying = false;
+          if (soundBtnText) soundBtnText.textContent = 'Play Cinematic Audio';
+        }, (swellStart - now + swellDur) * 1000);
+
       } catch (err) {
         console.warn('Audio context skipped:', err);
       }
@@ -754,13 +811,17 @@
      */
     const viewport = document.getElementById('cinema-viewport');
     const phaseIndicator = document.getElementById('phase-indicator');
+    const hudTop = document.getElementById('hud-top');
+    const hudBottom = document.getElementById('hud-bottom');
     const btnReplay = document.getElementById('btn-replay');
     const btnSound = document.getElementById('btn-sound');
     const btnPause = document.getElementById('btn-pause');
+    const btnCinema = document.getElementById('btn-cinema');
     const speedBtns = document.querySelectorAll('.speed-btn');
 
     let currentSpeed = 1;
     let isPaused = false;
+    let isCinemaMode = false;
     let phaseTimers = [];
 
     function clearPhaseTimers() {
@@ -796,22 +857,34 @@
       viewport.classList.remove('paused');
       btnPause.textContent = 'Pause';
 
-      const wordmarkStage = document.getElementById('wordmark-stage');
       const shockwave = document.getElementById('shockwave-ring');
 
       // Re-trigger CSS animations cleanly by re-rendering wordmark
       buildArchedWordmark();
 
       // Reset shockwave animation
-      shockwave.style.animation = 'none';
-      void shockwave.offsetWidth; // trigger reflow
-      shockwave.style.animation = '';
+      if (shockwave) {
+        shockwave.style.animation = 'none';
+        void shockwave.offsetWidth;
+        shockwave.style.animation = '';
+      }
 
       schedulePhaseUpdates();
 
       if (withAudio) {
         playCinematicAudio(currentSpeed);
       }
+    }
+
+    function toggleCinemaMode() {
+      isCinemaMode = !isCinemaMode;
+      const opacityClass = isCinemaMode ? 'opacity-0' : 'opacity-100';
+      const pointerClass = isCinemaMode ? 'pointer-events-none' : 'pointer-events-auto';
+
+      hudTop.className = `fixed top-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3 z-40 transition-opacity duration-500 ${opacityClass} ${isCinemaMode ? 'pointer-events-none' : ''}`;
+      hudBottom.className = `fixed bottom-5 left-1/2 -translate-x-1/2 z-40 flex flex-wrap items-center justify-center gap-2.5 bg-neutral-950/90 border border-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-2xl transition-opacity duration-500 w-[92vw] max-w-2xl ${opacityClass} ${pointerClass}`;
+      
+      btnCinema.textContent = isCinemaMode ? 'Exit Cinema (H)' : 'Cinema Mode';
     }
 
     btnReplay.addEventListener('click', () => restartAnimation(false));
@@ -822,6 +895,10 @@
       viewport.classList.toggle('paused', isPaused);
       btnPause.textContent = isPaused ? 'Resume' : 'Pause';
     });
+
+    if (btnCinema) {
+      btnCinema.addEventListener('click', toggleCinemaMode);
+    }
 
     speedBtns.forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -835,6 +912,18 @@
 
         restartAnimation(false);
       });
+    });
+
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        restartAnimation(true);
+      } else if (e.code === 'KeyH') {
+        toggleCinemaMode();
+      } else if (e.code === 'KeyP') {
+        btnPause.click();
+      }
     });
 
     window.addEventListener('resize', () => {
