@@ -446,6 +446,23 @@
       filter: drop-shadow(0 0 28px rgba(255, 42, 95, 0.75));
     }
 
+    /* ==========================================================================
+       REAL-TIME AUDIO SPECTRUM VISUALIZER RIBBON
+       ========================================================================== */
+    .visualizer-canvas {
+      position: absolute;
+      bottom: 74px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(88vw, 620px);
+      height: 40px;
+      pointer-events: none;
+      z-index: 25;
+      opacity: 0.85;
+      mix-blend-mode: screen;
+      filter: drop-shadow(0 0 10px rgba(255, 42, 95, 0.7));
+    }
+
     /* Ambient warm crimson floor reflection */
     .wordmark-glow-floor {
       width: min(88vw, 1020px);
@@ -550,6 +567,9 @@
         <div class="wordmark-glow-floor"></div>
       </div>
     </div>
+
+    <!-- Real-time Audio Spectrum Visualizer Ribbon -->
+    <canvas id="visualizer-canvas" class="visualizer-canvas" width="620" height="40"></canvas>
 
     <!-- ======================================================================
          TOP ARCHITECTURAL TELEMETRY BAR
@@ -858,21 +878,38 @@
 
     /**
      * ========================================================================
-     * 3. CINEMATIC WEB AUDIO SYNTHESIZER
+     * 3. CINEMATIC WEB AUDIO SYNTHESIZER & REAL-TIME SPECTRUM ANALYSER
      * ========================================================================
      */
     let audioCtx = null;
+    let masterGain = null;
+    let analyser = null;
+    let analyserData = null;
     let isAudioPlaying = false;
+
+    function initAudioEngine() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContextClass();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.setValueAtTime(0.85, audioCtx.currentTime);
+
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 64;
+        analyser.smoothingTimeConstant = 0.78;
+        analyserData = new Uint8Array(analyser.frequencyBinCount);
+
+        masterGain.connect(analyser);
+        analyser.connect(audioCtx.destination);
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
 
     function playCinematicAudio(speedMult = 1) {
       try {
-        if (!audioCtx) {
-          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-          audioCtx = new AudioContextClass();
-        }
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume();
-        }
+        initAudioEngine();
 
         isAudioPlaying = true;
         const soundBtnText = document.getElementById('sound-btn-text');
@@ -890,7 +927,7 @@
         subGain.gain.setValueAtTime(0.0001, now + 0.08 * invSpeed);
         subGain.gain.linearRampToValueAtTime(0.68, now + 0.14 * invSpeed);
         subGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.3 * invSpeed);
-        subOsc.connect(subGain).connect(audioCtx.destination);
+        subOsc.connect(subGain).connect(masterGain);
         subOsc.start(now + 0.08 * invSpeed);
         subOsc.stop(now + 2.4 * invSpeed);
 
@@ -903,7 +940,7 @@
           gain.gain.setValueAtTime(0.0001, startTime);
           gain.gain.linearRampToValueAtTime(0.38, startTime + 0.02);
           gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
-          osc.connect(gain).connect(audioCtx.destination);
+          osc.connect(gain).connect(masterGain);
           osc.start(startTime);
           osc.stop(startTime + duration + 0.05);
         }
@@ -935,7 +972,7 @@
         whooshGain.gain.linearRampToValueAtTime(0.19, whooshStart + whooshDur * 0.45);
         whooshGain.gain.exponentialRampToValueAtTime(0.0001, whooshStart + whooshDur);
 
-        whiteNoise.connect(filter).connect(whooshGain).connect(audioCtx.destination);
+        whiteNoise.connect(filter).connect(whooshGain).connect(masterGain);
         whiteNoise.start(whooshStart);
         whiteNoise.stop(whooshStart + whooshDur + 0.1);
 
@@ -962,7 +999,7 @@
           gain.gain.linearRampToValueAtTime(0.065 / Math.sqrt(idx + 1), swellStart + 1.3 * invSpeed);
           gain.gain.exponentialRampToValueAtTime(0.0001, swellStart + swellDur);
 
-          osc.connect(lpf).connect(gain).connect(audioCtx.destination);
+          osc.connect(lpf).connect(gain).connect(masterGain);
           osc.start(swellStart);
           osc.stop(swellStart + swellDur + 0.1);
         });
@@ -975,6 +1012,59 @@
       } catch (err) {
         console.warn('Audio context skipped:', err);
       }
+    }
+
+    /**
+     * Render dynamic visualizer frequency bars on the canvas
+     */
+    function renderVisualizer() {
+      const vCanvas = document.getElementById('visualizer-canvas');
+      if (vCanvas) {
+        const vCtx = vCanvas.getContext('2d');
+        const w = vCanvas.width;
+        const h = vCanvas.height;
+        vCtx.clearRect(0, 0, w, h);
+
+        const barCount = 28;
+        const totalSpacing = w / barCount;
+        const barWidth = totalSpacing * 0.65;
+        const gap = totalSpacing * 0.35;
+
+        if (analyser && analyserData && isAudioPlaying) {
+          analyser.getByteFrequencyData(analyserData);
+        }
+
+        const t = Date.now() * 0.0028;
+
+        for (let i = 0; i < barCount; i++) {
+          let energy = 0;
+          if (analyserData && isAudioPlaying) {
+            energy = analyserData[i] || 0;
+          } else {
+            // Ambient breathing idle motion
+            energy = (Math.sin(t + i * 0.32) * 0.5 + 0.5) * 26;
+          }
+
+          const barHeight = Math.max(3, (energy / 255) * (h - 4));
+          const x = i * (barWidth + gap);
+          const y = h - barHeight;
+
+          const grad = vCtx.createLinearGradient(0, y, 0, h);
+          grad.addColorStop(0, '#ffffff');
+          grad.addColorStop(0.35, 'rgba(255, 42, 95, 0.95)');
+          grad.addColorStop(1, 'rgba(139, 0, 36, 0.25)');
+
+          vCtx.fillStyle = grad;
+          vCtx.beginPath();
+          if (vCtx.roundRect) {
+            vCtx.roundRect(x, y, barWidth, barHeight, [2, 2, 0, 0]);
+          } else {
+            vCtx.rect(x, y, barWidth, barHeight);
+          }
+          vCtx.fill();
+        }
+      }
+      requestAnimationFrame(renderVisualizer);
     }
 
     /**
@@ -1202,6 +1292,7 @@
       buildArchedWordmark();
       schedulePhaseUpdates();
       updateParallax();
+      renderVisualizer();
     });
   </script>
 </body>
