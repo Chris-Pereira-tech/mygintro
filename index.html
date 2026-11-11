@@ -578,17 +578,26 @@
       <div class="pointer-events-auto flex items-center gap-3 bg-neutral-950/85 border border-red-500/25 backdrop-blur-md px-3.5 py-2 rounded-full shadow-2xl">
         <span class="inline-block w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_#ff2a5f]"></span>
         <span class="text-xs font-medium tracking-wider uppercase text-neutral-300">
-          Theme: <strong class="text-rose-400">Crimson Stardust & Ruby Monogram</strong>
+          Theme: <strong id="theme-name-display" class="text-rose-400">Crimson Stardust & Ruby</strong>
         </span>
         <span id="phase-indicator" class="text-xs px-2.5 py-0.5 rounded-full bg-red-950/80 border border-red-500/35 text-rose-200 font-medium">
           Phase 1: Radiant "AM" Ruby Ignition
         </span>
       </div>
 
-      <div class="pointer-events-auto hidden md:flex items-center gap-2 bg-neutral-950/85 border border-red-500/20 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs text-neutral-400 shadow-2xl">
-        <span class="text-rose-400 font-semibold">AM Ruby Monogram</span>
+      <!-- Studio Palette Preset Chips -->
+      <div class="pointer-events-auto flex items-center gap-1.5 bg-neutral-950/85 border border-white/10 backdrop-blur-md px-2.5 py-1.5 rounded-full text-xs shadow-2xl">
+        <span class="text-neutral-400 font-medium mr-1 hidden sm:inline">Universe:</span>
+        <button data-theme="crimson" class="theme-chip px-2.5 py-0.5 rounded-full bg-rose-600/30 border border-rose-500/60 text-rose-200 font-medium transition active:scale-95" title="Crimson Ruby (Key 1)">Crimson</button>
+        <button data-theme="cyberpunk" class="theme-chip px-2.5 py-0.5 rounded-full bg-white/5 border border-transparent text-neutral-400 hover:text-white transition active:scale-95" title="Cyberpunk Neon (Key 2)">Cyber</button>
+        <button data-theme="gold" class="theme-chip px-2.5 py-0.5 rounded-full bg-white/5 border border-transparent text-neutral-400 hover:text-white transition active:scale-95" title="Paramount Gold (Key 3)">Gold</button>
+        <button data-theme="emerald" class="theme-chip px-2.5 py-0.5 rounded-full bg-white/5 border border-transparent text-neutral-400 hover:text-white transition active:scale-95" title="Emerald Matrix (Key 4)">Matrix</button>
+      </div>
+
+      <div class="pointer-events-auto hidden xl:flex items-center gap-2 bg-neutral-950/85 border border-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs text-neutral-400 shadow-2xl">
+        <span class="text-rose-400 font-semibold">AM Monogram</span>
         <span>→</span>
-        <span class="text-red-400">Clean Glide Transition</span>
+        <span class="text-red-400">Glide Transition</span>
         <span>→</span>
         <span class="text-white font-semibold">ANAND MELAVA</span>
       </div>
@@ -1274,7 +1283,114 @@
         toggleParallax();
       } else if (e.code === 'KeyM') {
         if (btnMute) btnMute.click();
+      } else if (e.code === 'Digit1') {
+        applyTheme('crimson');
+      } else if (e.code === 'Digit2') {
+        applyTheme('cyberpunk');
+      } else if (e.code === 'Digit3') {
+        applyTheme('gold');
+      } else if (e.code === 'Digit4') {
+        applyTheme('emerald');
       }
+    });
+
+    /**
+     * ========================================================================
+     * 6. MULTI-UNIVERSE STUDIO CINEMA THEME ENGINE
+     * ========================================================================
+     */
+    const themes = {
+      crimson: {
+        name: 'Crimson Stardust & Ruby',
+        accentColor: '#ff2a5f',
+        primary: '#e6194b',
+        glow: '#ff2a5f',
+        deep: '#8b0024',
+        core: '#ff1e56',
+        light: '#ffe5ec',
+        viewportBg: 'radial-gradient(ellipse at 50% 50%, rgba(225, 29, 72, 0.24) 0%, rgba(136, 19, 55, 0.12) 38%, rgba(7, 2, 4, 0.95) 75%, rgba(4, 1, 2, 1) 100%)',
+        embers: ['#ff2a5f', '#ff1e56', '#ff758f', '#ffb4a2', '#ffffff'],
+        streakGrad: 'linear-gradient(90deg, transparent 0%, rgba(255, 42, 95, 0.05) 15%, rgba(255, 42, 95, 0.5) 45%, rgba(255, 255, 255, 0.9) 50%, rgba(255, 42, 95, 0.5) 55%, rgba(255, 42, 95, 0.05) 85%, transparent 100%)'
+      },
+      cyberpunk: {
+        name: 'Cyberpunk Neon & Violet',
+        accentColor: '#4cc9f0',
+        primary: '#7209b7',
+        glow: '#4cc9f0',
+        deep: '#3a0ca3',
+        core: '#f72585',
+        light: '#e0aaff',
+        viewportBg: 'radial-gradient(ellipse at 50% 50%, rgba(114, 9, 183, 0.28) 0%, rgba(58, 12, 163, 0.16) 38%, rgba(3, 2, 10, 0.95) 75%, rgba(1, 0, 5, 1) 100%)',
+        embers: ['#4cc9f0', '#f72585', '#7209b7', '#b5179e', '#ffffff'],
+        streakGrad: 'linear-gradient(90deg, transparent 0%, rgba(76, 201, 240, 0.05) 15%, rgba(76, 201, 240, 0.6) 45%, rgba(255, 255, 255, 0.9) 50%, rgba(247, 37, 133, 0.6) 55%, rgba(76, 201, 240, 0.05) 85%, transparent 100%)'
+      },
+      gold: {
+        name: 'Paramount Oscars 24K Gold',
+        accentColor: '#ffd700',
+        primary: '#d4af37',
+        glow: '#ffd700',
+        deep: '#583101',
+        core: '#ffaa00',
+        light: '#fff3b0',
+        viewportBg: 'radial-gradient(ellipse at 50% 50%, rgba(212, 175, 55, 0.22) 0%, rgba(88, 49, 1, 0.14) 38%, rgba(6, 4, 1, 0.95) 75%, rgba(2, 1, 0, 1) 100%)',
+        embers: ['#ffd700', '#ffaa00', '#fff3b0', '#e09f3e', '#ffffff'],
+        streakGrad: 'linear-gradient(90deg, transparent 0%, rgba(255, 215, 0, 0.05) 15%, rgba(255, 215, 0, 0.6) 45%, rgba(255, 255, 255, 0.9) 50%, rgba(255, 215, 0, 0.6) 55%, rgba(255, 215, 0, 0.05) 85%, transparent 100%)'
+      },
+      emerald: {
+        name: 'Emerald Matrix & Sci-Fi Aurora',
+        accentColor: '#10b981',
+        primary: '#059669',
+        glow: '#34d399',
+        deep: '#064e3b',
+        core: '#10b981',
+        light: '#d1fae5',
+        viewportBg: 'radial-gradient(ellipse at 50% 50%, rgba(16, 185, 129, 0.22) 0%, rgba(6, 78, 59, 0.14) 38%, rgba(2, 6, 4, 0.95) 75%, rgba(0, 2, 1, 1) 100%)',
+        embers: ['#34d399', '#10b981', '#6ee7b7', '#a7f3d0', '#ffffff'],
+        streakGrad: 'linear-gradient(90deg, transparent 0%, rgba(52, 211, 153, 0.05) 15%, rgba(52, 211, 153, 0.6) 45%, rgba(255, 255, 255, 0.9) 50%, rgba(16, 185, 129, 0.6) 55%, rgba(52, 211, 153, 0.05) 85%, transparent 100%)'
+      }
+    };
+
+    let activeThemeKey = 'crimson';
+
+    function applyTheme(key) {
+      if (!themes[key]) return;
+      activeThemeKey = key;
+      const t = themes[key];
+
+      document.documentElement.style.setProperty('--red-primary', t.primary);
+      document.documentElement.style.setProperty('--red-glow', t.glow);
+      document.documentElement.style.setProperty('--red-deep', t.deep);
+      document.documentElement.style.setProperty('--crimson-core', t.core);
+      document.documentElement.style.setProperty('--ruby-light', t.light);
+      document.documentElement.style.setProperty('--ruby-accent', t.accentColor);
+
+      viewport.style.background = t.viewportBg;
+
+      const beam = document.querySelector('.anamorphic-beam');
+      if (beam) beam.style.background = t.streakGrad;
+
+      emberColors.splice(0, emberColors.length, ...t.embers);
+
+      const nameDisplay = document.getElementById('theme-name-display');
+      if (nameDisplay) {
+        nameDisplay.textContent = t.name;
+        nameDisplay.style.color = t.accentColor;
+      }
+
+      document.querySelectorAll('.theme-chip').forEach(btn => {
+        const isCurrent = btn.getAttribute('data-theme') === key;
+        btn.className = isCurrent 
+          ? 'theme-chip px-2.5 py-0.5 rounded-full bg-white/20 border border-white/50 text-white font-medium transition active:scale-95 shadow-md'
+          : 'theme-chip px-2.5 py-0.5 rounded-full bg-white/5 border border-transparent text-neutral-400 hover:text-white transition active:scale-95';
+      });
+
+      spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 45, 0.9);
+    }
+
+    document.querySelectorAll('.theme-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        applyTheme(btn.getAttribute('data-theme'));
+      });
     });
 
     /**
