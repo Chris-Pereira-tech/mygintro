@@ -98,6 +98,78 @@
       z-index: 2;
     }
 
+    /* ==========================================================================
+       OPTICAL LENS FLARE & CINEMATIC GHOSTING SYSTEM
+       ========================================================================== */
+    .lens-flare-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 6;
+      mix-blend-mode: screen;
+      overflow: hidden;
+      opacity: 0.75;
+      transition: opacity 0.5s ease;
+    }
+
+    .flare-corona {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 480px;
+      height: 480px;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(255, 42, 95, 0.45) 0%, rgba(255, 30, 86, 0.15) 30%, transparent 70%);
+      border-radius: 50%;
+      filter: blur(28px);
+      animation: corona-pulse calc(5.5s / var(--speed-mult)) ease-in-out infinite;
+    }
+
+    @keyframes corona-pulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.4; }
+      38% { transform: translate(-50%, -50%) scale(1.6); opacity: 0.95; }
+      55% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.6; }
+    }
+
+    .flare-ghost {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      will-change: transform;
+      mix-blend-mode: screen;
+      transition: transform 0.05s linear;
+    }
+
+    .ghost-1 {
+      width: 110px;
+      height: 110px;
+      background: radial-gradient(circle, rgba(255, 80, 120, 0.4) 0%, rgba(255, 42, 95, 0.1) 60%, transparent 80%);
+      border: 1px solid rgba(255, 140, 170, 0.25);
+    }
+
+    .ghost-2 {
+      width: 58px;
+      height: 58px;
+      background: radial-gradient(circle, rgba(255, 230, 240, 0.55) 0%, rgba(255, 42, 95, 0.2) 65%, transparent 85%);
+      box-shadow: 0 0 20px rgba(255, 42, 95, 0.5);
+    }
+
+    .ghost-3 {
+      width: 170px;
+      height: 170px;
+      background: radial-gradient(circle, rgba(255, 30, 86, 0.2) 0%, rgba(139, 0, 36, 0.08) 55%, transparent 75%);
+      border: 1.5px solid rgba(255, 42, 95, 0.18);
+    }
+
+    .ghost-4 {
+      width: 32px;
+      height: 32px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, rgba(255, 90, 140, 0.3) 50%, transparent 80%);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    }
+
     /* Transition Shockwave Pulse Ring */
     #shockwave-ring {
       position: absolute;
@@ -450,6 +522,15 @@
       <div class="anamorphic-beam"></div>
       <div class="crimson-nebula-core"></div>
       <div id="shockwave-ring"></div>
+
+      <!-- Optical Lens Flare & Aperture Ghosts -->
+      <div id="lens-flare-layer" class="lens-flare-layer">
+        <div id="flare-ghost-1" class="flare-ghost ghost-1"></div>
+        <div id="flare-ghost-2" class="flare-ghost ghost-2"></div>
+        <div id="flare-ghost-3" class="flare-ghost ghost-3"></div>
+        <div id="flare-ghost-4" class="flare-ghost ghost-4"></div>
+        <div class="flare-corona"></div>
+      </div>
 
       <!-- Starfield / Ember canvas background -->
       <canvas id="starfield-canvas"></canvas>
@@ -967,6 +1048,23 @@
     let currentTiltY = 0;
     let parallaxFrameId = null;
 
+    function updateLensFlares(tiltX, tiltY) {
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      const offsetX = tiltY * 22;
+      const offsetY = -tiltX * 18;
+
+      const g1 = document.getElementById('flare-ghost-1');
+      const g2 = document.getElementById('flare-ghost-2');
+      const g3 = document.getElementById('flare-ghost-3');
+      const g4 = document.getElementById('flare-ghost-4');
+
+      if (g1) g1.style.transform = `translate(${cx - 55 - offsetX * 0.45}px, ${cy - 55 - offsetY * 0.45}px)`;
+      if (g2) g2.style.transform = `translate(${cx - 29 + offsetX * 0.8}px, ${cy - 29 + offsetY * 0.8}px)`;
+      if (g3) g3.style.transform = `translate(${cx - 85 - offsetX * 1.25}px, ${cy - 85 - offsetY * 1.25}px)`;
+      if (g4) g4.style.transform = `translate(${cx - 16 + offsetX * 1.6}px, ${cy - 16 + offsetY * 1.6}px)`;
+    }
+
     function updateParallax() {
       if (parallaxEnabled) {
         currentTiltX += (targetTiltX - currentTiltX) * 0.08;
@@ -979,6 +1077,8 @@
       if (parallaxRig) {
         parallaxRig.style.transform = `perspective(1400px) rotateX(${currentTiltX.toFixed(2)}deg) rotateY(${currentTiltY.toFixed(2)}deg)`;
       }
+
+      updateLensFlares(currentTiltX, currentTiltY);
 
       parallaxFrameId = requestAnimationFrame(updateParallax);
     }
