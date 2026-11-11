@@ -706,10 +706,65 @@
         <button data-speed="0.45" class="speed-btn px-2.5 py-1 rounded-lg text-xs text-neutral-400 hover:text-white transition">0.45x Slow-Mo</button>
         <button data-speed="1" class="speed-btn px-2.5 py-1 rounded-lg text-xs bg-white/15 text-white font-medium transition">1x Normal</button>
       </div>
+
+      <!-- Shortcuts Cheatsheet Info Button -->
+      <button id="btn-shortcuts" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-neutral-300 transition flex items-center justify-center" title="Keyboard Shortcuts (?)">
+        ?
+      </button>
     </div>
 
     <!-- Camera Shutter Flash Overlay -->
     <div id="camera-flash-overlay"></div>
+
+    <!-- Director Shortcuts Help Modal -->
+    <div id="shortcuts-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+      <div class="bg-neutral-900 border border-white/15 rounded-2xl p-6 max-w-md w-full shadow-2xl">
+        <div class="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
+          <h3 class="text-base font-semibold text-white flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_#ff2a5f]"></span>
+            Director Suite Shortcuts
+          </h3>
+          <button id="btn-close-modal" class="text-neutral-400 hover:text-white text-lg font-bold transition">&times;</button>
+        </div>
+        <div class="grid grid-cols-2 gap-2.5 text-xs text-neutral-300">
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+            <span>Replay + Audio</span>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">Space</kbd>
+          </div>
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+            <span>Cinema Mode</span>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">H</kbd>
+          </div>
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+            <span>Cycle Camera</span>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">C</kbd>
+          </div>
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+            <span>4K Wallpaper</span>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">S</kbd>
+          </div>
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+            <span>3D Parallax Tilt</span>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">T</kbd>
+          </div>
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+            <span>Mute / Unmute</span>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">M</kbd>
+          </div>
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+            <span>Pause / Resume</span>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">P</kbd>
+          </div>
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+            <span>Studio Palettes</span>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">1 - 4</kbd>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-white/10 text-[11px] text-neutral-400 text-center">
+          Tip: Click the presenter subtitle badge to type your custom director tagline!
+        </div>
+      </div>
+    </div>
 
   </main>
 
@@ -1356,8 +1411,50 @@
         applyTheme('gold');
       } else if (e.code === 'Digit4') {
         applyTheme('emerald');
+      } else if (e.key === '?' || (e.shiftKey && e.code === 'Slash')) {
+        toggleShortcutsModal();
+      } else if (e.code === 'Escape') {
+        closeShortcutsModal();
       }
     });
+
+    /**
+     * ========================================================================
+     * 9. DIRECTOR SHORTCUTS MODAL
+     * ========================================================================
+     */
+    const shortcutsModal = document.getElementById('shortcuts-modal');
+    const btnShortcuts = document.getElementById('btn-shortcuts');
+    const btnCloseModal = document.getElementById('btn-close-modal');
+
+    function toggleShortcutsModal() {
+      if (!shortcutsModal) return;
+      const isOpen = shortcutsModal.classList.contains('opacity-100');
+      if (isOpen) {
+        closeShortcutsModal();
+      } else {
+        shortcutsModal.classList.remove('opacity-0', 'pointer-events-none');
+        shortcutsModal.classList.add('opacity-100', 'pointer-events-auto');
+      }
+    }
+
+    function closeShortcutsModal() {
+      if (!shortcutsModal) return;
+      shortcutsModal.classList.remove('opacity-100', 'pointer-events-auto');
+      shortcutsModal.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    if (btnShortcuts) {
+      btnShortcuts.addEventListener('click', toggleShortcutsModal);
+    }
+    if (btnCloseModal) {
+      btnCloseModal.addEventListener('click', closeShortcutsModal);
+    }
+    if (shortcutsModal) {
+      shortcutsModal.addEventListener('click', (e) => {
+        if (e.target === shortcutsModal) closeShortcutsModal();
+      });
+    }
 
     /**
      * ========================================================================
