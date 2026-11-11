@@ -446,6 +446,17 @@
       filter: drop-shadow(0 0 28px rgba(255, 42, 95, 0.75));
     }
 
+    /* Camera Shutter Flash Overlay */
+    #camera-flash-overlay {
+      position: fixed;
+      inset: 0;
+      background: #ffffff;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 100;
+      transition: opacity 0.08s ease-out;
+    }
+
     /* ==========================================================================
        REAL-TIME AUDIO SPECTRUM VISUALIZER RIBBON
        ========================================================================== */
@@ -642,6 +653,15 @@
         <span>Cinema Mode</span>
       </button>
 
+      <!-- 4K Cinema Wallpaper Snapshot Button -->
+      <button id="btn-snapshot" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden lg:inline-flex items-center gap-1.5" title="Capture 4K Wallpaper (S)">
+        <svg class="w-3.5 h-3.5 text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <span>4K Snapshot</span>
+      </button>
+
       <!-- Master Volume Controller -->
       <div class="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl">
         <button id="btn-mute" class="text-neutral-400 hover:text-white transition" title="Toggle Mute (M)">
@@ -657,6 +677,9 @@
         <button data-speed="1" class="speed-btn px-2.5 py-1 rounded-lg text-xs bg-white/15 text-white font-medium transition">1x Normal</button>
       </div>
     </div>
+
+    <!-- Camera Shutter Flash Overlay -->
+    <div id="camera-flash-overlay"></div>
 
   </main>
 
@@ -1291,6 +1314,8 @@
         toggleParallax();
       } else if (e.code === 'KeyC') {
         cycleCamera();
+      } else if (e.code === 'KeyS') {
+        captureCinemaWallpaper();
       } else if (e.code === 'KeyM') {
         if (btnMute) btnMute.click();
       } else if (e.code === 'Digit1') {
@@ -1520,6 +1545,120 @@
 
     if (btnParallax) {
       btnParallax.addEventListener('click', toggleParallax);
+    }
+
+    /**
+     * ========================================================================
+     * 8. 4K CINEMA SNAPSHOT WALLPAPER EXPORTER & WATERMARK
+     * ========================================================================
+     */
+    const btnSnapshot = document.getElementById('btn-snapshot');
+    const flashOverlay = document.getElementById('camera-flash-overlay');
+
+    function captureCinemaWallpaper() {
+      if (flashOverlay) {
+        flashOverlay.style.opacity = '0.9';
+        setTimeout(() => {
+          flashOverlay.style.opacity = '0';
+        }, 120);
+      }
+
+      const snapW = 3840;
+      const snapH = 2160;
+      const offCanvas = document.createElement('canvas');
+      offCanvas.width = snapW;
+      offCanvas.height = snapH;
+      const oCtx = offCanvas.getContext('2d');
+
+      const t = themes[activeThemeKey] || themes.crimson;
+
+      // 1. Dark Vignette Cinema Background
+      const bgGrad = oCtx.createRadialGradient(snapW / 2, snapH / 2, 80, snapW / 2, snapH / 2, snapW * 0.7);
+      bgGrad.addColorStop(0, t.primary);
+      bgGrad.addColorStop(0.35, t.deep);
+      bgGrad.addColorStop(0.75, '#070204');
+      bgGrad.addColorStop(1, '#020001');
+      oCtx.fillStyle = bgGrad;
+      oCtx.fillRect(0, 0, snapW, snapH);
+
+      // 2. Anamorphic Lens Streak
+      const beamGrad = oCtx.createLinearGradient(0, snapH / 2, snapW, snapH / 2);
+      beamGrad.addColorStop(0, 'transparent');
+      beamGrad.addColorStop(0.4, t.glow);
+      beamGrad.addColorStop(0.5, '#ffffff');
+      beamGrad.addColorStop(0.6, t.glow);
+      beamGrad.addColorStop(1, 'transparent');
+      oCtx.fillStyle = beamGrad;
+      oCtx.fillRect(0, snapH / 2 - 4, snapW, 8);
+
+      // 3. Stardust Embers & Sparks
+      stars.forEach(s => {
+        const nx = (s.x / window.innerWidth) * snapW;
+        const ny = (s.y / window.innerHeight) * snapH;
+        oCtx.save();
+        oCtx.beginPath();
+        oCtx.arc(nx, ny, s.radius * 2.5, 0, Math.PI * 2);
+        oCtx.fillStyle = s.color;
+        oCtx.globalAlpha = Math.abs(s.alpha);
+        oCtx.shadowBlur = 14;
+        oCtx.shadowColor = s.color;
+        oCtx.fill();
+        oCtx.restore();
+      });
+
+      // 4. Wordmark Floor Glow
+      const floorGrad = oCtx.createRadialGradient(snapW / 2, snapH / 2 + 300, 20, snapW / 2, snapH / 2 + 300, snapW * 0.4);
+      floorGrad.addColorStop(0, t.glow);
+      floorGrad.addColorStop(0.5, 'rgba(0,0,0,0)');
+      oCtx.fillStyle = floorGrad;
+      oCtx.fillRect(0, snapH / 2 + 150, snapW, 300);
+
+      // 5. Presenter Tagline
+      oCtx.save();
+      oCtx.textAlign = 'center';
+      oCtx.font = '500 36px Inter, sans-serif';
+      oCtx.letterSpacing = '18px';
+      oCtx.fillStyle = 'rgba(255, 230, 235, 0.9)';
+      oCtx.shadowBlur = 20;
+      oCtx.shadowColor = t.glow;
+      oCtx.fillText('AN ORIGINAL CINEMATIC EXPERIENCE', snapW / 2, snapH / 2 - 160);
+      oCtx.restore();
+
+      // 6. Arched Monolithic Wordmark "ANAND MELAVA"
+      oCtx.save();
+      oCtx.textAlign = 'center';
+      oCtx.textBaseline = 'middle';
+      oCtx.font = '700 240px "Bebas Neue", sans-serif';
+
+      const wordmarkGrad = oCtx.createLinearGradient(0, snapH / 2 - 120, 0, snapH / 2 + 120);
+      wordmarkGrad.addColorStop(0, '#ffffff');
+      wordmarkGrad.addColorStop(0.38, t.light);
+      wordmarkGrad.addColorStop(0.72, t.glow);
+      wordmarkGrad.addColorStop(1, t.deep);
+
+      oCtx.fillStyle = wordmarkGrad;
+      oCtx.shadowBlur = 45;
+      oCtx.shadowColor = t.glow;
+      oCtx.fillText('ANAND  MELAVA', snapW / 2, snapH / 2 + 10);
+      oCtx.restore();
+
+      // 7. Studio Production Watermark Metadata
+      oCtx.save();
+      oCtx.textAlign = 'right';
+      oCtx.font = '600 24px Inter, sans-serif';
+      oCtx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+      oCtx.fillText('ANAND MELAVA CINEMA LABS // 4K MASTER // CHRIS PEREIRA', snapW - 90, snapH - 70);
+      oCtx.restore();
+
+      // Download Wallpaper Image
+      const link = document.createElement('a');
+      link.download = `anand-melava-4k-${activeThemeKey}.png`;
+      link.href = offCanvas.toDataURL('image/png');
+      link.click();
+    }
+
+    if (btnSnapshot) {
+      btnSnapshot.addEventListener('click', captureCinemaWallpaper);
     }
 
     window.addEventListener('resize', () => {
