@@ -625,6 +625,16 @@
         <span>Cinema Mode</span>
       </button>
 
+      <!-- Master Volume Controller -->
+      <div class="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl">
+        <button id="btn-mute" class="text-neutral-400 hover:text-white transition" title="Toggle Mute (M)">
+          <svg id="volume-icon" class="w-3.5 h-3.5 text-rose-400" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" />
+          </svg>
+        </button>
+        <input id="volume-slider" type="range" min="0" max="1" step="0.05" value="0.85" class="w-14 h-1 accent-rose-500 bg-white/20 rounded-lg cursor-pointer" title="Master Volume" />
+      </div>
+
       <div class="flex items-center gap-1 bg-black/60 border border-white/10 rounded-xl p-1">
         <button data-speed="0.45" class="speed-btn px-2.5 py-1 rounded-lg text-xs text-neutral-400 hover:text-white transition">0.45x Slow-Mo</button>
         <button data-speed="1" class="speed-btn px-2.5 py-1 rounded-lg text-xs bg-white/15 text-white font-medium transition">1x Normal</button>
@@ -947,7 +957,7 @@
         triggerChime(now + 0.2 * invSpeed, 523.25, 2.2 * invSpeed); // C5
         triggerChime(now + 0.7 * invSpeed, 659.25, 2.5 * invSpeed); // E5
 
-        // 3. Transition Stardust Whoosh (Noise glide)
+        // 3. Transition Stardust Whoosh with Spatial Stereo Panning
         const bufferSize = audioCtx.sampleRate * 1.5;
         const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
         const output = noiseBuffer.getChannelData(0);
@@ -969,10 +979,17 @@
         filter.frequency.exponentialRampToValueAtTime(500, whooshStart + whooshDur);
 
         whooshGain.gain.setValueAtTime(0.0001, whooshStart);
-        whooshGain.gain.linearRampToValueAtTime(0.19, whooshStart + whooshDur * 0.45);
+        whooshGain.gain.linearRampToValueAtTime(0.22, whooshStart + whooshDur * 0.45);
         whooshGain.gain.exponentialRampToValueAtTime(0.0001, whooshStart + whooshDur);
 
-        whiteNoise.connect(filter).connect(whooshGain).connect(masterGain);
+        if (audioCtx.createStereoPanner) {
+          const whooshPanner = audioCtx.createStereoPanner();
+          whooshPanner.pan.setValueAtTime(-0.65, whooshStart);
+          whooshPanner.pan.linearRampToValueAtTime(0.65, whooshStart + whooshDur);
+          whiteNoise.connect(filter).connect(whooshGain).connect(whooshPanner).connect(masterGain);
+        } else {
+          whiteNoise.connect(filter).connect(whooshGain).connect(masterGain);
+        }
         whiteNoise.start(whooshStart);
         whiteNoise.stop(whooshStart + whooshDur + 0.1);
 
@@ -1003,6 +1020,33 @@
           osc.start(swellStart);
           osc.stop(swellStart + swellDur + 0.1);
         });
+
+        // 5. Metallic Impact Transient (Wordmark Lock Hit)
+        const hitTime = now + 3.55 * invSpeed;
+        const hitOsc = audioCtx.createOscillator();
+        const hitGain = audioCtx.createGain();
+        hitOsc.type = 'triangle';
+        hitOsc.frequency.setValueAtTime(160, hitTime);
+        hitOsc.frequency.exponentialRampToValueAtTime(40, hitTime + 0.5);
+        hitGain.gain.setValueAtTime(0.0001, hitTime);
+        hitGain.gain.linearRampToValueAtTime(0.55, hitTime + 0.015);
+        hitGain.gain.exponentialRampToValueAtTime(0.0001, hitTime + 0.85);
+
+        const metalOsc = audioCtx.createOscillator();
+        const metalGain = audioCtx.createGain();
+        metalOsc.type = 'square';
+        metalOsc.frequency.setValueAtTime(880, hitTime);
+        metalOsc.frequency.exponentialRampToValueAtTime(220, hitTime + 0.3);
+        metalGain.gain.setValueAtTime(0.0001, hitTime);
+        metalGain.gain.linearRampToValueAtTime(0.12, hitTime + 0.01);
+        metalGain.gain.exponentialRampToValueAtTime(0.0001, hitTime + 0.35);
+
+        hitOsc.connect(hitGain).connect(masterGain);
+        metalOsc.connect(metalGain).connect(masterGain);
+        hitOsc.start(hitTime);
+        metalOsc.start(hitTime);
+        hitOsc.stop(hitTime + 0.9);
+        metalOsc.stop(hitTime + 0.4);
 
         setTimeout(() => {
           isAudioPlaying = false;
@@ -1166,6 +1210,43 @@
       btnCinema.addEventListener('click', toggleCinemaMode);
     }
 
+    // Volume & Mute Controls
+    const btnMute = document.getElementById('btn-mute');
+    const volumeSlider = document.getElementById('volume-slider');
+    let previousVolume = 0.85;
+
+    function setMasterVolume(val) {
+      if (masterGain && audioCtx) {
+        masterGain.gain.setValueAtTime(val, audioCtx.currentTime);
+      }
+      if (volumeSlider) volumeSlider.value = val;
+      if (btnMute) {
+        btnMute.style.opacity = val === 0 ? '0.4' : '1';
+      }
+    }
+
+    if (volumeSlider) {
+      volumeSlider.addEventListener('input', (e) => {
+        initAudioEngine();
+        const val = parseFloat(e.target.value);
+        if (val > 0) previousVolume = val;
+        setMasterVolume(val);
+      });
+    }
+
+    if (btnMute) {
+      btnMute.addEventListener('click', () => {
+        initAudioEngine();
+        const currentVal = masterGain ? masterGain.gain.value : parseFloat(volumeSlider.value);
+        if (currentVal > 0) {
+          previousVolume = currentVal;
+          setMasterVolume(0);
+        } else {
+          setMasterVolume(previousVolume || 0.85);
+        }
+      });
+    }
+
     speedBtns.forEach((btn) => {
       btn.addEventListener('click', () => {
         currentSpeed = parseFloat(btn.getAttribute('data-speed'));
@@ -1191,6 +1272,8 @@
         btnPause.click();
       } else if (e.code === 'KeyT') {
         toggleParallax();
+      } else if (e.code === 'KeyM') {
+        if (btnMute) btnMute.click();
       }
     });
 
