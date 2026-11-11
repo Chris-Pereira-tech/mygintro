@@ -60,6 +60,21 @@
       overflow: hidden;
     }
 
+    /* 3D Dynamic Gyroscope & Mouse Parallax Rig */
+    .parallax-rig {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transform-style: preserve-3d;
+      will-change: transform;
+      pointer-events: none;
+      transition: transform 0.08s cubic-bezier(0.2, 0, 0.2, 1);
+    }
+
     /* Anamorphic ruby light streak across the horizon */
     .anamorphic-beam {
       position: absolute;
@@ -429,27 +444,30 @@
   <!-- MAIN CINEMA VIEWPORT -->
   <main id="cinema-viewport">
 
-    <!-- Anamorphic Ruby Beam & Core Glow -->
-    <div class="anamorphic-beam"></div>
-    <div class="crimson-nebula-core"></div>
-    <div id="shockwave-ring"></div>
+    <!-- 3D PARALLAX CAMERA RIG -->
+    <div id="parallax-rig" class="parallax-rig">
+      <!-- Anamorphic Ruby Beam & Core Glow -->
+      <div class="anamorphic-beam"></div>
+      <div class="crimson-nebula-core"></div>
+      <div id="shockwave-ring"></div>
 
-    <!-- Starfield / Ember canvas background -->
-    <canvas id="starfield-canvas"></canvas>
+      <!-- Starfield / Ember canvas background -->
+      <canvas id="starfield-canvas"></canvas>
 
-    <!-- ======================================================================
-         UNIFIED WORDMARK STAGE: HERO "AM" GLIDES SEAMLESSLY INTO "ANAND MELAVA"
-         ====================================================================== -->
-    <div id="wordmark-stage">
-      <div class="presents-badge-wrapper">
-        <span class="badge-line"></span>
-        <span class="presents-badge">An Original Cinematic Experience</span>
-        <span class="badge-line"></span>
+      <!-- ======================================================================
+           UNIFIED WORDMARK STAGE: HERO "AM" GLIDES SEAMLESSLY INTO "ANAND MELAVA"
+           ====================================================================== -->
+      <div id="wordmark-stage">
+        <div class="presents-badge-wrapper">
+          <span class="badge-line"></span>
+          <span class="presents-badge">An Original Cinematic Experience</span>
+          <span class="badge-line"></span>
+        </div>
+        <div id="arched-wordmark" class="wordmark-row" aria-label="ANAND MELAVA">
+          <!-- Populated dynamically with mathematically aligned glide coords -->
+        </div>
+        <div class="wordmark-glow-floor"></div>
       </div>
-      <div id="arched-wordmark" class="wordmark-row" aria-label="ANAND MELAVA">
-        <!-- Populated dynamically with mathematically aligned glide coords -->
-      </div>
-      <div class="wordmark-glow-floor"></div>
     </div>
 
     <!-- ======================================================================
@@ -495,6 +513,11 @@
 
       <button id="btn-pause" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition">
         Pause
+      </button>
+
+      <button id="btn-parallax" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden sm:inline-flex items-center gap-1.5" title="Toggle 3D Parallax Tilt (T)">
+        <span id="parallax-dot" class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
+        <span>3D Tilt</span>
       </button>
 
       <button id="btn-cinema" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden sm:inline-flex items-center gap-1.5" title="Toggle Cinema Mode (H)">
@@ -923,8 +946,73 @@
         toggleCinemaMode();
       } else if (e.code === 'KeyP') {
         btnPause.click();
+      } else if (e.code === 'KeyT') {
+        toggleParallax();
       }
     });
+
+    /**
+     * ========================================================================
+     * 5. 3D GYROSCOPE & MOUSE PARALLAX TILT ENGINE
+     * ========================================================================
+     */
+    const parallaxRig = document.getElementById('parallax-rig');
+    const btnParallax = document.getElementById('btn-parallax');
+    const parallaxDot = document.getElementById('parallax-dot');
+
+    let parallaxEnabled = true;
+    let targetTiltX = 0;
+    let targetTiltY = 0;
+    let currentTiltX = 0;
+    let currentTiltY = 0;
+    let parallaxFrameId = null;
+
+    function updateParallax() {
+      if (parallaxEnabled) {
+        currentTiltX += (targetTiltX - currentTiltX) * 0.08;
+        currentTiltY += (targetTiltY - currentTiltY) * 0.08;
+      } else {
+        currentTiltX += (0 - currentTiltX) * 0.12;
+        currentTiltY += (0 - currentTiltY) * 0.12;
+      }
+
+      if (parallaxRig) {
+        parallaxRig.style.transform = `perspective(1400px) rotateX(${currentTiltX.toFixed(2)}deg) rotateY(${currentTiltY.toFixed(2)}deg)`;
+      }
+
+      parallaxFrameId = requestAnimationFrame(updateParallax);
+    }
+
+    function toggleParallax() {
+      parallaxEnabled = !parallaxEnabled;
+      if (parallaxDot) {
+        parallaxDot.className = parallaxEnabled 
+          ? 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]'
+          : 'w-2 h-2 rounded-full bg-neutral-500';
+      }
+      if (!parallaxEnabled) {
+        targetTiltX = 0;
+        targetTiltY = 0;
+      }
+    }
+
+    window.addEventListener('mousemove', (e) => {
+      if (!parallaxEnabled) return;
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      targetTiltY = ((e.clientX - cx) / cx) * 9.5;
+      targetTiltX = -((e.clientY - cy) / cy) * 7.5;
+    });
+
+    window.addEventListener('deviceorientation', (e) => {
+      if (!parallaxEnabled || e.gamma === null) return;
+      targetTiltY = Math.min(Math.max(e.gamma, -30), 30) * 0.35;
+      targetTiltX = -Math.min(Math.max(e.beta - 45, -30), 30) * 0.35;
+    });
+
+    if (btnParallax) {
+      btnParallax.addEventListener('click', toggleParallax);
+    }
 
     window.addEventListener('resize', () => {
       computeGlideOffsets();
@@ -935,6 +1023,7 @@
       renderStarfield();
       buildArchedWordmark();
       schedulePhaseUpdates();
+      updateParallax();
     });
   </script>
 </body>
