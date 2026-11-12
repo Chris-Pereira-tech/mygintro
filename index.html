@@ -671,7 +671,24 @@
     <!-- ======================================================================
          BOTTOM INTERACTIVE DIRECTOR BAR
          ====================================================================== -->
-    <div id="hud-bottom" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 flex flex-wrap items-center justify-center gap-2.5 bg-neutral-950/90 border border-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-2xl transition-opacity duration-500 w-[92vw] max-w-2xl">
+    <div id="hud-bottom" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 flex flex-wrap items-center justify-center gap-2.5 bg-neutral-950/90 border border-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-2xl transition-opacity duration-500 w-[94vw] max-w-3xl">
+      <!-- Interactive Cinema Timeline Scrubber -->
+      <div class="w-full flex items-center justify-between gap-3 px-1 pb-1 pt-0.5 border-b border-white/10 mb-1 text-xs text-neutral-400 font-mono">
+        <div class="flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+          <span id="timeline-time" class="text-white font-semibold">0.0s</span>
+          <span class="text-neutral-500">/ 5.5s</span>
+        </div>
+        <div class="flex-1 relative flex items-center mx-2">
+          <input id="timeline-scrubber" type="range" min="0" max="5.5" step="0.05" value="0" class="w-full h-1.5 bg-white/20 accent-rose-500 rounded-lg cursor-pointer transition" title="Scrub Timeline (Arrow Left / Right)" />
+        </div>
+        <div class="hidden sm:flex items-center gap-1.5 text-[11px]">
+          <button data-seek="0.0" class="seek-btn px-2 py-0.5 rounded bg-white/5 hover:bg-white/15 text-neutral-300 transition" title="Jump to Monogram Ignition">0.0s Ign</button>
+          <button data-seek="2.0" class="seek-btn px-2 py-0.5 rounded bg-white/5 hover:bg-white/15 text-neutral-300 transition" title="Jump to Glide Transition">2.0s Glide</button>
+          <button data-seek="3.6" class="seek-btn px-2 py-0.5 rounded bg-white/5 hover:bg-white/15 text-neutral-300 transition" title="Jump to Grand Reveal">3.6s Reveal</button>
+        </div>
+      </div>
+
       <button id="btn-replay" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 active:scale-95 text-xs sm:text-sm font-medium text-white transition">
         <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -788,6 +805,10 @@
           <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
             <span>Hyperdrive Warp</span>
             <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">W</kbd>
+          </div>
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+            <span>Scrub Timeline</span>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">← / →</kbd>
           </div>
           <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
             <span>4K Wallpaper</span>
@@ -1485,6 +1506,69 @@
     let isPaused = false;
     let isCinemaMode = false;
     let phaseTimers = [];
+    let animationStartTime = Date.now();
+    const introDuration = 5.5;
+
+    const timelineScrubber = document.getElementById('timeline-scrubber');
+    const timelineTime = document.getElementById('timeline-time');
+
+    function updateTimelineLoop() {
+      if (!isPaused) {
+        const elapsed = ((Date.now() - animationStartTime) / 1000) * currentSpeed;
+        const clamped = Math.min(introDuration, Math.max(0, elapsed));
+        if (timelineScrubber && document.activeElement !== timelineScrubber) {
+          timelineScrubber.value = clamped.toFixed(2);
+        }
+        if (timelineTime) {
+          timelineTime.textContent = clamped.toFixed(1) + 's';
+        }
+      }
+      requestAnimationFrame(updateTimelineLoop);
+    }
+
+    function seekTimeline(timeSec, resume = false) {
+      const clamped = Math.min(introDuration, Math.max(0, timeSec));
+      animationStartTime = Date.now() - (clamped / currentSpeed) * 1000;
+      if (timelineScrubber) timelineScrubber.value = clamped.toFixed(2);
+      if (timelineTime) timelineTime.textContent = clamped.toFixed(1) + 's';
+
+      if (clamped < 2.0) {
+        phaseIndicator.textContent = 'Phase 1: Radiant "AM" Ruby Monogram';
+      } else if (clamped < 3.6) {
+        phaseIndicator.textContent = 'Phase 2: Crimson Stardust Glide Transition';
+      } else {
+        phaseIndicator.textContent = 'Phase 3: Grand "ANAND MELAVA" Reveal';
+      }
+
+      const animatedElems = document.querySelectorAll('.hero-lead-a, .hero-lead-m, .follower-char, #wordmark-stage, .presents-badge-wrapper, .wordmark-glow-floor, #shockwave-ring');
+      animatedElems.forEach(el => {
+        el.style.animationPlayState = 'paused';
+        el.style.animationDelay = `-${clamped.toFixed(2)}s`;
+      });
+
+      if (resume) {
+        isPaused = false;
+        viewport.classList.remove('paused');
+        btnPause.textContent = 'Pause';
+        animatedElems.forEach(el => {
+          el.style.animationPlayState = 'running';
+        });
+      }
+    }
+
+    if (timelineScrubber) {
+      timelineScrubber.addEventListener('input', (e) => {
+        seekTimeline(parseFloat(e.target.value), false);
+      });
+    }
+
+    document.querySelectorAll('.seek-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const seekTime = parseFloat(btn.getAttribute('data-seek'));
+        seekTimeline(seekTime, false);
+        spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 30, 0.8);
+      });
+    });
 
     function clearPhaseTimers() {
       phaseTimers.forEach((id) => clearTimeout(id));
@@ -1521,6 +1605,7 @@
       isPaused = false;
       viewport.classList.remove('paused');
       btnPause.textContent = 'Pause';
+      animationStartTime = Date.now();
 
       const shockwave = document.getElementById('shockwave-ring');
 
@@ -1534,6 +1619,7 @@
         shockwave.style.animation = '';
       }
 
+      seekTimeline(0, true);
       schedulePhaseUpdates();
 
       if (withAudio) {
@@ -1633,6 +1719,12 @@
         cycleAspectRatio();
       } else if (e.code === 'KeyW') {
         toggleWarpMode();
+      } else if (e.code === 'ArrowLeft') {
+        const cur = timelineScrubber ? parseFloat(timelineScrubber.value) : 0;
+        seekTimeline(Math.max(0, cur - 0.25), false);
+      } else if (e.code === 'ArrowRight') {
+        const cur = timelineScrubber ? parseFloat(timelineScrubber.value) : 0;
+        seekTimeline(Math.min(introDuration, cur + 0.25), false);
       } else if (e.code === 'KeyS') {
         captureCinemaWallpaper();
       } else if (e.code === 'KeyM') {
@@ -2093,6 +2185,7 @@
       schedulePhaseUpdates();
       updateParallax();
       renderVisualizer();
+      updateTimelineLoop();
     });
   </script>
 </body>
