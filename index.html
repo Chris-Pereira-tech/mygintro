@@ -702,6 +702,12 @@
         <input id="volume-slider" type="range" min="0" max="1" step="0.05" value="0.85" class="w-14 h-1 accent-rose-500 bg-white/20 rounded-lg cursor-pointer" title="Master Volume" />
       </div>
 
+      <!-- Theater Bass Boost EQ Button -->
+      <button id="btn-bass-boost" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden lg:inline-flex items-center gap-1.5" title="Toggle Theater Bass Boost (B)">
+        <span id="bass-dot" class="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_6px_#ff2a5f]"></span>
+        <span id="bass-label">Bass: ON</span>
+      </button>
+
       <div class="flex items-center gap-1 bg-black/60 border border-white/10 rounded-xl p-1">
         <button data-speed="0.45" class="speed-btn px-2.5 py-1 rounded-lg text-xs text-neutral-400 hover:text-white transition">0.45x Slow-Mo</button>
         <button data-speed="1" class="speed-btn px-2.5 py-1 rounded-lg text-xs bg-white/15 text-white font-medium transition">1x Normal</button>
@@ -750,6 +756,10 @@
           <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
             <span>Mute / Unmute</span>
             <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">M</kbd>
+          </div>
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+            <span>Bass Boost EQ</span>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">B</kbd>
           </div>
           <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
             <span>Pause / Resume</span>
@@ -1018,16 +1028,72 @@
      */
     let audioCtx = null;
     let masterGain = null;
+    let soundBus = null;
+    let bassBoostFilter = null;
+    let convolverNode = null;
+    let reverbWetGain = null;
+    let dryGain = null;
+    let bassBoostEnabled = true;
     let analyser = null;
     let analyserData = null;
     let isAudioPlaying = false;
+
+    function createSyntheticReverbBuffer(ctx, duration = 2.4, decay = 2.1) {
+      const sampleRate = ctx.sampleRate;
+      const length = Math.floor(sampleRate * duration);
+      const impulse = ctx.createBuffer(2, length, sampleRate);
+      const left = impulse.getChannelData(0);
+      const right = impulse.getChannelData(1);
+
+      for (let i = 0; i < length; i++) {
+        const t = i / length;
+        const envelope = Math.pow(1 - t, decay);
+        left[i] = (Math.random() * 2 - 1) * envelope;
+        right[i] = (Math.random() * 2 - 1) * envelope;
+      }
+      return impulse;
+    }
 
     function initAudioEngine() {
       if (!audioCtx) {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
         audioCtx = new AudioContextClass();
+
+        // 1. Master Gain
         masterGain = audioCtx.createGain();
         masterGain.gain.setValueAtTime(0.85, audioCtx.currentTime);
+
+        // 2. Sound Bus (Mixer Input)
+        soundBus = audioCtx.createGain();
+        soundBus.gain.setValueAtTime(1.0, audioCtx.currentTime);
+
+        // 3. Binaural Algorithmic Reverb Unit
+        dryGain = audioCtx.createGain();
+        dryGain.gain.setValueAtTime(0.92, audioCtx.currentTime);
+
+        reverbWetGain = audioCtx.createGain();
+        reverbWetGain.gain.setValueAtTime(0.24, audioCtx.currentTime);
+
+        convolverNode = audioCtx.createConvolver();
+        convolverNode.buffer = createSyntheticReverbBuffer(audioCtx, 2.4, 2.1);
+
+        // 4. Cinema Bass Boost EQ (Low-shelf 68Hz +8.5dB)
+        bassBoostFilter = audioCtx.createBiquadFilter();
+        bassBoostFilter.type = 'lowshelf';
+        bassBoostFilter.frequency.setValueAtTime(68, audioCtx.currentTime);
+        bassBoostFilter.gain.setValueAtTime(bassBoostEnabled ? 8.5 : 0, audioCtx.currentTime);
+
+        // Route: soundBus -> dryGain -> bassBoostFilter
+        //        soundBus -> convolver -> reverbWetGain -> bassBoostFilter
+        //        bassBoostFilter -> masterGain -> analyser -> destination
+        soundBus.connect(dryGain);
+        dryGain.connect(bassBoostFilter);
+
+        soundBus.connect(convolverNode);
+        convolverNode.connect(reverbWetGain);
+        reverbWetGain.connect(bassBoostFilter);
+
+        bassBoostFilter.connect(masterGain);
 
         analyser = audioCtx.createAnalyser();
         analyser.fftSize = 64;
@@ -1042,6 +1108,31 @@
       }
     }
 
+    function toggleBassBoost() {
+      bassBoostEnabled = !bassBoostEnabled;
+      if (bassBoostFilter && audioCtx) {
+        bassBoostFilter.gain.setValueAtTime(bassBoostEnabled ? 8.5 : 0, audioCtx.currentTime);
+      }
+      const bassDot = document.getElementById('bass-dot');
+      const bassLabel = document.getElementById('bass-label');
+      if (bassDot) {
+        bassDot.className = bassBoostEnabled 
+          ? 'w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_6px_#ff2a5f]' 
+          : 'w-2 h-2 rounded-full bg-neutral-600';
+      }
+      if (bassLabel) {
+        bassLabel.textContent = `Bass: ${bassBoostEnabled ? 'ON' : 'OFF'}`;
+      }
+    }
+
+    const btnBassBoost = document.getElementById('btn-bass-boost');
+    if (btnBassBoost) {
+      btnBassBoost.addEventListener('click', () => {
+        initAudioEngine();
+        toggleBassBoost();
+      });
+    }
+
     function playCinematicAudio(speedMult = 1) {
       try {
         initAudioEngine();
@@ -1052,6 +1143,7 @@
 
         const now = audioCtx.currentTime;
         const invSpeed = 1 / speedMult;
+        const outBus = soundBus || masterGain;
 
         // 1. Sub-Bass Cinema Boom (Monogram Ignition)
         const subOsc = audioCtx.createOscillator();
@@ -1062,7 +1154,7 @@
         subGain.gain.setValueAtTime(0.0001, now + 0.08 * invSpeed);
         subGain.gain.linearRampToValueAtTime(0.68, now + 0.14 * invSpeed);
         subGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.3 * invSpeed);
-        subOsc.connect(subGain).connect(masterGain);
+        subOsc.connect(subGain).connect(outBus);
         subOsc.start(now + 0.08 * invSpeed);
         subOsc.stop(now + 2.4 * invSpeed);
 
@@ -1075,7 +1167,7 @@
           gain.gain.setValueAtTime(0.0001, startTime);
           gain.gain.linearRampToValueAtTime(0.38, startTime + 0.02);
           gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
-          osc.connect(gain).connect(masterGain);
+          osc.connect(gain).connect(outBus);
           osc.start(startTime);
           osc.stop(startTime + duration + 0.05);
         }
@@ -1111,9 +1203,9 @@
           const whooshPanner = audioCtx.createStereoPanner();
           whooshPanner.pan.setValueAtTime(-0.65, whooshStart);
           whooshPanner.pan.linearRampToValueAtTime(0.65, whooshStart + whooshDur);
-          whiteNoise.connect(filter).connect(whooshGain).connect(whooshPanner).connect(masterGain);
+          whiteNoise.connect(filter).connect(whooshGain).connect(whooshPanner).connect(outBus);
         } else {
-          whiteNoise.connect(filter).connect(whooshGain).connect(masterGain);
+          whiteNoise.connect(filter).connect(whooshGain).connect(outBus);
         }
         whiteNoise.start(whooshStart);
         whiteNoise.stop(whooshStart + whooshDur + 0.1);
@@ -1141,7 +1233,7 @@
           gain.gain.linearRampToValueAtTime(0.065 / Math.sqrt(idx + 1), swellStart + 1.3 * invSpeed);
           gain.gain.exponentialRampToValueAtTime(0.0001, swellStart + swellDur);
 
-          osc.connect(lpf).connect(gain).connect(masterGain);
+          osc.connect(lpf).connect(gain).connect(outBus);
           osc.start(swellStart);
           osc.stop(swellStart + swellDur + 0.1);
         });
@@ -1166,8 +1258,8 @@
         metalGain.gain.linearRampToValueAtTime(0.12, hitTime + 0.01);
         metalGain.gain.exponentialRampToValueAtTime(0.0001, hitTime + 0.35);
 
-        hitOsc.connect(hitGain).connect(masterGain);
-        metalOsc.connect(metalGain).connect(masterGain);
+        hitOsc.connect(hitGain).connect(outBus);
+        metalOsc.connect(metalGain).connect(outBus);
         hitOsc.start(hitTime);
         metalOsc.start(hitTime);
         hitOsc.stop(hitTime + 0.9);
@@ -1403,6 +1495,8 @@
         captureCinemaWallpaper();
       } else if (e.code === 'KeyM') {
         if (btnMute) btnMute.click();
+      } else if (e.code === 'KeyB') {
+        if (btnBassBoost) btnBassBoost.click();
       } else if (e.code === 'Digit1') {
         applyTheme('crimson');
       } else if (e.code === 'Digit2') {
