@@ -657,6 +657,8 @@
         <button data-theme="cyberpunk" class="theme-chip px-2.5 py-0.5 rounded-full bg-white/5 border border-transparent text-neutral-400 hover:text-white transition active:scale-95" title="Cyberpunk Neon (Key 2)">Cyber</button>
         <button data-theme="gold" class="theme-chip px-2.5 py-0.5 rounded-full bg-white/5 border border-transparent text-neutral-400 hover:text-white transition active:scale-95" title="Paramount Gold (Key 3)">Gold</button>
         <button data-theme="emerald" class="theme-chip px-2.5 py-0.5 rounded-full bg-white/5 border border-transparent text-neutral-400 hover:text-white transition active:scale-95" title="Emerald Matrix (Key 4)">Matrix</button>
+        <button data-theme="amber" class="theme-chip px-2.5 py-0.5 rounded-full bg-white/5 border border-transparent text-neutral-400 hover:text-white transition active:scale-95" title="Solar Flare Amber (Key 5)">Solar</button>
+        <button data-theme="sapphire" class="theme-chip px-2.5 py-0.5 rounded-full bg-white/5 border border-transparent text-neutral-400 hover:text-white transition active:scale-95" title="Deep Space Sapphire (Key 6)">Sapphire</button>
       </div>
 
       <div class="pointer-events-auto hidden xl:flex items-center gap-2 bg-neutral-950/85 border border-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs text-neutral-400 shadow-2xl">
@@ -832,7 +834,7 @@
           </div>
           <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
             <span>Studio Palettes</span>
-            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">1 - 4</kbd>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">1 - 6</kbd>
           </div>
         </div>
         <div class="mt-4 pt-3 border-t border-white/10 text-[11px] text-neutral-400 text-center">
@@ -1739,6 +1741,10 @@
         applyTheme('gold');
       } else if (e.code === 'Digit4') {
         applyTheme('emerald');
+      } else if (e.code === 'Digit5') {
+        applyTheme('amber');
+      } else if (e.code === 'Digit6') {
+        applyTheme('sapphire');
       } else if (e.key === '?' || (e.shiftKey && e.code === 'Slash')) {
         toggleShortcutsModal();
       } else if (e.code === 'Escape') {
@@ -1837,6 +1843,30 @@
         viewportBg: 'radial-gradient(ellipse at 50% 50%, rgba(16, 185, 129, 0.22) 0%, rgba(6, 78, 59, 0.14) 38%, rgba(2, 6, 4, 0.95) 75%, rgba(0, 2, 1, 1) 100%)',
         embers: ['#34d399', '#10b981', '#6ee7b7', '#a7f3d0', '#ffffff'],
         streakGrad: 'linear-gradient(90deg, transparent 0%, rgba(52, 211, 153, 0.05) 15%, rgba(52, 211, 153, 0.6) 45%, rgba(255, 255, 255, 0.9) 50%, rgba(16, 185, 129, 0.6) 55%, rgba(52, 211, 153, 0.05) 85%, transparent 100%)'
+      },
+      amber: {
+        name: 'Solar Flare Amber & Supernova',
+        accentColor: '#ff7b00',
+        primary: '#ff5400',
+        glow: '#ff9e00',
+        deep: '#6a040f',
+        core: '#ffaa00',
+        light: '#ffdd00',
+        viewportBg: 'radial-gradient(ellipse at 50% 50%, rgba(255, 84, 0, 0.25) 0%, rgba(157, 2, 8, 0.16) 38%, rgba(10, 3, 0, 0.95) 75%, rgba(4, 1, 0, 1) 100%)',
+        embers: ['#ff9e00', '#ff5400', '#ffaa00', '#ffd60a', '#ffffff'],
+        streakGrad: 'linear-gradient(90deg, transparent 0%, rgba(255, 123, 0, 0.05) 15%, rgba(255, 158, 0, 0.6) 45%, rgba(255, 255, 255, 0.95) 50%, rgba(255, 123, 0, 0.6) 55%, rgba(255, 84, 0, 0.05) 85%, transparent 100%)'
+      },
+      sapphire: {
+        name: 'Deep Space Sapphire & Cosmic Azure',
+        accentColor: '#00b4d8',
+        primary: '#0077b6',
+        glow: '#48cae4',
+        deep: '#03045e',
+        core: '#0096c7',
+        light: '#caf0f8',
+        viewportBg: 'radial-gradient(ellipse at 50% 50%, rgba(0, 119, 182, 0.28) 0%, rgba(3, 4, 94, 0.18) 38%, rgba(1, 2, 10, 0.95) 75%, rgba(0, 1, 4, 1) 100%)',
+        embers: ['#48cae4', '#00b4d8', '#90e0ef', '#0077b6', '#ffffff'],
+        streakGrad: 'linear-gradient(90deg, transparent 0%, rgba(0, 180, 216, 0.05) 15%, rgba(72, 202, 228, 0.6) 45%, rgba(255, 255, 255, 0.95) 50%, rgba(0, 180, 216, 0.6) 55%, rgba(0, 119, 182, 0.05) 85%, transparent 100%)'
       }
     };
 
