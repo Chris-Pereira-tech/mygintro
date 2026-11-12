@@ -595,6 +595,13 @@
     <div id="letterbox-top" class="letterbox-bar letterbox-top"></div>
     <div id="letterbox-bottom" class="letterbox-bar letterbox-bottom"></div>
 
+    <!-- Real-time Recording Floating Badge -->
+    <div id="recording-hud" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-red-950/90 border border-red-500/50 backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-mono text-red-200 flex items-center gap-2 shadow-2xl opacity-0 pointer-events-none transition-opacity duration-300">
+      <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
+      <span class="font-bold tracking-widest uppercase text-red-400">REC</span>
+      <span id="recording-countdown">0.0s / 5.5s</span>
+    </div>
+
     <!-- 35mm Hollywood Film Grain Overlay -->
     <div class="film-grain"></div>
 
@@ -754,6 +761,12 @@
         <span>4K Snapshot</span>
       </button>
 
+      <!-- Cinema WebM Video Reel Recorder Button -->
+      <button id="btn-record" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden xl:inline-flex items-center gap-1.5" title="Record WebM Cinema Reel (R)">
+        <span id="record-dot" class="w-2 h-2 rounded-full bg-red-500"></span>
+        <span id="record-label">Record Reel</span>
+      </button>
+
       <!-- Master Volume Controller -->
       <div class="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl">
         <button id="btn-mute" class="text-neutral-400 hover:text-white transition" title="Toggle Mute (M)">
@@ -822,6 +835,10 @@
           <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
             <span>Edit Title Wordmark</span>
             <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">E</kbd>
+          </div>
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+            <span>Record WebM Reel</span>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">R</kbd>
           </div>
           <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
             <span>4K Wallpaper</span>
@@ -1792,6 +1809,8 @@
         seekTimeline(Math.min(introDuration, cur + 0.25), false);
       } else if (e.code === 'KeyS') {
         captureCinemaWallpaper();
+      } else if (e.code === 'KeyR') {
+        if (btnRecord) btnRecord.click();
       } else if (e.code === 'KeyM') {
         if (btnMute) btnMute.click();
       } else if (e.code === 'KeyB') {
@@ -2265,6 +2284,134 @@
 
     if (btnSnapshot) {
       btnSnapshot.addEventListener('click', captureCinemaWallpaper);
+    }
+
+    /**
+     * ========================================================================
+     * CINEMA VIDEO REEL RECORDER (WEBM 60FPS EXPORT)
+     * ========================================================================
+     */
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let isRecording = false;
+    let recordTimer = null;
+
+    function startCinemaRecording() {
+      if (isRecording) return;
+      if (!canvas.captureStream) {
+        alert('Canvas stream recording not supported in this browser.');
+        return;
+      }
+
+      initAudioEngine();
+      restartAnimation(true);
+
+      const canvasStream = canvas.captureStream(60);
+      let combinedStream = canvasStream;
+
+      if (audioCtx && audioCtx.createMediaStreamDestination && masterGain) {
+        try {
+          const audioDest = audioCtx.createMediaStreamDestination();
+          masterGain.connect(audioDest);
+          const audioTrack = audioDest.stream.getAudioTracks()[0];
+          if (audioTrack) {
+            combinedStream.addTrack(audioTrack);
+          }
+        } catch (e) {
+          console.warn('Audio stream capture error:', e);
+        }
+      }
+
+      recordedChunks = [];
+      const mimeTypes = [
+        'video/webm;codecs=vp9,opus',
+        'video/webm;codecs=vp8,opus',
+        'video/webm'
+      ];
+      let selectedMime = mimeTypes.find(m => window.MediaRecorder && MediaRecorder.isTypeSupported(m)) || 'video/webm';
+
+      try {
+        mediaRecorder = new MediaRecorder(combinedStream, { mimeType: selectedMime });
+      } catch (err) {
+        mediaRecorder = new MediaRecorder(combinedStream);
+      }
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          recordedChunks.push(e.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(recordedChunks, { type: selectedMime });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `anand-melava-reel-${activeThemeKey}.webm`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+        stopRecordingUI();
+      };
+
+      mediaRecorder.start();
+      isRecording = true;
+      startRecordingUI();
+
+      const recordDuration = (5.5 / currentSpeed) * 1000 + 400;
+      setTimeout(() => {
+        if (isRecording && mediaRecorder && mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+        }
+      }, recordDuration);
+    }
+
+    function startRecordingUI() {
+      const recHud = document.getElementById('recording-hud');
+      const recDot = document.getElementById('record-dot');
+      const recLabel = document.getElementById('record-label');
+
+      if (recHud) {
+        recHud.classList.remove('opacity-0', 'pointer-events-none');
+        recHud.classList.add('opacity-100', 'pointer-events-auto');
+      }
+      if (recDot) recDot.className = 'w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_#ef4444]';
+      if (recLabel) recLabel.textContent = 'Recording...';
+
+      const recStart = Date.now();
+      recordTimer = setInterval(() => {
+        const count = document.getElementById('recording-countdown');
+        if (count) {
+          const sec = ((Date.now() - recStart) / 1000).toFixed(1);
+          count.textContent = `${sec}s / 5.5s`;
+        }
+      }, 100);
+    }
+
+    function stopRecordingUI() {
+      isRecording = false;
+      clearInterval(recordTimer);
+      const recHud = document.getElementById('recording-hud');
+      const recDot = document.getElementById('record-dot');
+      const recLabel = document.getElementById('record-label');
+
+      if (recHud) {
+        recHud.classList.remove('opacity-100', 'pointer-events-auto');
+        recHud.classList.add('opacity-0', 'pointer-events-none');
+      }
+      if (recDot) recDot.className = 'w-2 h-2 rounded-full bg-red-500';
+      if (recLabel) recLabel.textContent = 'Record Reel';
+    }
+
+    const btnRecord = document.getElementById('btn-record');
+    if (btnRecord) {
+      btnRecord.addEventListener('click', () => {
+        if (!isRecording) {
+          startCinemaRecording();
+        } else if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+        }
+      });
     }
 
     window.addEventListener('resize', () => {
