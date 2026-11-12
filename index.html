@@ -469,6 +469,26 @@
       transition: opacity 0.08s ease-out;
     }
 
+    /* Hollywood Letterbox Cinema Aspect Ratio Bars */
+    .letterbox-bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      background: #000000;
+      z-index: 35;
+      pointer-events: none;
+      transition: height 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.95);
+    }
+    .letterbox-top {
+      top: 0;
+      height: 0px;
+    }
+    .letterbox-bottom {
+      bottom: 0;
+      height: 0px;
+    }
+
     /* ==========================================================================
        REAL-TIME AUDIO SPECTRUM VISUALIZER RIBBON
        ========================================================================== */
@@ -570,6 +590,10 @@
 
   <!-- MAIN CINEMA VIEWPORT -->
   <main id="cinema-viewport">
+
+    <!-- Hollywood Anamorphic Letterbox Bars -->
+    <div id="letterbox-top" class="letterbox-bar letterbox-top"></div>
+    <div id="letterbox-bottom" class="letterbox-bar letterbox-bottom"></div>
 
     <!-- 35mm Hollywood Film Grain Overlay -->
     <div class="film-grain"></div>
@@ -679,6 +703,12 @@
         <span id="camera-label">Cam: Center</span>
       </button>
 
+      <!-- Anamorphic Aspect Ratio Button -->
+      <button id="btn-aspect" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden md:inline-flex items-center gap-1.5" title="Cycle Aspect Ratio (A)">
+        <span class="text-rose-400 font-mono text-[11px] font-bold">2.39</span>
+        <span id="aspect-label">Scope: Full</span>
+      </button>
+
       <button id="btn-cinema" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden sm:inline-flex items-center gap-1.5" title="Toggle Cinema Mode (H)">
         <span>Cinema Mode</span>
       </button>
@@ -744,6 +774,10 @@
           <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
             <span>Cycle Camera</span>
             <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">C</kbd>
+          </div>
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+            <span>Aspect Ratio</span>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">A</kbd>
           </div>
           <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
             <span>4K Wallpaper</span>
@@ -1491,6 +1525,8 @@
         toggleParallax();
       } else if (e.code === 'KeyC') {
         cycleCamera();
+      } else if (e.code === 'KeyA') {
+        cycleAspectRatio();
       } else if (e.code === 'KeyS') {
         captureCinemaWallpaper();
       } else if (e.code === 'KeyM') {
@@ -1708,6 +1744,61 @@
     if (btnCamera) {
       btnCamera.addEventListener('click', cycleCamera);
     }
+
+    /**
+     * ========================================================================
+     * ASPECT RATIO LETTERBOX ENGINE (HOLLYWOOD SCOPE)
+     * ========================================================================
+     */
+    const aspectRatios = [
+      { name: 'Full', ratio: null },
+      { name: '2.39:1 Scope', ratio: 2.39 },
+      { name: '16:9 Cinema', ratio: 16 / 9 },
+      { name: '4:3 Vintage', ratio: 4 / 3 }
+    ];
+    let currentAspectIndex = 0;
+    const btnAspect = document.getElementById('btn-aspect');
+    const aspectLabel = document.getElementById('aspect-label');
+    const letterboxTop = document.getElementById('letterbox-top');
+    const letterboxBottom = document.getElementById('letterbox-bottom');
+
+    function applyAspectRatio() {
+      const current = aspectRatios[currentAspectIndex];
+      if (aspectLabel) aspectLabel.textContent = `Scope: ${current.name}`;
+
+      if (!current.ratio) {
+        if (letterboxTop) letterboxTop.style.height = '0px';
+        if (letterboxBottom) letterboxBottom.style.height = '0px';
+        return;
+      }
+
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const currentRatio = vw / vh;
+
+      if (currentRatio > current.ratio) {
+        // Wider than target ratio: letterbox height 0
+        if (letterboxTop) letterboxTop.style.height = '0px';
+        if (letterboxBottom) letterboxBottom.style.height = '0px';
+      } else {
+        // Taller than target ratio: letterbox top & bottom
+        const targetHeight = vw / current.ratio;
+        const totalBarHeight = Math.max(0, (vh - targetHeight) / 2);
+        if (letterboxTop) letterboxTop.style.height = `${Math.round(totalBarHeight)}px`;
+        if (letterboxBottom) letterboxBottom.style.height = `${Math.round(totalBarHeight)}px`;
+      }
+    }
+
+    function cycleAspectRatio() {
+      currentAspectIndex = (currentAspectIndex + 1) % aspectRatios.length;
+      applyAspectRatio();
+      spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 24, 0.65);
+    }
+
+    if (btnAspect) {
+      btnAspect.addEventListener('click', cycleAspectRatio);
+    }
+    window.addEventListener('resize', applyAspectRatio);
 
     function updateParallax() {
       if (parallaxEnabled) {
