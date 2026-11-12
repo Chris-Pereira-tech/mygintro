@@ -709,6 +709,12 @@
         <span id="aspect-label">Scope: Full</span>
       </button>
 
+      <!-- Hyperdrive Warp Mode Button -->
+      <button id="btn-warp" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden lg:inline-flex items-center gap-1.5" title="Toggle Hyperdrive Warp Speed (W)">
+        <span id="warp-dot" class="w-2 h-2 rounded-full bg-neutral-600"></span>
+        <span id="warp-label">Warp: OFF</span>
+      </button>
+
       <button id="btn-cinema" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden sm:inline-flex items-center gap-1.5" title="Toggle Cinema Mode (H)">
         <span>Cinema Mode</span>
       </button>
@@ -780,6 +786,10 @@
             <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">A</kbd>
           </div>
           <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+            <span>Hyperdrive Warp</span>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">W</kbd>
+          </div>
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
             <span>4K Wallpaper</span>
             <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">S</kbd>
           </div>
@@ -821,8 +831,10 @@
     const canvas = document.getElementById('starfield-canvas');
     const ctx = canvas.getContext('2d');
     let stars = [];
+    let nebulaClouds = [];
     let explosionSparks = [];
     let animationFrameId = null;
+    let isWarpMode = false;
 
     const emberColors = [
       '#ff2a5f', // vibrant ruby glow
@@ -853,6 +865,40 @@
           isEmber: Math.random() > 0.4
         });
       }
+
+      // Initialize cosmic dust nebula clouds
+      nebulaClouds = [];
+      const cloudCount = 6;
+      for (let i = 0; i < cloudCount; i++) {
+        nebulaClouds.push({
+          x: (window.innerWidth / (cloudCount + 1)) * (i + 1) + (Math.random() - 0.5) * 120,
+          y: window.innerHeight * 0.5 + (Math.random() - 0.5) * 180,
+          radius: Math.random() * 180 + 140,
+          alpha: Math.random() * 0.12 + 0.06,
+          vx: (Math.random() - 0.5) * 0.08,
+          vy: (Math.random() - 0.5) * 0.06
+        });
+      }
+    }
+
+    function toggleWarpMode() {
+      isWarpMode = !isWarpMode;
+      const warpDot = document.getElementById('warp-dot');
+      const warpLabel = document.getElementById('warp-label');
+      if (warpDot) {
+        warpDot.className = isWarpMode 
+          ? 'w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]' 
+          : 'w-2 h-2 rounded-full bg-neutral-600';
+      }
+      if (warpLabel) {
+        warpLabel.textContent = `Warp: ${isWarpMode ? 'ON' : 'OFF'}`;
+      }
+      spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 60, 1.2);
+    }
+
+    const btnWarp = document.getElementById('btn-warp');
+    if (btnWarp) {
+      btnWarp.addEventListener('click', toggleWarpMode);
     }
 
     function spawnSparkBurst(originX, originY, count = 75, speedMult = 1.0) {
@@ -876,31 +922,89 @@
     function renderStarfield() {
       ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
-      // Render ambient drifting embers
-      stars.forEach(s => {
-        s.alpha += s.speed;
-        if (s.alpha > 0.95 || s.alpha < 0.15) s.speed = -s.speed;
+      // Render drifting cosmic nebula clouds
+      nebulaClouds.forEach(cloud => {
+        cloud.x += cloud.vx;
+        cloud.y += cloud.vy;
+        if (cloud.x < 0 || cloud.x > window.innerWidth) cloud.vx = -cloud.vx;
+        if (cloud.y < 0 || cloud.y > window.innerHeight) cloud.vy = -cloud.vy;
 
-        s.y += s.vy;
-        s.x += s.vx;
-        if (s.y < -10) s.y = window.innerHeight + 10;
-        if (s.x < -10) s.x = window.innerWidth + 10;
-        if (s.x > window.innerWidth + 10) s.x = -10;
+        const nGrad = ctx.createRadialGradient(cloud.x, cloud.y, 10, cloud.x, cloud.y, cloud.radius);
+        const activeColor = emberColors[0] || '#ff2a5f';
+        nGrad.addColorStop(0, activeColor);
+        nGrad.addColorStop(0.5, emberColors[1] || '#ff1e56');
+        nGrad.addColorStop(1, 'transparent');
 
         ctx.save();
+        ctx.fillStyle = nGrad;
+        ctx.globalAlpha = cloud.alpha;
+        ctx.filter = 'blur(30px)';
         ctx.beginPath();
-        ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
-        ctx.fillStyle = s.color;
-        ctx.globalAlpha = Math.abs(s.alpha);
-
-        if (s.isEmber) {
-          ctx.shadowBlur = 8;
-          ctx.shadowColor = s.color;
-        }
-
+        ctx.arc(cloud.x, cloud.y, cloud.radius, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
       });
+
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+
+      if (isWarpMode) {
+        // HYPERDRIVE WARP STREAKS
+        stars.forEach(s => {
+          const dx = s.x - cx;
+          const dy = s.y - cy;
+          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+          const speed = (dist / 110 + 2.8);
+          const prevX = s.x;
+          const prevY = s.y;
+
+          s.x += (dx / dist) * speed * 3.6;
+          s.y += (dy / dist) * speed * 3.6;
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(prevX, prevY);
+          ctx.lineTo(s.x, s.y);
+          ctx.strokeStyle = s.color;
+          ctx.lineWidth = s.radius * 1.6;
+          ctx.globalAlpha = Math.min(0.95, (dist / 140));
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = s.color;
+          ctx.stroke();
+          ctx.restore();
+
+          if (s.x < 0 || s.x > window.innerWidth || s.y < 0 || s.y > window.innerHeight) {
+            s.x = cx + (Math.random() - 0.5) * 60;
+            s.y = cy + (Math.random() - 0.5) * 60;
+          }
+        });
+      } else {
+        // AMBIENT DRIFTING EMBERS
+        stars.forEach(s => {
+          s.alpha += s.speed;
+          if (s.alpha > 0.95 || s.alpha < 0.15) s.speed = -s.speed;
+
+          s.y += s.vy;
+          s.x += s.vx;
+          if (s.y < -10) s.y = window.innerHeight + 10;
+          if (s.x < -10) s.x = window.innerWidth + 10;
+          if (s.x > window.innerWidth + 10) s.x = -10;
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+          ctx.fillStyle = s.color;
+          ctx.globalAlpha = Math.abs(s.alpha);
+
+          if (s.isEmber) {
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = s.color;
+          }
+
+          ctx.fill();
+          ctx.restore();
+        });
+      }
 
       // Render kinetic explosion sparks with comet trails
       for (let i = explosionSparks.length - 1; i >= 0; i--) {
@@ -1527,6 +1631,8 @@
         cycleCamera();
       } else if (e.code === 'KeyA') {
         cycleAspectRatio();
+      } else if (e.code === 'KeyW') {
+        toggleWarpMode();
       } else if (e.code === 'KeyS') {
         captureCinemaWallpaper();
       } else if (e.code === 'KeyM') {
