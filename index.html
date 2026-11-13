@@ -233,6 +233,56 @@
     }
 
     /* ==========================================================================
+       VOLUMETRIC STAGE SEARCHLIGHTS & PREMIERE GOD RAY BEAMS
+       ========================================================================== */
+    .stage-spotlights {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 4;
+      overflow: hidden;
+      mix-blend-mode: screen;
+      opacity: 0.55;
+      transition: opacity 0.5s ease;
+    }
+
+    .spotlight-beam {
+      position: absolute;
+      bottom: -20%;
+      width: 48vw;
+      height: 140vh;
+      transform-origin: 50% 100%;
+      pointer-events: none;
+      filter: blur(32px);
+    }
+
+    .spotlight-left {
+      left: 10%;
+      background: conic-gradient(from 340deg at 50% 100%, transparent 0deg, rgba(255, 255, 255, 0.2) 16deg, var(--red-glow, #ff2a5f) 23deg, transparent 38deg);
+      animation: sweep-left calc(7s / var(--speed-mult)) ease-in-out infinite alternate;
+    }
+
+    .spotlight-right {
+      right: 10%;
+      background: conic-gradient(from 340deg at 50% 100%, transparent 0deg, var(--red-glow, #ff2a5f) 15deg, rgba(255, 255, 255, 0.2) 22deg, transparent 38deg);
+      animation: sweep-right calc(8s / var(--speed-mult)) ease-in-out infinite alternate;
+    }
+
+    @keyframes sweep-left {
+      0% { transform: rotate(-24deg); opacity: 0.35; }
+      50% { transform: rotate(12deg); opacity: 0.8; }
+      100% { transform: rotate(30deg); opacity: 0.4; }
+    }
+
+    @keyframes sweep-right {
+      0% { transform: rotate(28deg); opacity: 0.4; }
+      50% { transform: rotate(-10deg); opacity: 0.8; }
+      100% { transform: rotate(-26deg); opacity: 0.35; }
+    }
+
+    /* ==========================================================================
        UNIFIED WORDMARK STAGE: SEAMLESS AM GLIDE & WORDMARK UNFURL
        ========================================================================== */
     #wordmark-stage {
@@ -638,6 +688,12 @@
       <!-- Starfield / Ember canvas background -->
       <canvas id="starfield-canvas"></canvas>
 
+      <!-- Volumetric Stage Spotlights & Premiere Searchlights -->
+      <div id="stage-spotlights" class="stage-spotlights">
+        <div class="spotlight-beam spotlight-left"></div>
+        <div class="spotlight-beam spotlight-right"></div>
+      </div>
+
       <!-- ======================================================================
            UNIFIED WORDMARK STAGE: HERO "AM" GLIDES SEAMLESSLY INTO "ANAND MELAVA"
            ====================================================================== -->
@@ -782,6 +838,12 @@
         <span id="chroma-label">Chroma: OFF</span>
       </button>
 
+      <!-- Volumetric Stage Spotlights Button -->
+      <button id="btn-spotlights" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden md:inline-flex items-center gap-1.5" title="Toggle Stage Spotlights (L)">
+        <span id="spotlights-dot" class="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_6px_#fbbf24]"></span>
+        <span id="spotlights-label">Lights: ON</span>
+      </button>
+
       <button id="btn-cinema" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden sm:inline-flex items-center gap-1.5" title="Toggle Cinema Mode (H)">
         <span>Cinema Mode</span>
       </button>
@@ -916,6 +978,10 @@
             <span>Score Soundscape</span>
             <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">N</kbd>
           </div>
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+            <span>Stage Spotlights</span>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">L</kbd>
+          </div>
         </div>
         <div class="mt-4 pt-3 border-t border-white/10 text-[11px] text-neutral-400 text-center">
           Tip: Click the presenter subtitle badge to type your custom director tagline!
@@ -1034,6 +1100,38 @@
     const btnChroma = document.getElementById('btn-chroma');
     if (btnChroma) {
       btnChroma.addEventListener('click', toggleChromaticAberration);
+    }
+
+    /**
+     * ========================================================================
+     * VOLUMETRIC STAGE SEARCHLIGHTS & GOD RAY BEAMS
+     * ========================================================================
+     */
+    let spotlightsEnabled = true;
+
+    function toggleSpotlights() {
+      spotlightsEnabled = !spotlightsEnabled;
+      const spotLayer = document.getElementById('stage-spotlights');
+      const spotDot = document.getElementById('spotlights-dot');
+      const spotLabel = document.getElementById('spotlights-label');
+
+      if (spotLayer) {
+        spotLayer.style.opacity = spotlightsEnabled ? '0.55' : '0';
+      }
+      if (spotDot) {
+        spotDot.className = spotlightsEnabled
+          ? 'w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_6px_#fbbf24]'
+          : 'w-2 h-2 rounded-full bg-neutral-600';
+      }
+      if (spotLabel) {
+        spotLabel.textContent = `Lights: ${spotlightsEnabled ? 'ON' : 'OFF'}`;
+      }
+      spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 28, 0.75);
+    }
+
+    const btnSpotlights = document.getElementById('btn-spotlights');
+    if (btnSpotlights) {
+      btnSpotlights.addEventListener('click', toggleSpotlights);
     }
 
     function spawnSparkBurst(originX, originY, count = 75, speedMult = 1.0) {
@@ -2145,6 +2243,8 @@
         if (btnBassBoost) btnBassBoost.click();
       } else if (e.code === 'KeyN') {
         cycleSoundscape();
+      } else if (e.code === 'KeyL') {
+        toggleSpotlights();
       } else if (e.code === 'Digit1') {
         applyTheme('crimson');
       } else if (e.code === 'Digit2') {
