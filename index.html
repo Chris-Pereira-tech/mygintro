@@ -815,6 +815,12 @@
         <span id="bass-label">Bass: ON</span>
       </button>
 
+      <!-- Cinematic Soundscape Preset Button -->
+      <button id="btn-soundscape" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden md:inline-flex items-center gap-1.5" title="Cycle Cinematic Soundscape Preset (N)">
+        <span class="w-2 h-2 rounded-full bg-violet-400 shadow-[0_0_6px_#a78bfa]"></span>
+        <span id="soundscape-label">Score: Epic</span>
+      </button>
+
       <div class="flex items-center gap-1 bg-black/60 border border-white/10 rounded-xl p-1">
         <button data-speed="0.45" class="speed-btn px-2.5 py-1 rounded-lg text-xs text-neutral-400 hover:text-white transition">0.45x Slow-Mo</button>
         <button data-speed="1" class="speed-btn px-2.5 py-1 rounded-lg text-xs bg-white/15 text-white font-medium transition">1x Normal</button>
@@ -903,6 +909,10 @@
           <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
             <span>Chromatic Split</span>
             <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">Z</kbd>
+          </div>
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+            <span>Score Soundscape</span>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">N</kbd>
           </div>
         </div>
         <div class="mt-4 pt-3 border-t border-white/10 text-[11px] text-neutral-400 text-center">
@@ -1444,6 +1454,36 @@
       });
     }
 
+    /**
+     * ========================================================================
+     * CINEMATIC SOUNDSCAPE PRESETS (EPIC CINEMA, 80S SYNTHWAVE, CELESTIAL AMBIENT)
+     * ========================================================================
+     */
+    const soundscapes = [
+      { id: 'epic', name: 'Epic Cinema' },
+      { id: 'synthwave', name: '80s Synthwave' },
+      { id: 'celestial', name: 'Celestial Ambient' }
+    ];
+    let currentSoundscapeIndex = 0;
+
+    function cycleSoundscape() {
+      currentSoundscapeIndex = (currentSoundscapeIndex + 1) % soundscapes.length;
+      const sc = soundscapes[currentSoundscapeIndex];
+      const soundscapeLabel = document.getElementById('soundscape-label');
+      if (soundscapeLabel) {
+        soundscapeLabel.textContent = `Score: ${sc.name.split(' ')[0]}`;
+      }
+      spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 28, 0.75);
+    }
+
+    const btnSoundscape = document.getElementById('btn-soundscape');
+    if (btnSoundscape) {
+      btnSoundscape.addEventListener('click', () => {
+        initAudioEngine();
+        cycleSoundscape();
+      });
+    }
+
     function playCinematicAudio(speedMult = 1) {
       try {
         initAudioEngine();
@@ -1455,126 +1495,336 @@
         const now = audioCtx.currentTime;
         const invSpeed = 1 / speedMult;
         const outBus = soundBus || masterGain;
+        const currentMode = soundscapes[currentSoundscapeIndex].id;
 
-        // 1. Sub-Bass Cinema Boom (Monogram Ignition)
-        const subOsc = audioCtx.createOscillator();
-        const subGain = audioCtx.createGain();
-        subOsc.type = 'sine';
-        subOsc.frequency.setValueAtTime(115, now + 0.08 * invSpeed);
-        subOsc.frequency.exponentialRampToValueAtTime(36, now + 1.9 * invSpeed);
-        subGain.gain.setValueAtTime(0.0001, now + 0.08 * invSpeed);
-        subGain.gain.linearRampToValueAtTime(0.68, now + 0.14 * invSpeed);
-        subGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.3 * invSpeed);
-        subOsc.connect(subGain).connect(outBus);
-        subOsc.start(now + 0.08 * invSpeed);
-        subOsc.stop(now + 2.4 * invSpeed);
+        if (currentMode === 'synthwave') {
+          // ==================== 80S SYNTHWAVE SOUNDSCAPE ====================
+          // 1. Resonant Synth Bass Punch
+          const subOsc = audioCtx.createOscillator();
+          const subFilter = audioCtx.createBiquadFilter();
+          const subGain = audioCtx.createGain();
+          subOsc.type = 'sawtooth';
+          subOsc.frequency.setValueAtTime(145, now + 0.08 * invSpeed);
+          subOsc.frequency.exponentialRampToValueAtTime(42, now + 1.6 * invSpeed);
+          subFilter.type = 'lowpass';
+          subFilter.frequency.setValueAtTime(850, now + 0.08 * invSpeed);
+          subFilter.frequency.exponentialRampToValueAtTime(180, now + 1.6 * invSpeed);
+          subFilter.Q.value = 4.5;
+          subGain.gain.setValueAtTime(0.0001, now + 0.08 * invSpeed);
+          subGain.gain.linearRampToValueAtTime(0.55, now + 0.12 * invSpeed);
+          subGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.0 * invSpeed);
+          subOsc.connect(subFilter).connect(subGain).connect(outBus);
+          subOsc.start(now + 0.08 * invSpeed);
+          subOsc.stop(now + 2.1 * invSpeed);
 
-        // 2. Crystal Ruby Chimes
-        function triggerChime(startTime, freq, duration) {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(freq, startTime);
-          gain.gain.setValueAtTime(0.0001, startTime);
-          gain.gain.linearRampToValueAtTime(0.38, startTime + 0.02);
-          gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
-          osc.connect(gain).connect(outBus);
-          osc.start(startTime);
-          osc.stop(startTime + duration + 0.05);
-        }
-        triggerChime(now + 0.2 * invSpeed, 523.25, 2.2 * invSpeed); // C5
-        triggerChime(now + 0.7 * invSpeed, 659.25, 2.5 * invSpeed); // E5
+          // 2. Retro Arpeggio Plucks
+          const arpFreqs = [440, 554.37, 659.25, 880];
+          arpFreqs.forEach((freq, idx) => {
+            const arpOsc = audioCtx.createOscillator();
+            const arpFilter = audioCtx.createBiquadFilter();
+            const arpGain = audioCtx.createGain();
+            const startT = now + (0.2 + idx * 0.18) * invSpeed;
+            arpOsc.type = 'square';
+            arpOsc.frequency.setValueAtTime(freq, startT);
+            arpFilter.type = 'lowpass';
+            arpFilter.frequency.setValueAtTime(2200, startT);
+            arpFilter.frequency.exponentialRampToValueAtTime(400, startT + 0.35);
+            arpGain.gain.setValueAtTime(0.0001, startT);
+            arpGain.gain.linearRampToValueAtTime(0.18, startT + 0.015);
+            arpGain.gain.exponentialRampToValueAtTime(0.0001, startT + 0.4);
+            arpOsc.connect(arpFilter).connect(arpGain).connect(outBus);
+            arpOsc.start(startT);
+            arpOsc.stop(startT + 0.45);
+          });
 
-        // 3. Transition Stardust Whoosh with Spatial Stereo Panning
-        const bufferSize = audioCtx.sampleRate * 1.5;
-        const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-        const output = noiseBuffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-          output[i] = Math.random() * 2 - 1;
-        }
-        const whiteNoise = audioCtx.createBufferSource();
-        whiteNoise.buffer = noiseBuffer;
-        const filter = audioCtx.createBiquadFilter();
-        filter.type = 'bandpass';
-        filter.Q.value = 3.2;
-        const whooshGain = audioCtx.createGain();
+          // 3. Laser Pitch Whoosh Sweep
+          const bufSize = audioCtx.sampleRate * 1.5;
+          const nBuffer = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+          const nData = nBuffer.getChannelData(0);
+          for (let i = 0; i < bufSize; i++) nData[i] = Math.random() * 2 - 1;
+          const laserSrc = audioCtx.createBufferSource();
+          laserSrc.buffer = nBuffer;
+          const laserFilter = audioCtx.createBiquadFilter();
+          laserFilter.type = 'bandpass';
+          laserFilter.Q.value = 5.0;
+          const laserGain = audioCtx.createGain();
+          const laserStart = now + 1.85 * invSpeed;
+          const laserDur = 1.35 * invSpeed;
+          laserFilter.frequency.setValueAtTime(450, laserStart);
+          laserFilter.frequency.exponentialRampToValueAtTime(3600, laserStart + laserDur * 0.5);
+          laserFilter.frequency.exponentialRampToValueAtTime(350, laserStart + laserDur);
+          laserGain.gain.setValueAtTime(0.0001, laserStart);
+          laserGain.gain.linearRampToValueAtTime(0.26, laserStart + laserDur * 0.45);
+          laserGain.gain.exponentialRampToValueAtTime(0.0001, laserStart + laserDur);
 
-        const whooshStart = now + 1.85 * invSpeed;
-        const whooshDur = 1.35 * invSpeed;
+          if (audioCtx.createStereoPanner) {
+            const panner = audioCtx.createStereoPanner();
+            panner.pan.setValueAtTime(-0.7, laserStart);
+            panner.pan.linearRampToValueAtTime(0.7, laserStart + laserDur);
+            laserSrc.connect(laserFilter).connect(laserGain).connect(panner).connect(outBus);
+          } else {
+            laserSrc.connect(laserFilter).connect(laserGain).connect(outBus);
+          }
+          laserSrc.start(laserStart);
+          laserSrc.stop(laserStart + laserDur + 0.1);
 
-        filter.frequency.setValueAtTime(280, whooshStart);
-        filter.frequency.exponentialRampToValueAtTime(2600, whooshStart + whooshDur * 0.55);
-        filter.frequency.exponentialRampToValueAtTime(500, whooshStart + whooshDur);
+          // 4. Vintage Detuned Sawtooth Brass Chord
+          const brassStart = now + 2.05 * invSpeed;
+          const brassDur = 3.6 * invSpeed;
+          const brassFreqs = [55.00, 110.00, 164.81, 220.00, 277.18, 329.63, 440.00];
+          brassFreqs.forEach((freq, idx) => {
+            [-8, 8].forEach(detuneVal => {
+              const bOsc = audioCtx.createOscillator();
+              const bFilter = audioCtx.createBiquadFilter();
+              const bGain = audioCtx.createGain();
+              bOsc.type = 'sawtooth';
+              bOsc.frequency.setValueAtTime(freq, brassStart);
+              bOsc.detune.setValueAtTime(detuneVal, brassStart);
+              bFilter.type = 'lowpass';
+              bFilter.frequency.setValueAtTime(400, brassStart);
+              bFilter.frequency.exponentialRampToValueAtTime(2800, brassStart + 1.2 * invSpeed);
+              bFilter.frequency.exponentialRampToValueAtTime(800, brassStart + brassDur);
+              bGain.gain.setValueAtTime(0.0001, brassStart);
+              bGain.gain.linearRampToValueAtTime(0.045 / Math.sqrt(idx + 1), brassStart + 0.9 * invSpeed);
+              bGain.gain.exponentialRampToValueAtTime(0.0001, brassStart + brassDur);
+              bOsc.connect(bFilter).connect(bGain).connect(outBus);
+              bOsc.start(brassStart);
+              bOsc.stop(brassStart + brassDur + 0.1);
+            });
+          });
 
-        whooshGain.gain.setValueAtTime(0.0001, whooshStart);
-        whooshGain.gain.linearRampToValueAtTime(0.22, whooshStart + whooshDur * 0.45);
-        whooshGain.gain.exponentialRampToValueAtTime(0.0001, whooshStart + whooshDur);
+          // 5. 80s Snare / Transient Slam Hit
+          const hitTime = now + 3.55 * invSpeed;
+          const hitOsc = audioCtx.createOscillator();
+          const hitGain = audioCtx.createGain();
+          hitOsc.type = 'triangle';
+          hitOsc.frequency.setValueAtTime(220, hitTime);
+          hitOsc.frequency.exponentialRampToValueAtTime(65, hitTime + 0.25);
+          hitGain.gain.setValueAtTime(0.0001, hitTime);
+          hitGain.gain.linearRampToValueAtTime(0.5, hitTime + 0.01);
+          hitGain.gain.exponentialRampToValueAtTime(0.0001, hitTime + 0.4);
+          hitOsc.connect(hitGain).connect(outBus);
+          hitOsc.start(hitTime);
+          hitOsc.stop(hitTime + 0.45);
 
-        if (audioCtx.createStereoPanner) {
-          const whooshPanner = audioCtx.createStereoPanner();
-          whooshPanner.pan.setValueAtTime(-0.65, whooshStart);
-          whooshPanner.pan.linearRampToValueAtTime(0.65, whooshStart + whooshDur);
-          whiteNoise.connect(filter).connect(whooshGain).connect(whooshPanner).connect(outBus);
+        } else if (currentMode === 'celestial') {
+          // ==================== CELESTIAL AMBIENT SOUNDSCAPE ====================
+          // 1. Crystalline Harmonic Sub Breath
+          const subOsc = audioCtx.createOscillator();
+          const subGain = audioCtx.createGain();
+          subOsc.type = 'sine';
+          subOsc.frequency.setValueAtTime(68, now + 0.08 * invSpeed);
+          subOsc.frequency.exponentialRampToValueAtTime(32, now + 2.2 * invSpeed);
+          subGain.gain.setValueAtTime(0.0001, now + 0.08 * invSpeed);
+          subGain.gain.linearRampToValueAtTime(0.52, now + 0.3 * invSpeed);
+          subGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.5 * invSpeed);
+          subOsc.connect(subGain).connect(outBus);
+          subOsc.start(now + 0.08 * invSpeed);
+          subOsc.stop(now + 2.6 * invSpeed);
+
+          // 2. Pure Glass Bell Chimes
+          function triggerGlassChime(startTime, freq, duration) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, startTime);
+            gain.gain.setValueAtTime(0.0001, startTime);
+            gain.gain.linearRampToValueAtTime(0.28, startTime + 0.04);
+            gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+            osc.connect(gain).connect(outBus);
+            osc.start(startTime);
+            osc.stop(startTime + duration + 0.1);
+          }
+          triggerGlassChime(now + 0.15 * invSpeed, 523.25, 2.8 * invSpeed); // C5
+          triggerGlassChime(now + 0.55 * invSpeed, 783.99, 3.0 * invSpeed); // G5
+          triggerGlassChime(now + 0.95 * invSpeed, 1046.50, 2.6 * invSpeed); // C6
+
+          // 3. Ethereal Highpass Shimmer Whoosh
+          const bufSize = audioCtx.sampleRate * 1.5;
+          const nBuffer = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+          const nData = nBuffer.getChannelData(0);
+          for (let i = 0; i < bufSize; i++) nData[i] = Math.random() * 2 - 1;
+          const etherSrc = audioCtx.createBufferSource();
+          etherSrc.buffer = nBuffer;
+          const etherFilter = audioCtx.createBiquadFilter();
+          etherFilter.type = 'bandpass';
+          etherFilter.Q.value = 2.0;
+          const etherGain = audioCtx.createGain();
+          const etherStart = now + 1.85 * invSpeed;
+          const etherDur = 1.45 * invSpeed;
+          etherFilter.frequency.setValueAtTime(600, etherStart);
+          etherFilter.frequency.exponentialRampToValueAtTime(2200, etherStart + etherDur * 0.5);
+          etherFilter.frequency.exponentialRampToValueAtTime(700, etherStart + etherDur);
+          etherGain.gain.setValueAtTime(0.0001, etherStart);
+          etherGain.gain.linearRampToValueAtTime(0.18, etherStart + etherDur * 0.45);
+          etherGain.gain.exponentialRampToValueAtTime(0.0001, etherStart + etherDur);
+
+          if (audioCtx.createStereoPanner) {
+            const panner = audioCtx.createStereoPanner();
+            panner.pan.setValueAtTime(-0.5, etherStart);
+            panner.pan.linearRampToValueAtTime(0.5, etherStart + etherDur);
+            etherSrc.connect(etherFilter).connect(etherGain).connect(panner).connect(outBus);
+          } else {
+            etherSrc.connect(etherFilter).connect(etherGain).connect(outBus);
+          }
+          etherSrc.start(etherStart);
+          etherSrc.stop(etherStart + etherDur + 0.1);
+
+          // 4. Shimmering Fifths Celestial Pad
+          const padStart = now + 2.05 * invSpeed;
+          const padDur = 3.6 * invSpeed;
+          const padFreqs = [130.81, 196.00, 261.63, 392.00, 523.25, 783.99];
+          padFreqs.forEach((freq, idx) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
+            osc.frequency.setValueAtTime(freq, padStart);
+            gain.gain.setValueAtTime(0.0001, padStart);
+            gain.gain.linearRampToValueAtTime(0.05 / Math.sqrt(idx + 1), padStart + 1.5 * invSpeed);
+            gain.gain.exponentialRampToValueAtTime(0.0001, padStart + padDur);
+            osc.connect(gain).connect(outBus);
+            osc.start(padStart);
+            osc.stop(padStart + padDur + 0.1);
+          });
+
+          // 5. Crystalline Chime Bloom Lock
+          const hitTime = now + 3.55 * invSpeed;
+          const hitChimes = [1046.50, 1318.51, 1567.98];
+          hitChimes.forEach((f) => {
+            const hOsc = audioCtx.createOscillator();
+            const hGain = audioCtx.createGain();
+            hOsc.type = 'sine';
+            hOsc.frequency.setValueAtTime(f, hitTime);
+            hGain.gain.setValueAtTime(0.0001, hitTime);
+            hGain.gain.linearRampToValueAtTime(0.12, hitTime + 0.02);
+            hGain.gain.exponentialRampToValueAtTime(0.0001, hitTime + 1.2);
+            hOsc.connect(hGain).connect(outBus);
+            hOsc.start(hitTime);
+            hOsc.stop(hitTime + 1.3);
+          });
+
         } else {
-          whiteNoise.connect(filter).connect(whooshGain).connect(outBus);
+          // ==================== DEFAULT HOLLYWOOD EPIC SOUNDSCAPE ====================
+          // 1. Sub-Bass Cinema Boom (Monogram Ignition)
+          const subOsc = audioCtx.createOscillator();
+          const subGain = audioCtx.createGain();
+          subOsc.type = 'sine';
+          subOsc.frequency.setValueAtTime(115, now + 0.08 * invSpeed);
+          subOsc.frequency.exponentialRampToValueAtTime(36, now + 1.9 * invSpeed);
+          subGain.gain.setValueAtTime(0.0001, now + 0.08 * invSpeed);
+          subGain.gain.linearRampToValueAtTime(0.68, now + 0.14 * invSpeed);
+          subGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.3 * invSpeed);
+          subOsc.connect(subGain).connect(outBus);
+          subOsc.start(now + 0.08 * invSpeed);
+          subOsc.stop(now + 2.4 * invSpeed);
+
+          // 2. Crystal Ruby Chimes
+          function triggerChime(startTime, freq, duration) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, startTime);
+            gain.gain.setValueAtTime(0.0001, startTime);
+            gain.gain.linearRampToValueAtTime(0.38, startTime + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+            osc.connect(gain).connect(outBus);
+            osc.start(startTime);
+            osc.stop(startTime + duration + 0.05);
+          }
+          triggerChime(now + 0.2 * invSpeed, 523.25, 2.2 * invSpeed); // C5
+          triggerChime(now + 0.7 * invSpeed, 659.25, 2.5 * invSpeed); // E5
+
+          // 3. Transition Stardust Whoosh with Spatial Stereo Panning
+          const bufferSize = audioCtx.sampleRate * 1.5;
+          const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+          const output = noiseBuffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            output[i] = Math.random() * 2 - 1;
+          }
+          const whiteNoise = audioCtx.createBufferSource();
+          whiteNoise.buffer = noiseBuffer;
+          const filter = audioCtx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.Q.value = 3.2;
+          const whooshGain = audioCtx.createGain();
+
+          const whooshStart = now + 1.85 * invSpeed;
+          const whooshDur = 1.35 * invSpeed;
+
+          filter.frequency.setValueAtTime(280, whooshStart);
+          filter.frequency.exponentialRampToValueAtTime(2600, whooshStart + whooshDur * 0.55);
+          filter.frequency.exponentialRampToValueAtTime(500, whooshStart + whooshDur);
+
+          whooshGain.gain.setValueAtTime(0.0001, whooshStart);
+          whooshGain.gain.linearRampToValueAtTime(0.22, whooshStart + whooshDur * 0.45);
+          whooshGain.gain.exponentialRampToValueAtTime(0.0001, whooshStart + whooshDur);
+
+          if (audioCtx.createStereoPanner) {
+            const whooshPanner = audioCtx.createStereoPanner();
+            whooshPanner.pan.setValueAtTime(-0.65, whooshStart);
+            whooshPanner.pan.linearRampToValueAtTime(0.65, whooshStart + whooshDur);
+            whiteNoise.connect(filter).connect(whooshGain).connect(whooshPanner).connect(outBus);
+          } else {
+            whiteNoise.connect(filter).connect(whooshGain).connect(outBus);
+          }
+          whiteNoise.start(whooshStart);
+          whiteNoise.stop(whooshStart + whooshDur + 0.1);
+
+          // 4. Orchestral Warm Swell on Wordmark Lock
+          const swellStart = now + 2.05 * invSpeed;
+          const swellDur = 3.6 * invSpeed;
+          const chordFreqs = [73.42, 110.00, 146.83, 220.00, 293.66, 369.99, 440.00, 587.33];
+
+          chordFreqs.forEach((freq, idx) => {
+            const osc = audioCtx.createOscillator();
+            const lpf = audioCtx.createBiquadFilter();
+            const gain = audioCtx.createGain();
+
+            osc.type = idx % 2 === 0 ? 'triangle' : 'sawtooth';
+            osc.frequency.setValueAtTime(freq, swellStart);
+            osc.detune.setValueAtTime((idx % 3 - 1) * 6, swellStart);
+
+            lpf.type = 'lowpass';
+            lpf.frequency.setValueAtTime(320, swellStart);
+            lpf.frequency.exponentialRampToValueAtTime(3400, swellStart + 1.4 * invSpeed);
+            lpf.frequency.exponentialRampToValueAtTime(950, swellStart + swellDur);
+
+            gain.gain.setValueAtTime(0.0001, swellStart);
+            gain.gain.linearRampToValueAtTime(0.065 / Math.sqrt(idx + 1), swellStart + 1.3 * invSpeed);
+            gain.gain.exponentialRampToValueAtTime(0.0001, swellStart + swellDur);
+
+            osc.connect(lpf).connect(gain).connect(outBus);
+            osc.start(swellStart);
+            osc.stop(swellStart + swellDur + 0.1);
+          });
+
+          // 5. Metallic Impact Transient (Wordmark Lock Hit)
+          const hitTime = now + 3.55 * invSpeed;
+          const hitOsc = audioCtx.createOscillator();
+          const hitGain = audioCtx.createGain();
+          hitOsc.type = 'triangle';
+          hitOsc.frequency.setValueAtTime(160, hitTime);
+          hitOsc.frequency.exponentialRampToValueAtTime(40, hitTime + 0.5);
+          hitGain.gain.setValueAtTime(0.0001, hitTime);
+          hitGain.gain.linearRampToValueAtTime(0.55, hitTime + 0.015);
+          hitGain.gain.exponentialRampToValueAtTime(0.0001, hitTime + 0.85);
+
+          const metalOsc = audioCtx.createOscillator();
+          const metalGain = audioCtx.createGain();
+          metalOsc.type = 'square';
+          metalOsc.frequency.setValueAtTime(880, hitTime);
+          metalOsc.frequency.exponentialRampToValueAtTime(220, hitTime + 0.3);
+          metalGain.gain.setValueAtTime(0.0001, hitTime);
+          metalGain.gain.linearRampToValueAtTime(0.12, hitTime + 0.01);
+          metalGain.gain.exponentialRampToValueAtTime(0.0001, hitTime + 0.35);
+
+          hitOsc.connect(hitGain).connect(outBus);
+          metalOsc.connect(metalGain).connect(outBus);
+          hitOsc.start(hitTime);
+          metalOsc.start(hitTime);
+          hitOsc.stop(hitTime + 0.9);
+          metalOsc.stop(hitTime + 0.4);
         }
-        whiteNoise.start(whooshStart);
-        whiteNoise.stop(whooshStart + whooshDur + 0.1);
-
-        // 4. Orchestral Warm Swell on Wordmark Lock
-        const swellStart = now + 2.05 * invSpeed;
-        const swellDur = 3.6 * invSpeed;
-        const chordFreqs = [73.42, 110.00, 146.83, 220.00, 293.66, 369.99, 440.00, 587.33];
-
-        chordFreqs.forEach((freq, idx) => {
-          const osc = audioCtx.createOscillator();
-          const lpf = audioCtx.createBiquadFilter();
-          const gain = audioCtx.createGain();
-
-          osc.type = idx % 2 === 0 ? 'triangle' : 'sawtooth';
-          osc.frequency.setValueAtTime(freq, swellStart);
-          osc.detune.setValueAtTime((idx % 3 - 1) * 6, swellStart);
-
-          lpf.type = 'lowpass';
-          lpf.frequency.setValueAtTime(320, swellStart);
-          lpf.frequency.exponentialRampToValueAtTime(3400, swellStart + 1.4 * invSpeed);
-          lpf.frequency.exponentialRampToValueAtTime(950, swellStart + swellDur);
-
-          gain.gain.setValueAtTime(0.0001, swellStart);
-          gain.gain.linearRampToValueAtTime(0.065 / Math.sqrt(idx + 1), swellStart + 1.3 * invSpeed);
-          gain.gain.exponentialRampToValueAtTime(0.0001, swellStart + swellDur);
-
-          osc.connect(lpf).connect(gain).connect(outBus);
-          osc.start(swellStart);
-          osc.stop(swellStart + swellDur + 0.1);
-        });
-
-        // 5. Metallic Impact Transient (Wordmark Lock Hit)
-        const hitTime = now + 3.55 * invSpeed;
-        const hitOsc = audioCtx.createOscillator();
-        const hitGain = audioCtx.createGain();
-        hitOsc.type = 'triangle';
-        hitOsc.frequency.setValueAtTime(160, hitTime);
-        hitOsc.frequency.exponentialRampToValueAtTime(40, hitTime + 0.5);
-        hitGain.gain.setValueAtTime(0.0001, hitTime);
-        hitGain.gain.linearRampToValueAtTime(0.55, hitTime + 0.015);
-        hitGain.gain.exponentialRampToValueAtTime(0.0001, hitTime + 0.85);
-
-        const metalOsc = audioCtx.createOscillator();
-        const metalGain = audioCtx.createGain();
-        metalOsc.type = 'square';
-        metalOsc.frequency.setValueAtTime(880, hitTime);
-        metalOsc.frequency.exponentialRampToValueAtTime(220, hitTime + 0.3);
-        metalGain.gain.setValueAtTime(0.0001, hitTime);
-        metalGain.gain.linearRampToValueAtTime(0.12, hitTime + 0.01);
-        metalGain.gain.exponentialRampToValueAtTime(0.0001, hitTime + 0.35);
-
-        hitOsc.connect(hitGain).connect(outBus);
-        metalOsc.connect(metalGain).connect(outBus);
-        hitOsc.start(hitTime);
-        metalOsc.start(hitTime);
-        hitOsc.stop(hitTime + 0.9);
-        metalOsc.stop(hitTime + 0.4);
 
         setTimeout(() => {
           isAudioPlaying = false;
@@ -1891,6 +2141,8 @@
         if (btnMute) btnMute.click();
       } else if (e.code === 'KeyB') {
         if (btnBassBoost) btnBassBoost.click();
+      } else if (e.code === 'KeyN') {
+        cycleSoundscape();
       } else if (e.code === 'Digit1') {
         applyTheme('crimson');
       } else if (e.code === 'Digit2') {
