@@ -692,6 +692,8 @@
         <button data-theme="emerald" class="theme-chip px-2.5 py-0.5 rounded-full bg-white/5 border border-transparent text-neutral-400 hover:text-white transition active:scale-95" title="Emerald Matrix (Key 4)">Matrix</button>
         <button data-theme="amber" class="theme-chip px-2.5 py-0.5 rounded-full bg-white/5 border border-transparent text-neutral-400 hover:text-white transition active:scale-95" title="Solar Flare Amber (Key 5)">Solar</button>
         <button data-theme="sapphire" class="theme-chip px-2.5 py-0.5 rounded-full bg-white/5 border border-transparent text-neutral-400 hover:text-white transition active:scale-95" title="Deep Space Sapphire (Key 6)">Sapphire</button>
+        <button data-theme="platinum" class="theme-chip px-2.5 py-0.5 rounded-full bg-white/5 border border-transparent text-neutral-400 hover:text-white transition active:scale-95" title="Void Monolith Platinum (Key 7)">Platinum</button>
+        <button data-theme="sakura" class="theme-chip px-2.5 py-0.5 rounded-full bg-white/5 border border-transparent text-neutral-400 hover:text-white transition active:scale-95" title="Cybernetic Sakura (Key 8)">Sakura</button>
       </div>
 
       <div class="pointer-events-auto hidden xl:flex items-center gap-2 bg-neutral-950/85 border border-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs text-neutral-400 shadow-2xl">
@@ -904,7 +906,7 @@
           </div>
           <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
             <span>Studio Palettes</span>
-            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">1 - 6</kbd>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">1 - 8</kbd>
           </div>
           <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
             <span>Chromatic Split</span>
@@ -2155,6 +2157,10 @@
         applyTheme('amber');
       } else if (e.code === 'Digit6') {
         applyTheme('sapphire');
+      } else if (e.code === 'Digit7') {
+        applyTheme('platinum');
+      } else if (e.code === 'Digit8') {
+        applyTheme('sakura');
       } else if (e.key === '?' || (e.shiftKey && e.code === 'Slash')) {
         toggleShortcutsModal();
       } else if (e.code === 'Escape') {
@@ -2277,6 +2283,30 @@
         viewportBg: 'radial-gradient(ellipse at 50% 50%, rgba(0, 119, 182, 0.28) 0%, rgba(3, 4, 94, 0.18) 38%, rgba(1, 2, 10, 0.95) 75%, rgba(0, 1, 4, 1) 100%)',
         embers: ['#48cae4', '#00b4d8', '#90e0ef', '#0077b6', '#ffffff'],
         streakGrad: 'linear-gradient(90deg, transparent 0%, rgba(0, 180, 216, 0.05) 15%, rgba(72, 202, 228, 0.6) 45%, rgba(255, 255, 255, 0.95) 50%, rgba(0, 180, 216, 0.6) 55%, rgba(0, 119, 182, 0.05) 85%, transparent 100%)'
+      },
+      platinum: {
+        name: 'Void Monolith Platinum & Titanium',
+        accentColor: '#f1f5f9',
+        primary: '#94a3b8',
+        glow: '#ffffff',
+        deep: '#0f172a',
+        core: '#e2e8f0',
+        light: '#ffffff',
+        viewportBg: 'radial-gradient(ellipse at 50% 50%, rgba(148, 163, 184, 0.22) 0%, rgba(30, 41, 59, 0.18) 38%, rgba(2, 6, 23, 0.96) 75%, rgba(0, 0, 0, 1) 100%)',
+        embers: ['#ffffff', '#e2e8f0', '#cbd5e1', '#38bdf8', '#94a3b8'],
+        streakGrad: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.05) 15%, rgba(226, 232, 240, 0.7) 45%, rgba(255, 255, 255, 1) 50%, rgba(226, 232, 240, 0.7) 55%, rgba(255, 255, 255, 0.05) 85%, transparent 100%)'
+      },
+      sakura: {
+        name: 'Cybernetic Sakura & Neo Tokyo Rose',
+        accentColor: '#ff758f',
+        primary: '#ff1493',
+        glow: '#ff85a1',
+        deep: '#4a041c',
+        core: '#ff4d6d',
+        light: '#ffe5ec',
+        viewportBg: 'radial-gradient(ellipse at 50% 50%, rgba(255, 20, 147, 0.26) 0%, rgba(74, 4, 28, 0.18) 38%, rgba(8, 2, 6, 0.96) 75%, rgba(3, 0, 2, 1) 100%)',
+        embers: ['#ff758f', '#ff1493', '#ffb3c1', '#4cc9f0', '#ffffff'],
+        streakGrad: 'linear-gradient(90deg, transparent 0%, rgba(255, 117, 143, 0.05) 15%, rgba(255, 20, 147, 0.65) 45%, rgba(255, 255, 255, 0.95) 50%, rgba(76, 201, 240, 0.6) 55%, rgba(255, 117, 143, 0.05) 85%, transparent 100%)'
       }
     };
 
