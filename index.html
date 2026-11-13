@@ -490,6 +490,20 @@
     }
 
     /* ==========================================================================
+       CHROMATIC ABERRATION RGB LENS DISPERSION SHADER
+       ========================================================================== */
+    .chromatic-aberration-active #wordmark-stage {
+      filter: drop-shadow(-2.5px 0 0 rgba(255, 30, 86, 0.7)) drop-shadow(2.5px 0 0 rgba(76, 201, 240, 0.7));
+      transition: filter 0.25s ease;
+    }
+    .chromatic-aberration-active .arch-char {
+      text-shadow: -2px 0 3px rgba(255, 30, 86, 0.85), 2px 0 3px rgba(76, 201, 240, 0.85), 0 16px 36px rgba(0, 0, 0, 0.9);
+    }
+    .chromatic-aberration-active .anamorphic-beam {
+      filter: blur(1.5px) drop-shadow(-3px 0 14px rgba(255, 0, 85, 0.9)) drop-shadow(3px 0 14px rgba(0, 229, 255, 0.9));
+    }
+
+    /* ==========================================================================
        REAL-TIME AUDIO SPECTRUM VISUALIZER RIBBON
        ========================================================================== */
     .visualizer-canvas {
@@ -760,6 +774,12 @@
         <span id="warp-label">Warp: OFF</span>
       </button>
 
+      <!-- Chromatic Aberration RGB Lens Split Button -->
+      <button id="btn-chroma" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden lg:inline-flex items-center gap-1.5" title="Toggle Chromatic Aberration RGB Split (Z)">
+        <span id="chroma-dot" class="w-2 h-2 rounded-full bg-neutral-600"></span>
+        <span id="chroma-label">Chroma: OFF</span>
+      </button>
+
       <button id="btn-cinema" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden sm:inline-flex items-center gap-1.5" title="Toggle Cinema Mode (H)">
         <span>Cinema Mode</span>
       </button>
@@ -880,6 +900,10 @@
             <span>Studio Palettes</span>
             <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">1 - 6</kbd>
           </div>
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+            <span>Chromatic Split</span>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">Z</kbd>
+          </div>
         </div>
         <div class="mt-4 pt-3 border-t border-white/10 text-[11px] text-neutral-400 text-center">
           Tip: Click the presenter subtitle badge to type your custom director tagline!
@@ -966,6 +990,38 @@
     const btnWarp = document.getElementById('btn-warp');
     if (btnWarp) {
       btnWarp.addEventListener('click', toggleWarpMode);
+    }
+
+    /**
+     * ========================================================================
+     * CHROMATIC ABERRATION RGB LENS DISPERSION
+     * ========================================================================
+     */
+    let isChromaMode = false;
+
+    function toggleChromaticAberration() {
+      isChromaMode = !isChromaMode;
+      const chromaDot = document.getElementById('chroma-dot');
+      const chromaLabel = document.getElementById('chroma-label');
+      const cinemaViewport = document.getElementById('cinema-viewport');
+
+      if (cinemaViewport) {
+        cinemaViewport.classList.toggle('chromatic-aberration-active', isChromaMode);
+      }
+      if (chromaDot) {
+        chromaDot.className = isChromaMode
+          ? 'w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]'
+          : 'w-2 h-2 rounded-full bg-neutral-600';
+      }
+      if (chromaLabel) {
+        chromaLabel.textContent = `Chroma: ${isChromaMode ? 'ON' : 'OFF'}`;
+      }
+      spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 35, 0.8);
+    }
+
+    const btnChroma = document.getElementById('btn-chroma');
+    if (btnChroma) {
+      btnChroma.addEventListener('click', toggleChromaticAberration);
     }
 
     function spawnSparkBurst(originX, originY, count = 75, speedMult = 1.0) {
@@ -1815,6 +1871,8 @@
         cycleAspectRatio();
       } else if (e.code === 'KeyW') {
         toggleWarpMode();
+      } else if (e.code === 'KeyZ') {
+        toggleChromaticAberration();
       } else if (e.code === 'KeyE') {
         promptEditTitle();
       } else if (e.code === 'ArrowLeft') {
