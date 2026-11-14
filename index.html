@@ -858,6 +858,12 @@
         <span id="camera-label">Cam: Center</span>
       </button>
 
+      <!-- Director Auto-Orbit Camera Button -->
+      <button id="btn-orbit" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden md:inline-flex items-center gap-1.5" title="Toggle Auto-Orbit Turntable Camera (Y)">
+        <span id="orbit-dot" class="w-2 h-2 rounded-full bg-neutral-600"></span>
+        <span id="orbit-label">Orbit: OFF</span>
+      </button>
+
       <!-- Anamorphic Aspect Ratio Button -->
       <button id="btn-aspect" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden md:inline-flex items-center gap-1.5" title="Cycle Aspect Ratio (A)">
         <span class="text-rose-400 font-mono text-[11px] font-bold">2.39</span>
@@ -1059,6 +1065,10 @@
           <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
             <span>Film Stock LUT</span>
             <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">V</kbd>
+          </div>
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+            <span>Turntable Orbit</span>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">Y</kbd>
           </div>
         </div>
         <div class="mt-4 pt-3 border-t border-white/10 text-[11px] text-neutral-400 text-center">
@@ -2572,6 +2582,8 @@
         toggleBokehMode();
       } else if (e.code === 'KeyV') {
         cycleFilmStock();
+      } else if (e.code === 'KeyY') {
+        toggleOrbitMode();
       } else if (e.code === 'Digit1') {
         applyTheme('crimson');
       } else if (e.code === 'Digit2') {
@@ -2904,17 +2916,53 @@
         currentTiltY += (0 - currentTiltY) * 0.12;
       }
 
+      let orbitOffsetX = 0;
+      let orbitOffsetY = 0;
+      if (isOrbitMode) {
+        orbitAngle += 0.012;
+        orbitOffsetY = Math.sin(orbitAngle) * 9.5;
+        orbitOffsetX = Math.cos(orbitAngle * 0.7) * 4.5;
+      }
+
       const cam = cameraPresets[currentCameraIndex];
-      const finalPitch = (currentTiltX + cam.basePitch).toFixed(2);
-      const finalYaw = (currentTiltY + cam.baseYaw).toFixed(2);
+      const finalPitch = (currentTiltX + cam.basePitch + orbitOffsetX).toFixed(2);
+      const finalYaw = (currentTiltY + cam.baseYaw + orbitOffsetY).toFixed(2);
 
       if (parallaxRig) {
         parallaxRig.style.transform = `perspective(1400px) translateY(${cam.translateY}px) scale(${cam.scale}) rotateX(${finalPitch}deg) rotateY(${finalYaw}deg)`;
       }
 
-      updateLensFlares(currentTiltX + cam.basePitch * 0.4, currentTiltY + cam.baseYaw * 0.4);
+      updateLensFlares(currentTiltX + cam.basePitch * 0.4 + orbitOffsetX * 0.4, currentTiltY + cam.baseYaw * 0.4 + orbitOffsetY * 0.4);
 
       parallaxFrameId = requestAnimationFrame(updateParallax);
+    }
+
+    /**
+     * ========================================================================
+     * DIRECTOR TURNTABLE AUTO-ORBIT CAMERA
+     * ========================================================================
+     */
+    let isOrbitMode = false;
+    let orbitAngle = 0;
+
+    function toggleOrbitMode() {
+      isOrbitMode = !isOrbitMode;
+      const orbitDot = document.getElementById('orbit-dot');
+      const orbitLabel = document.getElementById('orbit-label');
+      if (orbitDot) {
+        orbitDot.className = isOrbitMode
+          ? 'w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_6px_#22d3ee]'
+          : 'w-2 h-2 rounded-full bg-neutral-600';
+      }
+      if (orbitLabel) {
+        orbitLabel.textContent = `Orbit: ${isOrbitMode ? 'ON' : 'OFF'}`;
+      }
+      spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 28, 0.75);
+    }
+
+    const btnOrbit = document.getElementById('btn-orbit');
+    if (btnOrbit) {
+      btnOrbit.addEventListener('click', toggleOrbitMode);
     }
 
     function toggleParallax() {
