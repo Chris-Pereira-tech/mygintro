@@ -511,6 +511,25 @@
       mix-blend-mode: overlay;
     }
 
+    /* ==========================================================================
+       HOLLYWOOD FILM STOCK COLOR GRADING (LUTS)
+       ========================================================================== */
+    .film-stock-natural {
+      filter: none;
+    }
+    .film-stock-vision3 {
+      filter: contrast(1.08) saturate(1.22) sepia(0.08) hue-rotate(-4deg);
+    }
+    .film-stock-technicolor {
+      filter: contrast(1.22) saturate(1.58) brightness(1.03);
+    }
+    .film-stock-bleach {
+      filter: contrast(1.3) saturate(0.55) brightness(0.96);
+    }
+    .film-stock-noir {
+      filter: grayscale(1) contrast(1.35) brightness(1.05);
+    }
+
     /* Camera Shutter Flash Overlay */
     #camera-flash-overlay {
       position: fixed;
@@ -922,6 +941,12 @@
         <span id="crest-label">Crest: Laurels</span>
       </button>
 
+      <!-- Hollywood Film Stock Color Grading Button -->
+      <button id="btn-film-stock" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden lg:inline-flex items-center gap-1.5" title="Cycle Hollywood Film Stock Grading (V)">
+        <span class="text-amber-400 font-bold text-xs">🎞️</span>
+        <span id="film-stock-label">Stock: Standard</span>
+      </button>
+
       <div class="flex items-center gap-1 bg-black/60 border border-white/10 rounded-xl p-1">
         <button data-speed="0.45" class="speed-btn px-2.5 py-1 rounded-lg text-xs text-neutral-400 hover:text-white transition">0.45x Slow-Mo</button>
         <button data-speed="1" class="speed-btn px-2.5 py-1 rounded-lg text-xs bg-white/15 text-white font-medium transition">1x Normal</button>
@@ -1030,6 +1055,10 @@
           <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
             <span>Anamorphic Bokeh</span>
             <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">K</kbd>
+          </div>
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+            <span>Film Stock LUT</span>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">V</kbd>
           </div>
         </div>
         <div class="mt-4 pt-3 border-t border-white/10 text-[11px] text-neutral-400 text-center">
@@ -1338,6 +1367,45 @@
     const btnCrest = document.getElementById('btn-crest');
     if (btnCrest) {
       btnCrest.addEventListener('click', cycleCrest);
+    }
+
+    /**
+     * ========================================================================
+     * HOLLYWOOD FILM STOCK COLOR GRADING (LUTS)
+     * ========================================================================
+     */
+    const filmStocks = [
+      { id: 'natural', name: 'Standard', cls: 'film-stock-natural' },
+      { id: 'vision3', name: 'Kodak Vision3', cls: 'film-stock-vision3' },
+      { id: 'technicolor', name: 'Technicolor', cls: 'film-stock-technicolor' },
+      { id: 'bleach', name: 'Bleach Bypass', cls: 'film-stock-bleach' },
+      { id: 'noir', name: 'Noir B&W', cls: 'film-stock-noir' }
+    ];
+    let currentFilmStockIndex = 0;
+
+    function applyFilmStock() {
+      const stock = filmStocks[currentFilmStockIndex];
+      const rig = document.getElementById('parallax-rig');
+      const label = document.getElementById('film-stock-label');
+
+      if (rig) {
+        filmStocks.forEach(s => rig.classList.remove(s.cls));
+        rig.classList.add(stock.cls);
+      }
+      if (label) {
+        label.textContent = `Stock: ${stock.name.split(' ')[0]}`;
+      }
+    }
+
+    function cycleFilmStock() {
+      currentFilmStockIndex = (currentFilmStockIndex + 1) % filmStocks.length;
+      applyFilmStock();
+      spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 28, 0.75);
+    }
+
+    const btnFilmStock = document.getElementById('btn-film-stock');
+    if (btnFilmStock) {
+      btnFilmStock.addEventListener('click', cycleFilmStock);
     }
 
     function spawnSparkBurst(originX, originY, count = 75, speedMult = 1.0) {
@@ -2502,6 +2570,8 @@
         cycleCrest();
       } else if (e.code === 'KeyK') {
         toggleBokehMode();
+      } else if (e.code === 'KeyV') {
+        cycleFilmStock();
       } else if (e.code === 'Digit1') {
         applyTheme('crimson');
       } else if (e.code === 'Digit2') {
@@ -3186,6 +3256,7 @@
       renderStarfield();
       buildArchedWordmark();
       renderCrest();
+      applyFilmStock();
       schedulePhaseUpdates();
       updateParallax();
       renderVisualizer();
