@@ -42,10 +42,13 @@ Built with **pure vanilla HTML5, CSS3 3D transforms, HTML5 Canvas 2D, Web Audio 
   - `3.6s`: Grand Reveal
 - **Keyboard Stepping**: Use `Arrow Left` and `Arrow Right` for frame-by-frame scrubbing (±0.25s).
 
-### 🎵 6. Real-time Audio Spectrum Visualizer Ribbon
+### 🎵 6. Multi-Mode Real-time Audio Spectrum Visualizer (`U`)
 - **Web Audio AnalyserNode**: 64-band frequency spectrum analyser extracted in real-time.
-- **Dynamic Neon Wave Ribbon**: 28 rounded frequency bars dancing with glowing gradients to the sub-bass drops, bell chimes, whoosh, and orchestral swell.
-- **Ambient Idle Breathing**: Smooth sinusoidal motion keeps the visualizer alive even before audio playback starts.
+- **3 Visualizer Modes (`U`)**:
+  - **Neon Ribbon Bars**: 28 rounded vertical gradient bars dancing to sub-bass drops, bell chimes, whoosh, and orchestral swell.
+  - **Oscilloscope Waveform**: Continuous curved neon oscilloscope trace glowing with active theme hues and soft blur.
+  - **VU Dots Array**: Minimalist floating illuminated LED dots at peak frequencies with ground specular reflections.
+- **Ambient Idle Breathing**: Smooth sinusoidal motion keeps the visualizer active even before audio playback starts.
 
 ### 🔊 7. Procedural Hollywood Sound Design & Soundscape Presets (`N`)
 - **Multi-Genre Soundscape Presets (`N`)**:
@@ -127,6 +130,25 @@ Instant theatrical camera angles via the camera button or shortcut `C`:
 - **Celluloid Texture**: Procedural SVG fractal noise overlay (`feTurbulence`) gives authentic 35mm Hollywood celluloid grain.
 - **Interactive Director Tagline**: Click directly on the subtitle badge ("An Original Cinematic Experience") to type your own custom film tagline. Updates persist and render directly onto 4K exported wallpapers!
 
+### ✨ 19. Anamorphic Lens Bokeh & Optical Aperture Orbs (`K`)
+- **Cinematic Depth Optics**: 18 floating illuminated aperture discs (6-blade hexagonal iris discs and soft circular bokeh) drifting through 3D space with subtle depth parallax.
+- **Specular Rim Highlights**: Dual-ring radial gradients with specular rims and theme-reactive coloration creating authentic anamorphic optical flare artifacts.
+- **Instant Toggle (`K`)**: Press `K` or click **Bokeh** in the director HUD to toggle bokeh orbs on or off.
+
+### 🎞️ 20. Hollywood Film Stock Color Grading Profiles (`V`)
+Cycle between 5 authentic post-production cinema color grading profiles via key `V` or the **Film Stock** button:
+- **Standard Digital**: Modern crystal-clear reference master with linear color accuracy and full dynamic range.
+- **Kodak Vision3 500T**: Legendary 35mm motion picture stock with warm golden highlights, rich teal-cyan shadows, and organic analog latitude.
+- **Technicolor 3-Strip**: Vintage Hollywood Golden Age profile featuring rich primary red saturation, deep cyan contrast, and vivid technicolor punch.
+- **Bleach Bypass (Silver Retention)**: Gritty 90s thriller aesthetic (*Fight Club*, *Saving Private Ryan*) with desaturated hues, heightened midtone contrast, and deep crushed shadows.
+- **Noir Black & White**: High-contrast German expressionist and classic 1940s silver-screen monochrome with rich velvety blacks and bright specular accents.
+- **Isolated Grading Rig**: Scoped to the 3D parallax stage so titles and world geometry receive grading while all director telemetry HUD monitors remain crystal clear.
+
+### 🛸 21. Director Turntable Auto-Orbit Camera Rig (`Y`)
+- **Sinusoidal Jib & Crane Movement**: Continuous autonomous camera turntable sweeping smooth sinusoidal yaw (`±9.5°`) and pitch (`±4.5°`) around the 3D typography stage.
+- **Compound Perspective Dynamics**: Seamlessly integrates with manual mouse/gyroscope parallax and switchable camera angle presets (`C`).
+- **Showreel Ready**: Creates a dynamic living showcase ideal for looping theatrical exhibition or live stream presentation. Toggle instantly with key `Y`.
+
 ---
 
 ## 🎬 Cinematic Timeline & Phase Breakdown
@@ -152,6 +174,7 @@ Instant theatrical camera angles via the camera button or shortcut `C`:
 | `F` | **FPS Telemetry** | Toggle real-time performance telemetry monitor |
 | `G` | **Studio Crest** | Cycle Hollywood Studio Crest Badges (Laurels, Starburst, Shield, None) |
 | `H` | **Cinema Mode** | Toggle Cinema Mode (Hide/Show all HUD telemetry controls) |
+| `K` | **Bokeh Orbs** | Toggle floating anamorphic bokeh aperture discs & optical dust motes |
 | `L` | **Stage Lights** | Toggle Volumetric Stage Searchlights & God Ray Beams |
 | `M` | **Mute Audio** | Quick toggle master audio mute |
 | `N` | **Soundscape Preset** | Cycle Score Soundscape (Epic Cinema, 80s Synthwave, Celestial Ambient) |
@@ -160,7 +183,10 @@ Instant theatrical camera angles via the camera button or shortcut `C`:
 | `R` | **Record Reel** | Record 60FPS WebM video clip with synchronized audio |
 | `S` | **4K Wallpaper** | Capture and download 3840×2160 UHD wallpaper image |
 | `T` | **3D Parallax** | Toggle 3D mouse and gyroscope perspective tilt |
+| `U` | **Visualizer Mode** | Cycle Audio Visualizer (Neon Ribbon, Oscilloscope, VU Dots) |
+| `V` | **Film Stock** | Cycle Hollywood Film Stock LUTs (Standard, Kodak Vision3, Technicolor, Bleach Bypass, Noir B&W) |
 | `W` | **Hyperdrive Warp** | Toggle high-speed stardust hyperdrive streak mode |
+| `Y` | **Orbit Camera** | Toggle Director Turntable Auto-Orbit Cinematic Camera |
 | `Z` | **Chromatic Split** | Toggle Chromatic Aberration RGB Lens Split |
 | `←` / `→` | **Scrub Timeline** | Step forward / backward by 0.25 seconds |
 | `?` | **Shortcuts Modal** | Open interactive director shortcuts modal cheatsheet |
