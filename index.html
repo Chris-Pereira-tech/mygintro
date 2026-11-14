@@ -863,6 +863,12 @@
         <span id="spotlights-label">Lights: ON</span>
       </button>
 
+      <!-- Anamorphic Bokeh Orbs Button -->
+      <button id="btn-bokeh" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden md:inline-flex items-center gap-1.5" title="Toggle Anamorphic Lens Bokeh (K)">
+        <span id="bokeh-dot" class="w-2 h-2 rounded-full bg-rose-400 shadow-[0_0_6px_#fb7185]"></span>
+        <span id="bokeh-label">Bokeh: ON</span>
+      </button>
+
       <button id="btn-cinema" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden sm:inline-flex items-center gap-1.5" title="Toggle Cinema Mode (H)">
         <span>Cinema Mode</span>
       </button>
@@ -1021,6 +1027,10 @@
             <span>Studio Crest</span>
             <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">G</kbd>
           </div>
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+            <span>Anamorphic Bokeh</span>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">K</kbd>
+          </div>
         </div>
         <div class="mt-4 pt-3 border-t border-white/10 text-[11px] text-neutral-400 text-center">
           Tip: Click the presenter subtitle badge to type your custom director tagline!
@@ -1041,6 +1051,8 @@
     let stars = [];
     let nebulaClouds = [];
     let explosionSparks = [];
+    let bokehOrbs = [];
+    let isBokehMode = true;
     let animationFrameId = null;
     let isWarpMode = false;
 
@@ -1051,6 +1063,27 @@
       '#ffb4a2', // ruby-gold spark
       '#ffffff'  // white specular highlight
     ];
+
+    function initBokehOrbs() {
+      bokehOrbs = [];
+      const count = 18;
+      for (let i = 0; i < count; i++) {
+        bokehOrbs.push({
+          x: Math.random() * window.innerWidth,
+          y: Math.random() * window.innerHeight,
+          radius: Math.random() * 24 + 10,
+          sides: Math.random() > 0.45 ? 6 : 0,
+          alpha: Math.random() * 0.16 + 0.05,
+          maxAlpha: Math.random() * 0.22 + 0.1,
+          speed: Math.random() * 0.007 + 0.003,
+          vx: (Math.random() - 0.5) * 0.28,
+          vy: -(Math.random() * 0.35 + 0.12),
+          rotation: Math.random() * Math.PI * 2,
+          rotSpeed: (Math.random() - 0.5) * 0.006,
+          color: emberColors[Math.floor(Math.random() * emberColors.length)]
+        });
+      }
+    }
 
     function initStarfield() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -1087,6 +1120,8 @@
           vy: (Math.random() - 0.5) * 0.06
         });
       }
+
+      initBokehOrbs();
     }
 
     function toggleWarpMode() {
@@ -1107,6 +1142,31 @@
     const btnWarp = document.getElementById('btn-warp');
     if (btnWarp) {
       btnWarp.addEventListener('click', toggleWarpMode);
+    }
+
+    /**
+     * ========================================================================
+     * ANAMORPHIC BOKEH ORBS & APERTURE DISCS
+     * ========================================================================
+     */
+    function toggleBokehMode() {
+      isBokehMode = !isBokehMode;
+      const bokehDot = document.getElementById('bokeh-dot');
+      const bokehLabel = document.getElementById('bokeh-label');
+      if (bokehDot) {
+        bokehDot.className = isBokehMode
+          ? 'w-2 h-2 rounded-full bg-rose-400 shadow-[0_0_6px_#fb7185]'
+          : 'w-2 h-2 rounded-full bg-neutral-600';
+      }
+      if (bokehLabel) {
+        bokehLabel.textContent = `Bokeh: ${isBokehMode ? 'ON' : 'OFF'}`;
+      }
+      spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 28, 0.75);
+    }
+
+    const btnBokeh = document.getElementById('btn-bokeh');
+    if (btnBokeh) {
+      btnBokeh.addEventListener('click', toggleBokehMode);
     }
 
     /**
@@ -1427,6 +1487,51 @@
         if (sp.alpha <= 0) {
           explosionSparks.splice(i, 1);
         }
+      }
+
+      // Render floating out-of-focus anamorphic bokeh orbs
+      if (isBokehMode && !isWarpMode) {
+        bokehOrbs.forEach(b => {
+          b.alpha += b.speed;
+          if (b.alpha > b.maxAlpha || b.alpha < 0.03) b.speed = -b.speed;
+          b.x += b.vx;
+          b.y += b.vy;
+          b.rotation += b.rotSpeed;
+          if (b.y < -40) b.y = window.innerHeight + 40;
+          if (b.x < -40) b.x = window.innerWidth + 40;
+          if (b.x > window.innerWidth + 40) b.x = -40;
+
+          ctx.save();
+          ctx.translate(b.x, b.y);
+          ctx.rotate(b.rotation);
+          ctx.globalAlpha = Math.max(0, Math.min(1, b.alpha));
+          ctx.fillStyle = b.color;
+          ctx.shadowBlur = 18;
+          ctx.shadowColor = b.color;
+
+          ctx.beginPath();
+          if (b.sides === 6) {
+            for (let a = 0; a < 6; a++) {
+              const angle = (a * Math.PI) / 3;
+              const hx = Math.cos(angle) * b.radius;
+              const hy = Math.sin(angle) * b.radius;
+              if (a === 0) ctx.moveTo(hx, hy);
+              else ctx.lineTo(hx, hy);
+            }
+            ctx.closePath();
+          } else {
+            ctx.arc(0, 0, b.radius, 0, Math.PI * 2);
+          }
+          ctx.fill();
+
+          // Delicate specular aperture rim
+          ctx.lineWidth = 1.0;
+          ctx.strokeStyle = '#ffffff';
+          ctx.globalAlpha = Math.max(0, Math.min(1, b.alpha * 0.5));
+          ctx.stroke();
+
+          ctx.restore();
+        });
       }
 
       animationFrameId = requestAnimationFrame(renderStarfield);
@@ -2395,6 +2500,8 @@
         cycleFontPreset();
       } else if (e.code === 'KeyG') {
         cycleCrest();
+      } else if (e.code === 'KeyK') {
+        toggleBokehMode();
       } else if (e.code === 'Digit1') {
         applyTheme('crimson');
       } else if (e.code === 'Digit2') {
