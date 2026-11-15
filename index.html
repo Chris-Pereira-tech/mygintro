@@ -774,6 +774,12 @@
       <span id="recording-countdown">0.0s / 5.5s</span>
     </div>
 
+    <!-- Director Suite Live HUD Toast Notification -->
+    <div id="director-toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 -translate-y-2 transition-all duration-300 flex items-center gap-2.5 bg-neutral-950/95 border border-white/20 backdrop-blur-md px-4 py-2 rounded-full text-xs font-medium text-white shadow-[0_0_24px_rgba(0,0,0,0.8)]">
+      <span id="toast-icon" class="text-rose-400 text-sm">🎬</span>
+      <span id="toast-message" class="tracking-wide">Director HUD Ready</span>
+    </div>
+
     <!-- 35mm Hollywood Film Grain Overlay -->
     <div class="film-grain"></div>
 
@@ -1273,6 +1279,32 @@
       initBokehOrbs();
     }
 
+    /**
+     * ========================================================================
+     * DIRECTOR HUD TOAST NOTIFICATION ENGINE
+     * ========================================================================
+     */
+    let toastTimeout = null;
+    function showDirectorToast(msg, icon = '🎬') {
+      const toast = document.getElementById('director-toast');
+      const msgElem = document.getElementById('toast-message');
+      const iconElem = document.getElementById('toast-icon');
+      if (!toast || !msgElem) return;
+
+      if (toastTimeout) clearTimeout(toastTimeout);
+
+      msgElem.textContent = msg;
+      if (iconElem) iconElem.textContent = icon;
+
+      toast.classList.remove('opacity-0', '-translate-y-2');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', '-translate-y-2');
+      }, 1900);
+    }
+
     function toggleWarpMode() {
       isWarpMode = !isWarpMode;
       const warpDot = document.getElementById('warp-dot');
@@ -1285,6 +1317,7 @@
       if (warpLabel) {
         warpLabel.textContent = `Warp: ${isWarpMode ? 'ON' : 'OFF'}`;
       }
+      showDirectorToast(`Hyperdrive Warp: ${isWarpMode ? 'ENGAGED' : 'OFF'}`, '⚡');
       spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 60, 1.2);
     }
 
@@ -1310,6 +1343,7 @@
       if (bokehLabel) {
         bokehLabel.textContent = `Bokeh: ${isBokehMode ? 'ON' : 'OFF'}`;
       }
+      showDirectorToast(`Anamorphic Bokeh: ${isBokehMode ? 'ON' : 'OFF'}`, '✨');
       spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 28, 0.75);
     }
 
@@ -1359,6 +1393,7 @@
       if (isMeteorMode) {
         for (let i = 0; i < 3; i++) spawnMeteor();
       }
+      showDirectorToast(`Meteor Shower: ${isMeteorMode ? 'ON' : 'OFF'}`, '☄️');
       spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 28, 0.75);
     }
 
@@ -1391,6 +1426,7 @@
       if (chromaLabel) {
         chromaLabel.textContent = `Chroma: ${isChromaMode ? 'ON' : 'OFF'}`;
       }
+      showDirectorToast(`Chromatic Aberration: ${isChromaMode ? 'ON' : 'OFF'}`, '🌈');
       spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 35, 0.8);
     }
 
@@ -1423,6 +1459,7 @@
       if (spotLabel) {
         spotLabel.textContent = `Lights: ${spotlightsEnabled ? 'ON' : 'OFF'}`;
       }
+      showDirectorToast(`Stage Spotlights: ${spotlightsEnabled ? 'ON' : 'OFF'}`, '💡');
       spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 28, 0.75);
     }
 
@@ -1455,6 +1492,7 @@
       if (fontLabel) {
         fontLabel.textContent = `Font: ${f.name}`;
       }
+      showDirectorToast(`Typography Font: ${f.name}`, '✒️');
       buildArchedWordmark();
       spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 28, 0.75);
     }
@@ -1532,6 +1570,8 @@
     function cycleCrest() {
       currentCrestIndex = (currentCrestIndex + 1) % crestStyles.length;
       renderCrest();
+      const current = crestStyles[currentCrestIndex];
+      showDirectorToast(`Studio Crest: ${current.name}`, '🎖️');
       spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 28, 0.75);
     }
 
@@ -1571,6 +1611,8 @@
     function cycleFilmStock() {
       currentFilmStockIndex = (currentFilmStockIndex + 1) % filmStocks.length;
       applyFilmStock();
+      const stock = filmStocks[currentFilmStockIndex];
+      showDirectorToast(`Film Stock LUT: ${stock.name}`, '🎞️');
       spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 28, 0.75);
     }
 
@@ -1606,6 +1648,8 @@
     function cycleVignette() {
       currentVignetteIndex = (currentVignetteIndex + 1) % vignetteModes.length;
       applyVignette();
+      const mode = vignetteModes[currentVignetteIndex];
+      showDirectorToast(`Vignette Shutter: ${mode.name}`, '◐');
       spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 26, 0.75);
     }
 
@@ -2147,6 +2191,7 @@
       if (soundscapeLabel) {
         soundscapeLabel.textContent = `Score: ${sc.name.split(' ')[0]}`;
       }
+      showDirectorToast(`Score Soundscape: ${sc.name}`, '🎵');
       spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 28, 0.75);
     }
 
@@ -2606,6 +2651,7 @@
       if (label) {
         label.textContent = `Viz: ${vMode.name.split(' ')[0]}`;
       }
+      showDirectorToast(`Visualizer Style: ${vMode.name}`, '〰️');
       spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 25, 0.75);
     }
 
@@ -3223,6 +3269,7 @@
           : 'theme-chip px-2.5 py-0.5 rounded-full bg-white/5 border border-transparent text-neutral-400 hover:text-white transition active:scale-95';
       });
 
+      showDirectorToast(`Universe: ${t.name}`, '🎨');
       spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 45, 0.9);
     }
 
@@ -3285,6 +3332,7 @@
       currentCameraIndex = (currentCameraIndex + 1) % cameraPresets.length;
       const cam = cameraPresets[currentCameraIndex];
       if (cameraLabel) cameraLabel.textContent = `Cam: ${cam.name}`;
+      showDirectorToast(`Camera Angle: ${cam.name}`, '📹');
       spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 28, 0.7);
     }
 
@@ -3339,6 +3387,8 @@
     function cycleAspectRatio() {
       currentAspectIndex = (currentAspectIndex + 1) % aspectRatios.length;
       applyAspectRatio();
+      const current = aspectRatios[currentAspectIndex];
+      showDirectorToast(`Scope: ${current.name}`, '📐');
       spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 24, 0.65);
     }
 
@@ -3397,6 +3447,7 @@
       if (orbitLabel) {
         orbitLabel.textContent = `Orbit: ${isOrbitMode ? 'ON' : 'OFF'}`;
       }
+      showDirectorToast(`Turntable Orbit: ${isOrbitMode ? 'ON' : 'OFF'}`, '🛸');
       spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 28, 0.75);
     }
 
@@ -3555,6 +3606,7 @@
       link.download = `anand-melava-4k-${activeThemeKey}.png`;
       link.href = offCanvas.toDataURL('image/png');
       link.click();
+      showDirectorToast('4K UHD Master Snapshot Exported', '📸');
     }
 
     if (btnSnapshot) {
@@ -3652,6 +3704,7 @@
       }
       if (recDot) recDot.className = 'w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_#ef4444]';
       if (recLabel) recLabel.textContent = 'Recording...';
+      showDirectorToast('Recording 60FPS WebM Reel...', '🔴');
 
       const recStart = Date.now();
       recordTimer = setInterval(() => {
@@ -3676,6 +3729,7 @@
       }
       if (recDot) recDot.className = 'w-2 h-2 rounded-full bg-red-500';
       if (recLabel) recLabel.textContent = 'Record Reel';
+      showDirectorToast('Cinema Reel Exported (WebM)', '💾');
     }
 
     const btnRecord = document.getElementById('btn-record');
