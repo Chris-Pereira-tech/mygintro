@@ -864,6 +864,8 @@
         <button data-theme="sapphire" class="theme-chip px-2.5 py-0.5 rounded-full bg-white/5 border border-transparent text-neutral-400 hover:text-white transition active:scale-95" title="Deep Space Sapphire (Key 6)">Sapphire</button>
         <button data-theme="platinum" class="theme-chip px-2.5 py-0.5 rounded-full bg-white/5 border border-transparent text-neutral-400 hover:text-white transition active:scale-95" title="Void Monolith Platinum (Key 7)">Platinum</button>
         <button data-theme="sakura" class="theme-chip px-2.5 py-0.5 rounded-full bg-white/5 border border-transparent text-neutral-400 hover:text-white transition active:scale-95" title="Cybernetic Sakura (Key 8)">Sakura</button>
+        <button data-theme="quantum" class="theme-chip px-2.5 py-0.5 rounded-full bg-white/5 border border-transparent text-neutral-400 hover:text-white transition active:scale-95" title="Quantum Matrix (Key 9)">Quantum</button>
+        <button data-theme="eclipse" class="theme-chip px-2.5 py-0.5 rounded-full bg-white/5 border border-transparent text-neutral-400 hover:text-white transition active:scale-95" title="Solar Eclipse (Key 0)">Eclipse</button>
       </div>
 
       <div class="pointer-events-auto hidden xl:flex items-center gap-2 bg-neutral-950/85 border border-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs text-neutral-400 shadow-2xl">
@@ -1130,7 +1132,7 @@
           </div>
           <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
             <span>Studio Palettes</span>
-            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">1 - 8</kbd>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">Keys 1 - 0</kbd>
           </div>
           <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
             <span>Chromatic Split</span>
@@ -3008,6 +3010,10 @@
         applyTheme('platinum');
       } else if (e.code === 'Digit8') {
         applyTheme('sakura');
+      } else if (e.code === 'Digit9') {
+        applyTheme('quantum');
+      } else if (e.code === 'Digit0') {
+        applyTheme('eclipse');
       } else if (e.key === '?' || (e.shiftKey && e.code === 'Slash')) {
         toggleShortcutsModal();
       } else if (e.code === 'Escape') {
@@ -3154,6 +3160,30 @@
         viewportBg: 'radial-gradient(ellipse at 50% 50%, rgba(255, 20, 147, 0.26) 0%, rgba(74, 4, 28, 0.18) 38%, rgba(8, 2, 6, 0.96) 75%, rgba(3, 0, 2, 1) 100%)',
         embers: ['#ff758f', '#ff1493', '#ffb3c1', '#4cc9f0', '#ffffff'],
         streakGrad: 'linear-gradient(90deg, transparent 0%, rgba(255, 117, 143, 0.05) 15%, rgba(255, 20, 147, 0.65) 45%, rgba(255, 255, 255, 0.95) 50%, rgba(76, 201, 240, 0.6) 55%, rgba(255, 117, 143, 0.05) 85%, transparent 100%)'
+      },
+      quantum: {
+        name: 'Quantum Cyber Matrix & Electric Cyan',
+        accentColor: '#00f5d4',
+        primary: '#00bbf9',
+        glow: '#00f5d4',
+        deep: '#031926',
+        core: '#00f5d4',
+        light: '#e0fbfc',
+        viewportBg: 'radial-gradient(ellipse at 50% 50%, rgba(0, 245, 212, 0.22) 0%, rgba(3, 25, 38, 0.22) 38%, rgba(1, 10, 16, 0.96) 75%, rgba(0, 4, 8, 1) 100%)',
+        embers: ['#00f5d4', '#00bbf9', '#9b5de5', '#fee440', '#ffffff'],
+        streakGrad: 'linear-gradient(90deg, transparent 0%, rgba(0, 245, 212, 0.05) 15%, rgba(0, 187, 249, 0.65) 45%, rgba(255, 255, 255, 0.95) 50%, rgba(0, 245, 212, 0.6) 55%, rgba(0, 187, 249, 0.05) 85%, transparent 100%)'
+      },
+      eclipse: {
+        name: 'Solar Eclipse Obsidian & Molten Copper',
+        accentColor: '#ff5400',
+        primary: '#ff3c00',
+        glow: '#ff7b00',
+        deep: '#2d0a00',
+        core: '#ff5400',
+        light: '#ffedd8',
+        viewportBg: 'radial-gradient(ellipse at 50% 50%, rgba(255, 60, 0, 0.26) 0%, rgba(45, 10, 0, 0.22) 38%, rgba(8, 2, 0, 0.96) 75%, rgba(3, 1, 0, 1) 100%)',
+        embers: ['#ff5400', '#ff7b00', '#ffd000', '#ff3c00', '#ffffff'],
+        streakGrad: 'linear-gradient(90deg, transparent 0%, rgba(255, 84, 0, 0.05) 15%, rgba(255, 123, 0, 0.65) 45%, rgba(255, 255, 255, 0.95) 50%, rgba(255, 60, 0, 0.6) 55%, rgba(255, 84, 0, 0.05) 85%, transparent 100%)'
       }
     };
 
