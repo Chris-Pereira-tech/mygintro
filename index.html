@@ -1939,9 +1939,28 @@
       return { firstIdx: Math.max(0, firstIdx), secondIdx };
     }
 
+    /**
+     * ========================================================================
+     * SECURITY & INPUT SANITIZATION UTILITIES
+     * ========================================================================
+     */
+    function sanitizeCinemaInput(input, maxLength = 24) {
+      if (typeof input !== 'string') return '';
+      const clean = input
+        .replace(/<[^>]*>?/gm, '')
+        .replace(/[\x00-\x1F\x7F-\x9F]/g, '')
+        .replace(/[<>"'&]/g, (char) => {
+          const map = { '<': '', '>': '', '"': '', "'": '', '&': '' };
+          return map[char] || '';
+        })
+        .trim();
+      return clean.substring(0, maxLength);
+    }
+
     function buildArchedWordmark(customText) {
       if (customText) {
-        currentTitleText = customText.trim().toUpperCase() || 'ANAND MELAVA';
+        const sanitized = sanitizeCinemaInput(customText, 24);
+        currentTitleText = sanitized.toUpperCase() || 'ANAND MELAVA';
       }
       const text = currentTitleText;
       const container = document.getElementById('arched-wordmark');
@@ -2045,18 +2064,42 @@
     }
 
     function promptEditTitle() {
-      const newTitle = prompt('Enter Cinema Title Wordmark (e.g. ANAND MELAVA, PARAMOUNT, CHRISTOPHER PEREIRA):', currentTitleText);
-      if (newTitle && newTitle.trim()) {
-        buildArchedWordmark(newTitle.trim());
-        const badge = document.getElementById('current-title-badge');
-        if (badge) badge.textContent = currentTitleText;
-        restartAnimation(false);
+      const rawTitle = prompt('Enter Cinema Title Wordmark (e.g. ANAND MELAVA, PARAMOUNT, CHRISTOPHER PEREIRA):', currentTitleText);
+      if (rawTitle !== null) {
+        const cleaned = sanitizeCinemaInput(rawTitle, 24);
+        if (cleaned) {
+          buildArchedWordmark(cleaned);
+          const badge = document.getElementById('current-title-badge');
+          if (badge) badge.textContent = currentTitleText;
+          showDirectorToast(`Wordmark: ${currentTitleText}`, '🔤');
+          restartAnimation(false);
+        }
       }
     }
 
     const btnEditTitle = document.getElementById('btn-edit-title');
     if (btnEditTitle) {
       btnEditTitle.addEventListener('click', promptEditTitle);
+    }
+
+    // Presenter Tagline Security Sanitization & Length Restriction
+    const presentsBadge = document.getElementById('presents-badge');
+    if (presentsBadge) {
+      presentsBadge.addEventListener('input', () => {
+        if (presentsBadge.textContent.length > 60) {
+          presentsBadge.textContent = presentsBadge.textContent.substring(0, 60);
+        }
+      });
+      presentsBadge.addEventListener('blur', () => {
+        const cleanTag = sanitizeCinemaInput(presentsBadge.textContent, 60) || 'An Original Cinematic Experience';
+        presentsBadge.textContent = cleanTag;
+      });
+      presentsBadge.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          presentsBadge.blur();
+        }
+      });
     }
 
     /**
@@ -2142,9 +2185,22 @@
         analyser.connect(audioCtx.destination);
       }
       if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
+        audioCtx.resume().catch((err) => {
+          console.warn('AudioContext resume deferred until gesture:', err);
+        });
       }
     }
+
+    // Auto-unlock AudioContext on first user interaction anywhere on viewport
+    const unlockAudioOnce = () => {
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+      window.removeEventListener('pointerdown', unlockAudioOnce);
+      window.removeEventListener('keydown', unlockAudioOnce);
+    };
+    window.addEventListener('pointerdown', unlockAudioOnce);
+    window.addEventListener('keydown', unlockAudioOnce);
 
     function toggleBassBoost() {
       bassBoostEnabled = !bassBoostEnabled;
