@@ -1041,6 +1041,12 @@
         <span id="vignette-label">Shutter: Deep</span>
       </button>
 
+      <!-- Cosmic Meteors Shower Button -->
+      <button id="btn-meteors" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden lg:inline-flex items-center gap-1.5" title="Toggle Cosmic Meteor Shower (X)">
+        <span id="meteors-dot" class="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_6px_#22d3ee]"></span>
+        <span id="meteors-label">Meteors: ON</span>
+      </button>
+
       <div class="flex items-center gap-1 bg-black/60 border border-white/10 rounded-xl p-1">
         <button data-speed="0.45" class="speed-btn px-2.5 py-1 rounded-lg text-xs text-neutral-400 hover:text-white transition">0.45x Slow-Mo</button>
         <button data-speed="1" class="speed-btn px-2.5 py-1 rounded-lg text-xs bg-white/15 text-white font-medium transition">1x Normal</button>
@@ -1166,6 +1172,10 @@
             <span>Vignette Shutter</span>
             <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">J</kbd>
           </div>
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+            <span>Cosmic Meteors</span>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">X</kbd>
+          </div>
         </div>
         <div class="mt-4 pt-3 border-t border-white/10 text-[11px] text-neutral-400 text-center">
           Tip: Click the presenter subtitle badge to type your custom director tagline!
@@ -1187,7 +1197,9 @@
     let nebulaClouds = [];
     let explosionSparks = [];
     let bokehOrbs = [];
+    let meteors = [];
     let isBokehMode = true;
+    let isMeteorMode = true;
     let animationFrameId = null;
     let isWarpMode = false;
 
@@ -1302,6 +1314,55 @@
     const btnBokeh = document.getElementById('btn-bokeh');
     if (btnBokeh) {
       btnBokeh.addEventListener('click', toggleBokehMode);
+    }
+
+    /**
+     * ========================================================================
+     * COSMIC METEOR SHOWER & PLASMA SHOOTING STARS (KEY X)
+     * ========================================================================
+     */
+    function spawnMeteor() {
+      const startX = Math.random() * (window.innerWidth + 300) - 100;
+      const startY = Math.random() * (window.innerHeight * 0.4) - 40;
+      const length = Math.random() * 85 + 75;
+      const speed = Math.random() * 11 + 10;
+      const angle = (Math.PI / 4) + (Math.random() - 0.5) * 0.28;
+      const activeColor = emberColors[Math.floor(Math.random() * Math.max(1, emberColors.length - 1))] || '#ff2a5f';
+
+      meteors.push({
+        x: startX,
+        y: startY,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        length: length,
+        radius: Math.random() * 1.5 + 1.2,
+        alpha: 1.0,
+        decay: Math.random() * 0.016 + 0.012,
+        color: activeColor
+      });
+    }
+
+    function toggleMeteorMode() {
+      isMeteorMode = !isMeteorMode;
+      const mDot = document.getElementById('meteors-dot');
+      const mLabel = document.getElementById('meteors-label');
+      if (mDot) {
+        mDot.className = isMeteorMode
+          ? 'w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_6px_#22d3ee]'
+          : 'w-2 h-2 rounded-full bg-neutral-600';
+      }
+      if (mLabel) {
+        mLabel.textContent = `Meteors: ${isMeteorMode ? 'ON' : 'OFF'}`;
+      }
+      if (isMeteorMode) {
+        for (let i = 0; i < 3; i++) spawnMeteor();
+      }
+      spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 28, 0.75);
+    }
+
+    const btnMeteors = document.getElementById('btn-meteors');
+    if (btnMeteors) {
+      btnMeteors.addEventListener('click', toggleMeteorMode);
     }
 
     /**
@@ -1741,6 +1802,54 @@
 
           ctx.restore();
         });
+      }
+
+      // Render cosmic meteor shower streaks
+      if (isMeteorMode && !isWarpMode) {
+        if (Math.random() < 0.032 && meteors.length < 4) {
+          spawnMeteor();
+        }
+
+        for (let i = meteors.length - 1; i >= 0; i--) {
+          const m = meteors[i];
+          const dist = Math.hypot(m.vx, m.vy) || 1;
+          const tailX = m.x - (m.vx / dist) * m.length;
+          const tailY = m.y - (m.vy / dist) * m.length;
+
+          const mGrad = ctx.createLinearGradient(tailX, tailY, m.x, m.y);
+          mGrad.addColorStop(0, 'transparent');
+          mGrad.addColorStop(0.65, m.color);
+          mGrad.addColorStop(1, '#ffffff');
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(tailX, tailY);
+          ctx.lineTo(m.x, m.y);
+          ctx.strokeStyle = mGrad;
+          ctx.lineWidth = m.radius * 1.6;
+          ctx.lineCap = 'round';
+          ctx.globalAlpha = Math.max(0, m.alpha);
+          ctx.shadowBlur = 14;
+          ctx.shadowColor = m.color;
+          ctx.stroke();
+
+          // Specular glowing meteor head
+          ctx.beginPath();
+          ctx.arc(m.x, m.y, m.radius * 1.5, 0, Math.PI * 2);
+          ctx.fillStyle = '#ffffff';
+          ctx.shadowBlur = 16;
+          ctx.shadowColor = '#ffffff';
+          ctx.fill();
+          ctx.restore();
+
+          m.x += m.vx;
+          m.y += m.vy;
+          m.alpha -= m.decay;
+
+          if (m.alpha <= 0 || m.x > window.innerWidth + 250 || m.y > window.innerHeight + 250) {
+            meteors.splice(i, 1);
+          }
+        }
       }
 
       animationFrameId = requestAnimationFrame(renderStarfield);
@@ -2881,6 +2990,8 @@
         cycleVisualizerMode();
       } else if (e.code === 'KeyJ') {
         cycleVignette();
+      } else if (e.code === 'KeyX') {
+        toggleMeteorMode();
       } else if (e.code === 'Digit1') {
         applyTheme('crimson');
       } else if (e.code === 'Digit2') {
@@ -3571,7 +3682,7 @@
           elemFps.className = fps >= 50 ? 'text-emerald-300' : (fps >= 30 ? 'text-amber-300' : 'text-rose-400');
         }
         if (elemParticles) {
-          const totalParticles = stars.length + explosionSparks.length + (nebulaClouds ? nebulaClouds.length : 0);
+          const totalParticles = stars.length + explosionSparks.length + meteors.length + (isBokehMode ? bokehOrbs.length : 0) + (nebulaClouds ? nebulaClouds.length : 0);
           elemParticles.textContent = totalParticles;
         }
         if (elemDpr) {
