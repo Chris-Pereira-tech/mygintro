@@ -1901,7 +1901,8 @@
     const soundscapes = [
       { id: 'epic', name: 'Epic Cinema' },
       { id: 'synthwave', name: '80s Synthwave' },
-      { id: 'celestial', name: 'Celestial Ambient' }
+      { id: 'celestial', name: 'Celestial Ambient' },
+      { id: 'zimmer', name: 'Dark Braam' }
     ];
     let currentSoundscapeIndex = 0;
 
@@ -2141,6 +2142,83 @@
             hOsc.start(hitTime);
             hOsc.stop(hitTime + 1.3);
           });
+
+        } else if (currentMode === 'zimmer') {
+          // ==================== DARK ZIMMER INCEPTION BRAAM SOUNDSCAPE ====================
+          // 1. Tectonic Sub-Bass Drop (Monogram Ignition)
+          const subOsc = audioCtx.createOscillator();
+          const subGain = audioCtx.createGain();
+          subOsc.type = 'sawtooth';
+          const subLpf = audioCtx.createBiquadFilter();
+          subLpf.type = 'lowpass';
+          subLpf.frequency.setValueAtTime(160, now + 0.08 * invSpeed);
+          subLpf.frequency.exponentialRampToValueAtTime(32, now + 2.4 * invSpeed);
+          subOsc.frequency.setValueAtTime(82, now + 0.08 * invSpeed);
+          subOsc.frequency.exponentialRampToValueAtTime(26, now + 2.4 * invSpeed);
+          subGain.gain.setValueAtTime(0.0001, now + 0.08 * invSpeed);
+          subGain.gain.linearRampToValueAtTime(0.72, now + 0.18 * invSpeed);
+          subGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.7 * invSpeed);
+          subOsc.connect(subLpf).connect(subGain).connect(outBus);
+          subOsc.start(now + 0.08 * invSpeed);
+          subOsc.stop(now + 2.8 * invSpeed);
+
+          // 2. High-Tension Orchestral Riser & Ticking Tension
+          const riserOsc = audioCtx.createOscillator();
+          const riserGain = audioCtx.createGain();
+          riserOsc.type = 'triangle';
+          riserOsc.frequency.setValueAtTime(130, now + 0.2 * invSpeed);
+          riserOsc.frequency.exponentialRampToValueAtTime(520, now + 1.9 * invSpeed);
+          riserGain.gain.setValueAtTime(0.0001, now + 0.2 * invSpeed);
+          riserGain.gain.linearRampToValueAtTime(0.18, now + 1.8 * invSpeed);
+          riserGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.0 * invSpeed);
+          riserOsc.connect(riserGain).connect(outBus);
+          riserOsc.start(now + 0.2 * invSpeed);
+          riserOsc.stop(now + 2.1 * invSpeed);
+
+          // 3. Monolithic Inception Brass "BRAAM" Horn on Glide / Lock
+          const braamStart = now + 1.95 * invSpeed;
+          const braamDur = 3.5 * invSpeed;
+          const braamFreqs = [32.70, 65.41, 98.00, 130.81, 164.81, 196.00];
+
+          braamFreqs.forEach((freq, idx) => {
+            [-12, 0, 12].forEach(detuneCents => {
+              const bOsc = audioCtx.createOscillator();
+              const bFilter = audioCtx.createBiquadFilter();
+              const bGain = audioCtx.createGain();
+
+              bOsc.type = 'sawtooth';
+              bOsc.frequency.setValueAtTime(freq, braamStart);
+              bOsc.detune.setValueAtTime(detuneCents, braamStart);
+
+              bFilter.type = 'lowpass';
+              bFilter.Q.value = 6.0;
+              bFilter.frequency.setValueAtTime(140, braamStart);
+              bFilter.frequency.linearRampToValueAtTime(2600, braamStart + 0.22 * invSpeed);
+              bFilter.frequency.exponentialRampToValueAtTime(220, braamStart + braamDur);
+
+              bGain.gain.setValueAtTime(0.0001, braamStart);
+              bGain.gain.linearRampToValueAtTime(0.065 / Math.sqrt(idx + 1), braamStart + 0.12 * invSpeed);
+              bGain.gain.exponentialRampToValueAtTime(0.0001, braamStart + braamDur);
+
+              bOsc.connect(bFilter).connect(bGain).connect(outBus);
+              bOsc.start(braamStart);
+              bOsc.stop(braamStart + braamDur + 0.1);
+            });
+          });
+
+          // 4. Anvil Metallic Slam Impact Hit (Wordmark Lock)
+          const slamTime = now + 3.55 * invSpeed;
+          const slamOsc = audioCtx.createOscillator();
+          const slamGain = audioCtx.createGain();
+          slamOsc.type = 'square';
+          slamOsc.frequency.setValueAtTime(180, slamTime);
+          slamOsc.frequency.exponentialRampToValueAtTime(38, slamTime + 0.45);
+          slamGain.gain.setValueAtTime(0.0001, slamTime);
+          slamGain.gain.linearRampToValueAtTime(0.6, slamTime + 0.01);
+          slamGain.gain.exponentialRampToValueAtTime(0.0001, slamTime + 0.9);
+          slamOsc.connect(slamGain).connect(outBus);
+          slamOsc.start(slamTime);
+          slamOsc.stop(slamTime + 1.0);
 
         } else {
           // ==================== DEFAULT HOLLYWOOD EPIC SOUNDSCAPE ====================
