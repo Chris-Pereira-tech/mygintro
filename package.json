@@ -1,0 +1,20 @@
+{
+  "name": "anand-melava-cinematic-intro",
+  "version": "2.4.0",
+  "description": "Ultra-luxury, Hollywood-grade procedural cinematic intro sequence for Anand Melava",
+  "main": "index.html",
+  "scripts": {
+    "test": "node test/intro-smoke.test.js",
+    "serve": "npx serve ."
+  },
+  "keywords": [
+    "cinematic",
+    "web-audio",
+    "canvas",
+    "intro-generator",
+    "hollywood",
+    "3d-stage"
+  ],
+  "author": "Chris Pereira",
+  "license": "MIT"
+}
