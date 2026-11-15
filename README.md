@@ -55,13 +55,14 @@ Built with **pure vanilla HTML5, CSS3 3D transforms, HTML5 Canvas 2D, Web Audio 
   - **Epic Cinema**: Signature Hollywood trailer soundscape with sub-bass drop sweep (`115Hz` → `36Hz`), crystal bell chimes (C5/E5), stereo whoosh riser, orchestral D-minor9 chord swell, and metallic impact transient hit.
   - **80s Synthwave**: Retro cyberpunk aesthetic featuring resonant lowpass synth kick punch, square-wave arpeggio plucks, laser pitch-bend whoosh, analog detuned dual-sawtooth brass chords, and punchy gated snare transient.
   - **Celestial Ambient**: Ethereal dreamscape with deep sub-harmonic breathing sine wave, pure glass bell harmonics (`523.25Hz`, `783.99Hz`, `1046.50Hz`), highpass airy shimmer whoosh, and lush fifths ambient pad.
+  - **Dark Braam (Hans Zimmer / Inception)**: Monolithic cinematic brass horn with detuned multi-oscillator sawtooth banks, aggressive resonant lowpass filter envelope sweep (`140Hz` → `2600Hz` → `220Hz`), high-tension orchestral riser, and thunderous metallic anvil slam.
 - **Binaural Synthetic Reverb**: Convolver node loaded with an algorithmic stereo impulse response simulating a lush cathedral/cinema hall.
 - **Theater Bass Boost EQ (`B`)**: Low-shelf filter at 68Hz delivering a +8.5dB punch for theater-grade subwoofers.
 - **Spatial Stereo Panning Whoosh**: Procedural white-noise bandpass sweep (`280Hz` → `2600Hz` → `500Hz`) panned from left to right across headphones (`StereoPannerNode`).
 - **Master Volume Slider & Quick Mute (`M`)**: Seamless volume control slider and mute toggle in the director bar.
 
-### 🎨 8. Multi-Universe Cinema Studio Themes (Keys `1` – `8`)
-Switch between 8 high-concept cinematic color universes in real-time without interrupting playback:
+### 🎨 8. Multi-Universe Cinema Studio Themes (Keys `1` – `0`)
+Switch between 10 high-concept cinematic color universes in real-time without interrupting playback:
 1. **Crimson Stardust & Ruby** (Key `1`): Signature incandescent crimson `#ff1e56`, ruby glow `#ff2a5f`, and deep wine carmine `#8b0024`.
 2. **Cyberpunk Neon** (Key `2`): Blade Runner-inspired ultraviolet `#7209b7`, electric violet `#f72585`, and neon cyan `#4cc9f0`.
 3. **Paramount Gold** (Key `3`): Oscars prestige 24K gold `#ffd700`, champagne `#fff3b0`, and obsidian bronze `#583101`.
@@ -70,6 +71,8 @@ Switch between 8 high-concept cinematic color universes in real-time without int
 6. **Deep Space Sapphire** (Key `6`): Interstellar cosmic azure `#0077b6`, electric cyan `#48cae4`, and deep ocean cobalt `#03045e`.
 7. **Void Monolith Platinum** (Key `7`): Minimalist luxury Christopher Nolan & Dune aesthetic with platinum chrome `#e2e8f0`, titanium obsidian `#0f172a`, and icy diamond sparks.
 8. **Cybernetic Sakura & Rose** (Key `8`): Neo-Tokyo cyberpunk cherry blossom with electric magenta `#ff1493`, luminous sakura rose `#ff758f`, and turquoise cyan highlights.
+9. **Quantum Cyber Matrix** (Key `9`): High-voltage electric cyan `#00bbf9`, luminous mint aqua `#00f5d4`, and deep obsidian cyan `#031926`.
+10. **Solar Eclipse Obsidian** (Key `0`): Supermassive solar corona flare with molten copper `#ff3c00`, radiant amber `#ff7b00`, and pitch black shadow `#2d0a00`.
 
 ### 🌈 9. Chromatic Aberration RGB Lens Split (`Z`)
 - Physically inspired optical prism dispersion separating red and cyan color channels on the 3D stage and wordmark.
@@ -82,10 +85,12 @@ Switch between 8 high-concept cinematic color universes in real-time without int
 - Toggle visibility instantly via key `L`.
 
 ### ✒️ 11. Cinematic Typography Font Presets (`O`)
-Cycle between 3 distinct Hollywood title typography styles:
+Cycle between 5 distinct Hollywood title typography styles:
 - **Monumental Impact**: Ultra-bold, towering cinema title display (`Bebas Neue`).
 - **Imperial Epic**: Regal, sculpted Roman serif lettering for historical prestige dramas and Oscar contenders (`Cinzel`).
 - **Sci-Fi Cyber**: Futuristic, geometric widescreen typography for cyberpunk and space epics (`Orbitron`).
+- **Arthouse Avant-Garde**: Ultra-wide, idiosyncratic display typography for festival winners and indie auteur films (`Syne`).
+- **Royal High Fantasy**: Dramatic, baroque illuminated serif lettering for high-fantasy epics (`Cinzel Decorative`).
 
 ### 🎖️ 12. Hollywood Studio Crest Badges & Laurels (`G`)
 - Authentic cinema studio emblem displayed above the presenter badge:
@@ -149,6 +154,35 @@ Cycle between 5 authentic post-production cinema color grading profiles via key 
 - **Compound Perspective Dynamics**: Seamlessly integrates with manual mouse/gyroscope parallax and switchable camera angle presets (`C`).
 - **Showreel Ready**: Creates a dynamic living showcase ideal for looping theatrical exhibition or live stream presentation. Toggle instantly with key `Y`.
 
+### ◐ 22. Cinematic Vignette Shutter & Dynamic Laser Flare Sweep (`J`)
+- **Vignette Shutter Presets**: Toggle between 3 calibrated edge falloff profiles:
+  - **Deep Anamorphic**: Heavy 92% optical vignetting with dramatic edge contrast.
+  - **Standard Film**: Balanced 65% cinema falloff for natural dimensionality.
+  - **Clean Studio**: Minimalist 20% soft ambient illumination.
+- **Anamorphic Laser Flare Sweep**: Horizon-scanning light beam that sweeps across the stage during the phase glide transition.
+
+### ☄️ 23. Cosmic Meteor Shower & Plasma Shooting Stars (`X`)
+- **Kinetic Plasma Streaks**: High-velocity shooting stars traversing the celestial starfield with radiant multi-stop gradient comets and glowing white plasma heads.
+- **Theme Color Synchronization**: Meteor tails dynamically inherit active universe palette glow and ember tones. Toggle instantly via key `X`.
+
+### 🎬 24. Live Director HUD Toast Notification System
+- **Real-Time Tactical Feedback**: Floating glassmorphism HUD notification pill delivering instant visual confirmation for every keyboard shortcut, palette shift, soundscape cycle, camera cut, and wallpaper export.
+- **Auto-Clearing Queue**: Smooth slide-in animations with automatic 1.9s dismissal.
+
+### 🛡️ 25. Security Input Sanitization & Audio Autoplay Resilience
+- **XSS & Injection Protection**: Custom wordmark text and presenter taglines are sanitized to strip script tags, non-printable control characters, and dangerous entities.
+- **Strict Boundary Enforcement**: Automatic truncation limits (24 chars for title, 60 chars for tagline) protect canvas text rasterization and layout geometry.
+- **Browser Autoplay Resilience**: Web Audio context initialization includes graceful catch handlers and viewport-wide user gesture un-suspension listeners.
+
+### 🧪 26. Automated Smoke Test Suite (`npm test`)
+- **Built-in Verification Harness**: Native Node.js test script (`test/intro-smoke.test.js`) verifying:
+  - 18 vital cinema DOM fixture IDs.
+  - Complete schema for all 10 universe palettes and required color channels.
+  - Procedural soundscape synthesis routing and audio nodes.
+  - All 5 typography presets and Google Fonts links.
+  - Security sanitizer injection neutralization and length capping.
+  - Parabolic arch and monogram anchor mathematical calculation accuracy.
+
 ---
 
 ## 🎬 Cinematic Timeline & Phase Breakdown
@@ -166,7 +200,7 @@ Cycle between 5 authentic post-production cinema color grading profiles via key 
 | Shortcut | Action | Description |
 | :---: | :--- | :--- |
 | `Space` | **Replay + Audio** | Replays intro sequence with full procedural Hollywood audio |
-| `1` – `8` | **Studio Palettes** | Switch between Crimson, Cyber, Gold, Matrix, Solar, Sapphire, Platinum, Sakura |
+| `1` – `0` | **Studio Palettes** | Switch between Crimson, Cyber, Gold, Matrix, Solar, Sapphire, Platinum, Sakura, Quantum, Eclipse |
 | `A` | **Aspect Ratio** | Cycle Scope (Full, 2.39:1 Cinemascope, 16:9, 4:3) |
 | `B` | **Bass Boost EQ** | Toggle Theater Bass Boost (+8.5dB at 68Hz) |
 | `C` | **Camera Presets** | Cycle Director Cameras (Center, Low IMAX, Horizon, Iso) |
@@ -174,11 +208,12 @@ Cycle between 5 authentic post-production cinema color grading profiles via key 
 | `F` | **FPS Telemetry** | Toggle real-time performance telemetry monitor |
 | `G` | **Studio Crest** | Cycle Hollywood Studio Crest Badges (Laurels, Starburst, Shield, None) |
 | `H` | **Cinema Mode** | Toggle Cinema Mode (Hide/Show all HUD telemetry controls) |
+| `J` | **Vignette Shutter** | Cycle Cinema Vignette Shutter (Deep Anamorphic, Standard Film, Clean Studio) |
 | `K` | **Bokeh Orbs** | Toggle floating anamorphic bokeh aperture discs & optical dust motes |
 | `L` | **Stage Lights** | Toggle Volumetric Stage Searchlights & God Ray Beams |
 | `M` | **Mute Audio** | Quick toggle master audio mute |
-| `N` | **Soundscape Preset** | Cycle Score Soundscape (Epic Cinema, 80s Synthwave, Celestial Ambient) |
-| `O` | **Typography Font** | Cycle Typography Font (Monumental, Imperial Serif, Sci-Fi Cyber) |
+| `N` | **Soundscape Preset** | Cycle Score Soundscape (Epic Cinema, 80s Synthwave, Celestial Ambient, Dark Braam) |
+| `O` | **Typography Font** | Cycle Typography Font (Monumental, Imperial Serif, Sci-Fi Cyber, Arthouse Syne, Royal Decorative) |
 | `P` | **Pause / Resume** | Toggle freeze-frame animation pause |
 | `R` | **Record Reel** | Record 60FPS WebM video clip with synchronized audio |
 | `S` | **4K Wallpaper** | Capture and download 3840×2160 UHD wallpaper image |
@@ -186,6 +221,7 @@ Cycle between 5 authentic post-production cinema color grading profiles via key 
 | `U` | **Visualizer Mode** | Cycle Audio Visualizer (Neon Ribbon, Oscilloscope, VU Dots) |
 | `V` | **Film Stock** | Cycle Hollywood Film Stock LUTs (Standard, Kodak Vision3, Technicolor, Bleach Bypass, Noir B&W) |
 | `W` | **Hyperdrive Warp** | Toggle high-speed stardust hyperdrive streak mode |
+| `X` | **Meteor Shower** | Toggle high-velocity cosmic meteor streaks with plasma heads |
 | `Y` | **Orbit Camera** | Toggle Director Turntable Auto-Orbit Cinematic Camera |
 | `Z` | **Chromatic Split** | Toggle Chromatic Aberration RGB Lens Split |
 | `←` / `→` | **Scrub Timeline** | Step forward / backward by 0.25 seconds |
