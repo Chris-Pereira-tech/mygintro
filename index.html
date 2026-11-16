@@ -1044,6 +1044,14 @@
         <span>4K Snapshot</span>
       </button>
 
+      <!-- Direct Share Permalink Button -->
+      <button id="btn-share" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden sm:inline-flex items-center gap-1.5" title="Copy Direct Cinema Permalink">
+        <svg class="w-3.5 h-3.5 text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+        </svg>
+        <span>Share</span>
+      </button>
+
       <!-- Cinema WebM Video Reel Recorder Button -->
       <button id="btn-record" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden xl:inline-flex items-center gap-1.5" title="Record WebM Cinema Reel (R)">
         <span id="record-dot" class="w-2 h-2 rounded-full bg-red-500"></span>
@@ -3997,6 +4005,114 @@
 
     /**
      * ========================================================================
+     * CINEMA STATE SERIALIZATION & DIRECT SHARING PERMALINK
+     * ========================================================================
+     */
+    function generateShareUrl() {
+      const url = new URL(window.location.origin + window.location.pathname);
+      url.searchParams.set('title', currentTitleText);
+      url.searchParams.set('theme', activeThemeKey);
+      url.searchParams.set('font', fontPresets[currentFontIndex].id);
+      url.searchParams.set('stock', filmStocks[currentFilmStockIndex].id);
+      url.searchParams.set('sound', soundscapes[currentSoundscapeIndex].id);
+      url.searchParams.set('vignette', vignetteModes[currentVignetteIndex].id);
+      return url.toString();
+    }
+
+    function copyShareUrl() {
+      const shareUrl = generateShareUrl();
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareUrl).then(() => {
+          showDirectorToast('Permalink Copied to Clipboard', '🔗');
+        }).catch(() => {
+          prompt('Copy Cinema Permalink:', shareUrl);
+        });
+      } else {
+        prompt('Copy Cinema Permalink:', shareUrl);
+      }
+    }
+
+    const btnShare = document.getElementById('btn-share');
+    if (btnShare) {
+      btnShare.addEventListener('click', copyShareUrl);
+    }
+
+    function restoreStateFromUrl() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        let restoredCount = 0;
+
+        if (params.has('title')) {
+          const t = params.get('title');
+          if (t && t.trim()) {
+            buildArchedWordmark(t.trim());
+            const badge = document.getElementById('current-title-badge');
+            if (badge) badge.textContent = currentTitleText;
+            restoredCount++;
+          }
+        }
+        if (params.has('theme')) {
+          const th = params.get('theme').toLowerCase();
+          if (themes[th]) {
+            applyTheme(th);
+            restoredCount++;
+          }
+        }
+        if (params.has('font')) {
+          const fId = params.get('font').toLowerCase();
+          const fIdx = fontPresets.findIndex(f => f.id === fId);
+          if (fIdx !== -1) {
+            currentFontIndex = fIdx;
+            const f = fontPresets[currentFontIndex];
+            document.documentElement.style.setProperty('--title-font', f.family);
+            document.documentElement.style.setProperty('--title-tracking', f.tracking);
+            document.documentElement.style.setProperty('--hero-scale', f.heroScale);
+            const fontLabel = document.getElementById('font-label');
+            if (fontLabel) fontLabel.textContent = `Font: ${f.name}`;
+            buildArchedWordmark();
+            restoredCount++;
+          }
+        }
+        if (params.has('stock')) {
+          const sId = params.get('stock').toLowerCase();
+          const sIdx = filmStocks.findIndex(s => s.id === sId);
+          if (sIdx !== -1) {
+            currentFilmStockIndex = sIdx;
+            applyFilmStock();
+            restoredCount++;
+          }
+        }
+        if (params.has('sound')) {
+          const scId = params.get('sound').toLowerCase();
+          const scIdx = soundscapes.findIndex(s => s.id === scId);
+          if (scIdx !== -1) {
+            currentSoundscapeIndex = scIdx;
+            const sc = soundscapes[currentSoundscapeIndex];
+            const soundscapeLabel = document.getElementById('soundscape-label');
+            if (soundscapeLabel) soundscapeLabel.textContent = `Score: ${sc.name.split(' ')[0]}`;
+            restoredCount++;
+          }
+        }
+        if (params.has('vignette')) {
+          const vId = params.get('vignette').toLowerCase();
+          const vIdx = vignetteModes.findIndex(v => v.id === vId);
+          if (vIdx !== -1) {
+            currentVignetteIndex = vIdx;
+            applyVignette();
+            restoredCount++;
+          }
+        }
+
+        if (restoredCount > 0) {
+          showDirectorToast(`Loaded ${restoredCount} Director Settings from URL`, '🎬');
+        }
+      } catch (err) {
+        console.warn('Could not parse URL query parameters:', err);
+      }
+    }
+
+    /**
+     * ========================================================================
      * CINEMA VIDEO REEL RECORDER (WEBM 60FPS EXPORT)
      * ========================================================================
      */
@@ -4184,6 +4300,7 @@
       renderCrest();
       applyFilmStock();
       applyVignette();
+      restoreStateFromUrl();
       schedulePhaseUpdates();
       updateParallax();
       renderVisualizer();
