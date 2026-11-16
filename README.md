@@ -175,13 +175,41 @@ Cycle between 5 authentic post-production cinema color grading profiles via key 
 - **Browser Autoplay Resilience**: Web Audio context initialization includes graceful catch handlers and viewport-wide user gesture un-suspension listeners.
 
 ### 🧪 26. Automated Smoke Test Suite (`npm test`)
-- **Built-in Verification Harness**: Native Node.js test script (`test/intro-smoke.test.js`) verifying:
-  - 18 vital cinema DOM fixture IDs.
+- **Built-in Verification Harness**: Native Node.js test script (`test/intro-smoke.test.js`) executing 8 automated test suites verifying:
+  - 22 vital cinema DOM fixture IDs.
   - Complete schema for all 10 universe palettes and required color channels.
   - Procedural soundscape synthesis routing and audio nodes.
   - All 5 typography presets and Google Fonts links.
   - Security sanitizer injection neutralization and length capping.
   - Parabolic arch and monogram anchor mathematical calculation accuracy.
+  - Camera trauma quadratic formula and decay mechanics.
+  - URL permalink state serialization and parameter sanitization.
+
+### 💥 27. Dynamic Camera Impact Shake & Traumatic Shockwave Rumble (`Q`)
+- **Hollywood Trauma Physics**: Mathematically modeled quadratic impact camera shake (`shake = trauma^2 * scale`) simulating real cinema camera shudder during:
+  - Phase 1: Monogram ignition pulse (`0.35` trauma).
+  - Phase 2: Stardust glide shockwave explosion (`0.80` trauma).
+  - Phase 3: Grand wordmark lock impact (`0.55` trauma).
+  - Interactive stage clicks (`0.35` trauma).
+- Seamlessly compounds with 3D mouse parallax and auto-orbit without affecting orientation. Toggle instantly via key `Q`.
+
+### 🎧 28. 3D Spatial Audio Dynamic Panning linked to Camera Yaw (`D`)
+- **Stereoscopic Binaural Immersion**: Maps real-time 3D camera yaw angles directly to a Web Audio `StereoPannerNode` (`pan = clamp(yaw / 14 * 0.7, -0.75, 0.75)`).
+- As the stage tilts or auto-orbits, the ambient pad, risers, and metallic lock slam glide across left and right headphone channels. Toggle instantly via key `D`.
+
+### 📺 29. Retro CRT Scanlines & Interlaced VHS Tracking Jitter (`I`)
+- **Analog Celluloid Aesthetic**: High-contrast vintage cathode ray tube horizontal scanline grid (`background-size: 100% 4px`) with subtle frame sync jitter and edge vignette shadows.
+- Toggle instantly via key `I` or the director HUD button.
+
+### 🎨 30. Interactive Studio Palette Lab & Bespoke Hex Color Customizer
+- **Custom Universe Builder**: Click `Custom` in the top bar to open the Studio Palette Lab dialog.
+- Pick custom hex colors for **Primary Core**, **Radiant Glow**, **Deep Vignette**, and **Light Highlight**.
+- Automatically updates canvas embers, anamorphic beam gradients, CSS variables, and ambient backdrop in real-time.
+
+### 🔗 31. Direct Cinema Permalink Sharing & URL Query Synchronization
+- **Instant Preset Sharing**: Click `Share` in the director bar to generate and copy a permalink carrying your entire custom cinema configuration:
+  - `?title=...&theme=...&font=...&stock=...&sound=...&vignette=...`
+- Automatically loads, validates, and applies all parameters on page load with built-in XSS input sanitization.
 
 ---
 
@@ -204,10 +232,12 @@ Cycle between 5 authentic post-production cinema color grading profiles via key 
 | `A` | **Aspect Ratio** | Cycle Scope (Full, 2.39:1 Cinemascope, 16:9, 4:3) |
 | `B` | **Bass Boost EQ** | Toggle Theater Bass Boost (+8.5dB at 68Hz) |
 | `C` | **Camera Presets** | Cycle Director Cameras (Center, Low IMAX, Horizon, Iso) |
+| `D` | **3D Spatial Audio** | Toggle dynamic stereo panning linked to 3D camera yaw |
 | `E` | **Edit Title** | Enter custom wordmark text with live arch recalculation |
 | `F` | **FPS Telemetry** | Toggle real-time performance telemetry monitor |
 | `G` | **Studio Crest** | Cycle Hollywood Studio Crest Badges (Laurels, Starburst, Shield, None) |
 | `H` | **Cinema Mode** | Toggle Cinema Mode (Hide/Show all HUD telemetry controls) |
+| `I` | **CRT Scanlines** | Toggle retro CRT cathode scanline mesh & VHS jitter |
 | `J` | **Vignette Shutter** | Cycle Cinema Vignette Shutter (Deep Anamorphic, Standard Film, Clean Studio) |
 | `K` | **Bokeh Orbs** | Toggle floating anamorphic bokeh aperture discs & optical dust motes |
 | `L` | **Stage Lights** | Toggle Volumetric Stage Searchlights & God Ray Beams |
@@ -215,6 +245,7 @@ Cycle between 5 authentic post-production cinema color grading profiles via key 
 | `N` | **Soundscape Preset** | Cycle Score Soundscape (Epic Cinema, 80s Synthwave, Celestial Ambient, Dark Braam) |
 | `O` | **Typography Font** | Cycle Typography Font (Monumental, Imperial Serif, Sci-Fi Cyber, Arthouse Syne, Royal Decorative) |
 | `P` | **Pause / Resume** | Toggle freeze-frame animation pause |
+| `Q` | **Camera Shake** | Toggle Hollywood impact trauma screen shudder on shockwaves |
 | `R` | **Record Reel** | Record 60FPS WebM video clip with synchronized audio |
 | `S` | **4K Wallpaper** | Capture and download 3840×2160 UHD wallpaper image |
 | `T` | **3D Parallax** | Toggle 3D mouse and gyroscope perspective tilt |
