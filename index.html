@@ -1013,6 +1013,12 @@
         <span id="bass-label">Bass: ON</span>
       </button>
 
+      <!-- 3D Spatial Audio Tracking Button -->
+      <button id="btn-spatial" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden lg:inline-flex items-center gap-1.5" title="Toggle 3D Spatial Audio Panning (D)">
+        <span id="spatial-dot" class="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_6px_#22d3ee]"></span>
+        <span id="spatial-label">3D Audio: ON</span>
+      </button>
+
       <!-- Cinematic Soundscape Preset Button -->
       <button id="btn-soundscape" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden md:inline-flex items-center gap-1.5" title="Cycle Cinematic Soundscape Preset (N)">
         <span class="w-2 h-2 rounded-full bg-violet-400 shadow-[0_0_6px_#a78bfa]"></span>
@@ -1137,6 +1143,10 @@
           <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
             <span>Bass Boost EQ</span>
             <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">B</kbd>
+          </div>
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+            <span>3D Spatial Audio</span>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">D</kbd>
           </div>
           <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
             <span>Pause / Resume</span>
@@ -2124,7 +2134,9 @@
     let convolverNode = null;
     let reverbWetGain = null;
     let dryGain = null;
+    let spatialPanner = null;
     let bassBoostEnabled = true;
+    let isSpatialAudioEnabled = true;
     let analyser = null;
     let analyserData = null;
     let isAudioPlaying = false;
@@ -2184,7 +2196,14 @@
         convolverNode.connect(reverbWetGain);
         reverbWetGain.connect(bassBoostFilter);
 
-        bassBoostFilter.connect(masterGain);
+        if (audioCtx.createStereoPanner) {
+          spatialPanner = audioCtx.createStereoPanner();
+          spatialPanner.pan.setValueAtTime(0, audioCtx.currentTime);
+          bassBoostFilter.connect(spatialPanner);
+          spatialPanner.connect(masterGain);
+        } else {
+          bassBoostFilter.connect(masterGain);
+        }
 
         analyser = audioCtx.createAnalyser();
         analyser.fftSize = 64;
@@ -2227,6 +2246,29 @@
       if (bassLabel) {
         bassLabel.textContent = `Bass: ${bassBoostEnabled ? 'ON' : 'OFF'}`;
       }
+    }
+
+    function toggleSpatialAudio() {
+      isSpatialAudioEnabled = !isSpatialAudioEnabled;
+      const dot = document.getElementById('spatial-dot');
+      const label = document.getElementById('spatial-label');
+      if (dot) {
+        dot.className = isSpatialAudioEnabled
+          ? 'w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_6px_#22d3ee]'
+          : 'w-2 h-2 rounded-full bg-neutral-600';
+      }
+      if (label) {
+        label.textContent = `3D Audio: ${isSpatialAudioEnabled ? 'ON' : 'OFF'}`;
+      }
+      if (spatialPanner && audioCtx && !isSpatialAudioEnabled) {
+        spatialPanner.pan.setValueAtTime(0, audioCtx.currentTime);
+      }
+      showDirectorToast(`3D Spatial Audio: ${isSpatialAudioEnabled ? 'ON' : 'OFF'}`, '🎧');
+    }
+
+    const btnSpatial = document.getElementById('btn-spatial');
+    if (btnSpatial) {
+      btnSpatial.addEventListener('click', toggleSpatialAudio);
     }
 
     const btnBassBoost = document.getElementById('btn-bass-boost');
@@ -3091,6 +3133,8 @@
         if (btnMute) btnMute.click();
       } else if (e.code === 'KeyB') {
         if (btnBassBoost) btnBassBoost.click();
+      } else if (e.code === 'KeyD') {
+        toggleSpatialAudio();
       } else if (e.code === 'KeyN') {
         cycleSoundscape();
       } else if (e.code === 'KeyL') {
@@ -3503,6 +3547,15 @@
       }
 
       updateLensFlares(currentTiltX + cam.basePitch * 0.4 + orbitOffsetX * 0.4, currentTiltY + cam.baseYaw * 0.4 + orbitOffsetY * 0.4);
+
+      if (spatialPanner && audioCtx && isSpatialAudioEnabled) {
+        const targetPan = Math.max(-0.75, Math.min(0.75, (parseFloat(finalYaw) / 14) * 0.7));
+        try {
+          spatialPanner.pan.linearRampToValueAtTime(targetPan, audioCtx.currentTime + 0.05);
+        } catch (e) {
+          spatialPanner.pan.value = targetPan;
+        }
+      }
 
       parallaxFrameId = requestAnimationFrame(updateParallax);
     }
