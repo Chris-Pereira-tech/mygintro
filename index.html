@@ -921,6 +921,10 @@
         <button data-theme="sakura" class="theme-chip px-2.5 py-0.5 rounded-full bg-white/5 border border-transparent text-neutral-400 hover:text-white transition active:scale-95" title="Cybernetic Sakura (Key 8)">Sakura</button>
         <button data-theme="quantum" class="theme-chip px-2.5 py-0.5 rounded-full bg-white/5 border border-transparent text-neutral-400 hover:text-white transition active:scale-95" title="Quantum Matrix (Key 9)">Quantum</button>
         <button data-theme="eclipse" class="theme-chip px-2.5 py-0.5 rounded-full bg-white/5 border border-transparent text-neutral-400 hover:text-white transition active:scale-95" title="Solar Eclipse (Key 0)">Eclipse</button>
+        <button id="btn-palette-lab" class="theme-chip px-2.5 py-0.5 rounded-full bg-gradient-to-r from-rose-500/25 to-amber-500/25 border border-rose-400/40 text-rose-200 font-medium hover:brightness-125 transition active:scale-95 flex items-center gap-1" title="Open Custom Palette Lab">
+          <span>🎨</span>
+          <span class="hidden sm:inline">Custom</span>
+        </button>
       </div>
 
       <div class="pointer-events-auto hidden xl:flex items-center gap-2 bg-neutral-950/85 border border-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs text-neutral-400 shadow-2xl">
@@ -1266,6 +1270,46 @@
         </div>
         <div class="mt-4 pt-3 border-t border-white/10 text-[11px] text-neutral-400 text-center">
           Tip: Click the presenter subtitle badge to type your custom director tagline!
+        </div>
+      </div>
+    </div>
+
+    <!-- Studio Palette Lab Modal -->
+    <div id="palette-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+      <div class="bg-neutral-900 border border-white/15 rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+        <div class="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
+          <h3 class="text-base font-semibold text-white flex items-center gap-2">
+            <span class="text-rose-400">🎨</span>
+            Studio Palette Lab
+          </h3>
+          <button id="btn-close-palette-modal" class="text-neutral-400 hover:text-white text-lg font-bold transition">&times;</button>
+        </div>
+        <p class="text-xs text-neutral-400 mb-4">Design your bespoke Hollywood universe color palette in real-time.</p>
+        <div class="space-y-2.5 text-xs text-neutral-300">
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-xl border border-white/5">
+            <span>Primary Core</span>
+            <input type="color" id="picker-primary" value="#e6194b" class="w-8 h-8 rounded-lg cursor-pointer bg-transparent border-0" />
+          </div>
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-xl border border-white/5">
+            <span>Radiant Glow</span>
+            <input type="color" id="picker-glow" value="#ff2a5f" class="w-8 h-8 rounded-lg cursor-pointer bg-transparent border-0" />
+          </div>
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-xl border border-white/5">
+            <span>Deep Vignette</span>
+            <input type="color" id="picker-deep" value="#8b0024" class="w-8 h-8 rounded-lg cursor-pointer bg-transparent border-0" />
+          </div>
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-xl border border-white/5">
+            <span>Light Highlight</span>
+            <input type="color" id="picker-light" value="#ffe5ec" class="w-8 h-8 rounded-lg cursor-pointer bg-transparent border-0" />
+          </div>
+        </div>
+        <div class="mt-5 flex items-center gap-2">
+          <button id="btn-apply-custom-palette" class="flex-1 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 font-semibold text-xs text-white shadow-lg shadow-red-950/50 transition">
+            Apply Palette
+          </button>
+          <button id="btn-reset-palette" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-xs text-neutral-300 transition">
+            Reset
+          </button>
         </div>
       </div>
     </div>
@@ -3276,6 +3320,7 @@
         toggleShortcutsModal();
       } else if (e.code === 'Escape') {
         closeShortcutsModal();
+        closePaletteModal();
       }
     });
 
@@ -3314,6 +3359,80 @@
     if (shortcutsModal) {
       shortcutsModal.addEventListener('click', (e) => {
         if (e.target === shortcutsModal) closeShortcutsModal();
+      });
+    }
+
+    /**
+     * ========================================================================
+     * STUDIO PALETTE LAB (BESPOKE PALETTE ENGINE)
+     * ========================================================================
+     */
+    const paletteModal = document.getElementById('palette-modal');
+    const btnPaletteLab = document.getElementById('btn-palette-lab');
+    const btnClosePaletteModal = document.getElementById('btn-close-palette-modal');
+    const btnApplyPalette = document.getElementById('btn-apply-custom-palette');
+    const btnResetPalette = document.getElementById('btn-reset-palette');
+    const pickerPrimary = document.getElementById('picker-primary');
+    const pickerGlow = document.getElementById('picker-glow');
+    const pickerDeep = document.getElementById('picker-deep');
+    const pickerLight = document.getElementById('picker-light');
+
+    function openPaletteModal() {
+      if (!paletteModal) return;
+      paletteModal.classList.remove('opacity-0', 'pointer-events-none');
+      paletteModal.classList.add('opacity-100', 'pointer-events-auto');
+    }
+
+    function closePaletteModal() {
+      if (!paletteModal) return;
+      paletteModal.classList.remove('opacity-100', 'pointer-events-auto');
+      paletteModal.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    function applyCustomPalette(primary, glow, deep, light) {
+      themes.custom = {
+        name: 'Custom Director Master',
+        accentColor: glow,
+        primary: primary,
+        glow: glow,
+        deep: deep,
+        core: primary,
+        light: light,
+        viewportBg: `radial-gradient(ellipse at 50% 50%, ${primary}3d 0%, ${deep}2e 38%, #070204f2 75%, #040102 100%)`,
+        embers: [glow, primary, light, '#ffffff'],
+        streakGrad: `linear-gradient(90deg, transparent 0%, ${glow}1a 15%, ${glow}99 45%, #ffffff 50%, ${glow}99 55%, ${glow}1a 85%, transparent 100%)`
+      };
+      applyTheme('custom');
+      showDirectorToast('Custom Studio Palette Applied', '🎨');
+    }
+
+    if (btnPaletteLab) btnPaletteLab.addEventListener('click', openPaletteModal);
+    if (btnClosePaletteModal) btnClosePaletteModal.addEventListener('click', closePaletteModal);
+    if (paletteModal) {
+      paletteModal.addEventListener('click', (e) => {
+        if (e.target === paletteModal) closePaletteModal();
+      });
+    }
+
+    if (btnApplyPalette) {
+      btnApplyPalette.addEventListener('click', () => {
+        const prim = pickerPrimary ? pickerPrimary.value : '#e6194b';
+        const glow = pickerGlow ? pickerGlow.value : '#ff2a5f';
+        const deep = pickerDeep ? pickerDeep.value : '#8b0024';
+        const light = pickerLight ? pickerLight.value : '#ffe5ec';
+        applyCustomPalette(prim, glow, deep, light);
+        closePaletteModal();
+      });
+    }
+
+    if (btnResetPalette) {
+      btnResetPalette.addEventListener('click', () => {
+        if (pickerPrimary) pickerPrimary.value = '#e6194b';
+        if (pickerGlow) pickerGlow.value = '#ff2a5f';
+        if (pickerDeep) pickerDeep.value = '#8b0024';
+        if (pickerLight) pickerLight.value = '#ffe5ec';
+        applyTheme('crimson');
+        closePaletteModal();
       });
     }
 
