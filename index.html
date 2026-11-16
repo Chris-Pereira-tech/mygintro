@@ -584,6 +584,51 @@
     }
 
     /* ==========================================================================
+       RETRO CRT SCANLINES & VHS TAPE TRACKING JITTER SYSTEM
+       ========================================================================== */
+    .crt-scanlines {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 25;
+      background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, 0) 50%,
+        rgba(0, 0, 0, 0.35) 50%,
+        rgba(0, 0, 0, 0.35)
+      );
+      background-size: 100% 4px;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      mix-blend-mode: multiply;
+    }
+    .crt-scanlines.active {
+      opacity: 0.65;
+    }
+    .crt-vhs-glow {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 26;
+      box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.8), inset 0 0 40px rgba(0, 0, 0, 0.9);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .crt-vhs-glow.active {
+      opacity: 0.8;
+      animation: vhs-flicker 0.15s infinite;
+    }
+    @keyframes vhs-flicker {
+      0%, 100% { opacity: 0.76; }
+      50% { opacity: 0.84; }
+    }
+
+    /* ==========================================================================
        HOLLYWOOD FILM STOCK COLOR GRADING (LUTS)
        ========================================================================== */
     .film-stock-natural {
@@ -782,6 +827,10 @@
 
     <!-- 35mm Hollywood Film Grain Overlay -->
     <div class="film-grain"></div>
+
+    <!-- Retro CRT Scanlines & VHS Glow Overlay -->
+    <div id="crt-scanlines" class="crt-scanlines"></div>
+    <div id="crt-vhs-glow" class="crt-vhs-glow"></div>
 
     <!-- Cinematic Vignette Shutter Overlay -->
     <div id="vignette-overlay" class="vignette-overlay vignette-deep pointer-events-none"></div>
@@ -1067,6 +1116,12 @@
         <span id="shake-label">Shake: ON</span>
       </button>
 
+      <!-- Retro CRT Scanlines Button -->
+      <button id="btn-crt" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden lg:inline-flex items-center gap-1.5" title="Toggle Retro CRT Scanlines (I)">
+        <span id="crt-dot" class="w-2 h-2 rounded-full bg-neutral-600"></span>
+        <span id="crt-label">CRT: OFF</span>
+      </button>
+
       <div class="flex items-center gap-1 bg-black/60 border border-white/10 rounded-xl p-1">
         <button data-speed="0.45" class="speed-btn px-2.5 py-1 rounded-lg text-xs text-neutral-400 hover:text-white transition">0.45x Slow-Mo</button>
         <button data-speed="1" class="speed-btn px-2.5 py-1 rounded-lg text-xs bg-white/15 text-white font-medium transition">1x Normal</button>
@@ -1203,6 +1258,10 @@
           <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
             <span>Camera Shake</span>
             <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">Q</kbd>
+          </div>
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+            <span>CRT Scanlines</span>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">I</kbd>
           </div>
         </div>
         <div class="mt-4 pt-3 border-t border-white/10 text-[11px] text-neutral-400 text-center">
@@ -1453,6 +1512,40 @@
     const btnChroma = document.getElementById('btn-chroma');
     if (btnChroma) {
       btnChroma.addEventListener('click', toggleChromaticAberration);
+    }
+
+    /**
+     * ========================================================================
+     * RETRO CRT SCANLINES & INTERLACED VHS JITTER (KEY I)
+     * ========================================================================
+     */
+    let isCrtMode = false;
+
+    function toggleCrtMode() {
+      isCrtMode = !isCrtMode;
+      const crtLines = document.getElementById('crt-scanlines');
+      const crtGlow = document.getElementById('crt-vhs-glow');
+      const dot = document.getElementById('crt-dot');
+      const label = document.getElementById('crt-label');
+
+      if (crtLines) crtLines.classList.toggle('active', isCrtMode);
+      if (crtGlow) crtGlow.classList.toggle('active', isCrtMode);
+
+      if (dot) {
+        dot.className = isCrtMode
+          ? 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]'
+          : 'w-2 h-2 rounded-full bg-neutral-600';
+      }
+      if (label) {
+        label.textContent = `CRT: ${isCrtMode ? 'ON' : 'OFF'}`;
+      }
+      showDirectorToast(`Retro CRT Scanlines: ${isCrtMode ? 'ON' : 'OFF'}`, '📺');
+      spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 28, 0.7);
+    }
+
+    const btnCrt = document.getElementById('btn-crt');
+    if (btnCrt) {
+      btnCrt.addEventListener('click', toggleCrtMode);
     }
 
     /**
@@ -3157,6 +3250,8 @@
         toggleMeteorMode();
       } else if (e.code === 'KeyQ') {
         toggleScreenShake();
+      } else if (e.code === 'KeyI') {
+        toggleCrtMode();
       } else if (e.code === 'Digit1') {
         applyTheme('crimson');
       } else if (e.code === 'Digit2') {
