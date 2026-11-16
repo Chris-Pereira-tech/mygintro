@@ -3140,11 +3140,20 @@
       );
     }
 
+    let lastReplayTime = 0;
+    const REPLAY_COOLDOWN_MS = 280;
+
     function restartAnimation(withAudio = false) {
+      const now = Date.now();
+      if (now - lastReplayTime < REPLAY_COOLDOWN_MS) {
+        return;
+      }
+      lastReplayTime = now;
+
       isPaused = false;
       viewport.classList.remove('paused');
       btnPause.textContent = 'Pause';
-      animationStartTime = Date.now();
+      animationStartTime = now;
 
       const shockwave = document.getElementById('shockwave-ring');
 
@@ -4043,17 +4052,18 @@
         let restoredCount = 0;
 
         if (params.has('title')) {
-          const t = params.get('title');
-          if (t && t.trim()) {
-            buildArchedWordmark(t.trim());
+          const raw = params.get('title');
+          const clean = sanitizeCinemaInput(raw, 24);
+          if (clean) {
+            buildArchedWordmark(clean);
             const badge = document.getElementById('current-title-badge');
             if (badge) badge.textContent = currentTitleText;
             restoredCount++;
           }
         }
         if (params.has('theme')) {
-          const th = params.get('theme').toLowerCase();
-          if (themes[th]) {
+          const th = params.get('theme').toLowerCase().trim();
+          if (Object.prototype.hasOwnProperty.call(themes, th)) {
             applyTheme(th);
             restoredCount++;
           }
