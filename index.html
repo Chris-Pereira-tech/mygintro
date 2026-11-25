@@ -1160,9 +1160,14 @@
         <span id="grain-label">Grain: 35mm</span>
       </button>
 
+      <!-- Multi-Gear Director Playback Speed Controller -->
       <div class="flex items-center gap-1 bg-black/60 border border-white/10 rounded-xl p-1">
-        <button data-speed="0.45" class="speed-btn px-2.5 py-1 rounded-lg text-xs text-neutral-400 hover:text-white transition">0.45x Slow-Mo</button>
-        <button data-speed="1" class="speed-btn px-2.5 py-1 rounded-lg text-xs bg-white/15 text-white font-medium transition">1x Normal</button>
+        <button id="btn-speed-down" class="w-6 h-7 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition flex items-center justify-center text-xs font-bold" title="Slow Down Playback ([)">−</button>
+        <button id="btn-speed-pill" class="px-2.5 py-1 rounded-lg text-xs bg-white/15 text-white font-medium transition flex items-center gap-1" title="Cycle Playback Speed ([ / ])">
+          <span class="text-rose-400 text-[10px]">⏱️</span>
+          <span id="speed-pill-label">1.0x</span>
+        </button>
+        <button id="btn-speed-up" class="w-6 h-7 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition flex items-center justify-center text-xs font-bold" title="Speed Up Playback (])">+</button>
       </div>
 
       <!-- Shortcuts Cheatsheet Info Button -->
@@ -3300,19 +3305,56 @@
       });
     }
 
-    speedBtns.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        currentSpeed = parseFloat(btn.getAttribute('data-speed'));
-        document.documentElement.style.setProperty('--speed-mult', currentSpeed);
+    const speedGears = [
+      { speed: 0.25, label: '0.25x (Bullet Time)', badge: '0.25x' },
+      { speed: 0.5, label: '0.5x (Cinematic Slow)', badge: '0.5x' },
+      { speed: 0.75, label: '0.75x (Dramatic Pace)', badge: '0.75x' },
+      { speed: 1.0, label: '1.0x (Standard Master)', badge: '1.0x' },
+      { speed: 1.5, label: '1.5x (Fast Preview)', badge: '1.5x' },
+      { speed: 2.0, label: '2.0x (Double Speed)', badge: '2.0x' }
+    ];
+    let currentSpeedGearIndex = 3;
 
-        speedBtns.forEach((b) => {
-          b.className = 'speed-btn px-2.5 py-1 rounded-lg text-xs text-neutral-400 hover:text-white transition';
-        });
-        btn.className = 'speed-btn px-2.5 py-1 rounded-lg text-xs bg-white/15 text-white font-medium transition';
+    function setPlaybackSpeed(newSpeed, announce = true) {
+      const gear = speedGears.find((g) => Math.abs(g.speed - newSpeed) < 0.05);
+      if (gear) {
+        currentSpeedGearIndex = speedGears.indexOf(gear);
+        currentSpeed = gear.speed;
+      } else {
+        currentSpeed = Math.max(0.2, Math.min(3.0, newSpeed));
+      }
+      document.documentElement.style.setProperty('--speed-mult', currentSpeed);
+      const pillLabel = document.getElementById('speed-pill-label');
+      if (pillLabel) {
+        pillLabel.textContent = `${currentSpeed}x`;
+      }
+      if (announce) {
+        const desc = gear ? gear.label : `${currentSpeed}x`;
+        showDirectorToast(`Playback Speed: ${desc}`, '⏱️');
+        spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 18, 0.5);
+      }
+      restartAnimation(false);
+    }
 
-        restartAnimation(false);
-      });
-    });
+    function stepSpeed(direction) {
+      currentSpeedGearIndex = Math.max(0, Math.min(speedGears.length - 1, currentSpeedGearIndex + direction));
+      const g = speedGears[currentSpeedGearIndex];
+      setPlaybackSpeed(g.speed, true);
+    }
+
+    function cyclePlaybackSpeed() {
+      currentSpeedGearIndex = (currentSpeedGearIndex + 1) % speedGears.length;
+      const g = speedGears[currentSpeedGearIndex];
+      setPlaybackSpeed(g.speed, true);
+    }
+
+    const btnSpeedDown = document.getElementById('btn-speed-down');
+    const btnSpeedUp = document.getElementById('btn-speed-up');
+    const btnSpeedPill = document.getElementById('btn-speed-pill');
+
+    if (btnSpeedDown) btnSpeedDown.addEventListener('click', () => stepSpeed(-1));
+    if (btnSpeedUp) btnSpeedUp.addEventListener('click', () => stepSpeed(1));
+    if (btnSpeedPill) btnSpeedPill.addEventListener('click', cyclePlaybackSpeed);
 
     // Keyboard Shortcuts
     window.addEventListener('keydown', (e) => {
@@ -3379,6 +3421,10 @@
         toggleCrtMode();
       } else if (e.code === 'Backslash') {
         cycleFilmGrain();
+      } else if (e.code === 'BracketLeft') {
+        stepSpeed(-1);
+      } else if (e.code === 'BracketRight') {
+        stepSpeed(1);
       } else if (e.code === 'Digit1') {
         applyTheme('crimson');
       } else if (e.code === 'Digit2') {
