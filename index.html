@@ -2395,6 +2395,15 @@
       return impulse;
     }
 
+    function makeTapeSaturationCurve(amount = 1.85, n_samples = 4096) {
+      const curve = new Float32Array(n_samples);
+      for (let i = 0; i < n_samples; ++i) {
+        const x = (i * 2) / n_samples - 1;
+        curve[i] = Math.tanh(amount * x) / Math.tanh(amount);
+      }
+      return curve;
+    }
+
     function initAudioEngine() {
       if (!audioCtx) {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -2448,7 +2457,17 @@
         analyser.smoothingTimeConstant = 0.78;
         analyserData = new Uint8Array(analyser.frequencyBinCount);
 
-        masterGain.connect(analyser);
+        // 5. Analog Tape Saturation Limiter (Sigmoid Tanh Warmth Curve)
+        let tapeWarmthNode = null;
+        if (audioCtx.createWaveShaper) {
+          tapeWarmthNode = audioCtx.createWaveShaper();
+          tapeWarmthNode.curve = makeTapeSaturationCurve(1.85, 4096);
+          tapeWarmthNode.oversample = '2x';
+          masterGain.connect(tapeWarmthNode);
+          tapeWarmthNode.connect(analyser);
+        } else {
+          masterGain.connect(analyser);
+        }
         analyser.connect(audioCtx.destination);
       }
       if (audioCtx.state === 'suspended') {
@@ -2561,6 +2580,47 @@
         const invSpeed = 1 / speedMult;
         const outBus = soundBus || masterGain;
         const currentMode = soundscapes[currentSoundscapeIndex].id;
+
+        // Dynamic Hollywood Tension Riser Sweep (1.45s - 2.05s)
+        const riserOsc = audioCtx.createOscillator();
+        const riserFilter = audioCtx.createBiquadFilter();
+        const riserGain = audioCtx.createGain();
+        const riserStart = now + 1.45 * invSpeed;
+        const riserEnd = now + 2.02 * invSpeed;
+
+        riserOsc.type = 'sawtooth';
+        riserOsc.frequency.setValueAtTime(48, riserStart);
+        riserOsc.frequency.exponentialRampToValueAtTime(760, riserEnd);
+
+        riserFilter.type = 'bandpass';
+        riserFilter.frequency.setValueAtTime(140, riserStart);
+        riserFilter.frequency.exponentialRampToValueAtTime(1200, riserEnd);
+        riserFilter.Q.value = 3.6;
+
+        riserGain.gain.setValueAtTime(0.0001, riserStart);
+        riserGain.gain.exponentialRampToValueAtTime(0.24, now + 1.95 * invSpeed);
+        riserGain.gain.exponentialRampToValueAtTime(0.0001, riserEnd + 0.1);
+
+        riserOsc.connect(riserFilter).connect(riserGain).connect(outBus);
+        riserOsc.start(riserStart);
+        riserOsc.stop(riserEnd + 0.15);
+
+        // Sub-Harmonic Resonant Sonic Thump Transient at Shockwave Detonation (2.0s)
+        const thumpOsc = audioCtx.createOscillator();
+        const thumpGain = audioCtx.createGain();
+        const thumpTime = now + 2.0 * invSpeed;
+
+        thumpOsc.type = 'sine';
+        thumpOsc.frequency.setValueAtTime(82, thumpTime);
+        thumpOsc.frequency.exponentialRampToValueAtTime(28, thumpTime + 0.45 * invSpeed);
+
+        thumpGain.gain.setValueAtTime(0.0001, thumpTime);
+        thumpGain.gain.linearRampToValueAtTime(0.68, thumpTime + 0.03);
+        thumpGain.gain.exponentialRampToValueAtTime(0.0001, thumpTime + 0.55 * invSpeed);
+
+        thumpOsc.connect(thumpGain).connect(outBus);
+        thumpOsc.start(thumpTime);
+        thumpOsc.stop(thumpTime + 0.6 * invSpeed);
 
         if (currentMode === 'synthwave') {
           // ==================== 80S SYNTHWAVE SOUNDSCAPE ====================
