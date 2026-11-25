@@ -1521,16 +1521,31 @@
      * ========================================================================
      */
     let toastTimeout = null;
+    let lastToastTime = 0;
+    const TOAST_THROTTLE_MS = 140;
+
     function showDirectorToast(msg, icon = '🎬') {
       const toast = document.getElementById('director-toast');
       const msgElem = document.getElementById('toast-message');
       const iconElem = document.getElementById('toast-icon');
       if (!toast || !msgElem) return;
 
+      const safeMsg = String(msg || '').replace(/[\x00-\x1F\x7F-\x9F]/g, '').substring(0, 64);
+      const safeIcon = String(icon || '🎬').substring(0, 4);
+
+      const now = Date.now();
+      if (now - lastToastTime < TOAST_THROTTLE_MS) {
+        msgElem.textContent = safeMsg;
+        if (iconElem) iconElem.textContent = safeIcon;
+        lastToastTime = now;
+        return;
+      }
+      lastToastTime = now;
+
       if (toastTimeout) clearTimeout(toastTimeout);
 
-      msgElem.textContent = msg;
-      if (iconElem) iconElem.textContent = icon;
+      msgElem.textContent = safeMsg;
+      if (iconElem) iconElem.textContent = safeIcon;
 
       toast.classList.remove('opacity-0', '-translate-y-2');
       toast.classList.add('opacity-100', 'translate-y-0');
@@ -3782,8 +3797,21 @@
       projectModal.classList.add('opacity-0', 'pointer-events-none');
     }
 
+    function isSafeProjectPayload(obj) {
+      if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return false;
+      const dangerous = ['__proto__', 'constructor', 'prototype'];
+      for (const key of Object.keys(obj)) {
+        if (dangerous.includes(key.toLowerCase())) return false;
+      }
+      return true;
+    }
+
+    function isValidHexColor(hex) {
+      return typeof hex === 'string' && /^#[0-9a-fA-F]{6}$/.test(hex.trim());
+    }
+
     function applyProjectConfig(cfg) {
-      if (!cfg || typeof cfg !== 'object') throw new Error('Invalid project structure');
+      if (!isSafeProjectPayload(cfg)) throw new Error('Unsafe or invalid project payload');
       if (cfg.title && typeof cfg.title === 'string') {
         const cleanTitle = sanitizeCinemaInput(cfg.title, 24);
         if (cleanTitle) {
@@ -3795,16 +3823,20 @@
       if (cfg.subtitle && typeof cfg.subtitle === 'string' && presentsBadge) {
         presentsBadge.textContent = sanitizeCinemaInput(cfg.subtitle, 28);
       }
-      if (cfg.customPalette && typeof cfg.customPalette === 'object') {
+      if (cfg.customPalette && isSafeProjectPayload(cfg.customPalette)) {
         const p = cfg.customPalette;
-        if (p.primary && p.glow && p.deep && p.light) {
-          applyCustomPalette(p.primary, p.glow, p.deep, p.light);
+        if (isValidHexColor(p.primary) && isValidHexColor(p.glow) && isValidHexColor(p.deep) && isValidHexColor(p.light)) {
+          applyCustomPalette(p.primary.trim(), p.glow.trim(), p.deep.trim(), p.light.trim());
         }
-      } else if (cfg.theme && typeof cfg.theme === 'string' && themes[cfg.theme]) {
-        applyTheme(cfg.theme);
+      } else if (cfg.theme && typeof cfg.theme === 'string') {
+        const th = cfg.theme.toLowerCase().trim();
+        if (Object.prototype.hasOwnProperty.call(themes, th)) {
+          applyTheme(th);
+        }
       }
       if (cfg.font && typeof cfg.font === 'string') {
-        const fIdx = fontPresets.findIndex((f) => f.id === cfg.font.toLowerCase());
+        const fId = cfg.font.toLowerCase().trim();
+        const fIdx = fontPresets.findIndex((f) => f.id === fId);
         if (fIdx !== -1) {
           currentFontIndex = fIdx;
           const f = fontPresets[currentFontIndex];
@@ -3817,14 +3849,16 @@
         }
       }
       if (cfg.stock && typeof cfg.stock === 'string') {
-        const sIdx = filmStocks.findIndex((s) => s.id === cfg.stock.toLowerCase());
+        const sId = cfg.stock.toLowerCase().trim();
+        const sIdx = filmStocks.findIndex((s) => s.id === sId);
         if (sIdx !== -1) {
           currentFilmStockIndex = sIdx;
           applyFilmStock();
         }
       }
       if (cfg.sound && typeof cfg.sound === 'string') {
-        const scIdx = soundscapes.findIndex((s) => s.id === cfg.sound.toLowerCase());
+        const scId = cfg.sound.toLowerCase().trim();
+        const scIdx = soundscapes.findIndex((s) => s.id === scId);
         if (scIdx !== -1) {
           currentSoundscapeIndex = scIdx;
           const sc = soundscapes[currentSoundscapeIndex];
@@ -3833,28 +3867,32 @@
         }
       }
       if (cfg.vignette && typeof cfg.vignette === 'string') {
-        const vIdx = vignetteModes.findIndex((v) => v.id === cfg.vignette.toLowerCase());
+        const vId = cfg.vignette.toLowerCase().trim();
+        const vIdx = vignetteModes.findIndex((v) => v.id === vId);
         if (vIdx !== -1) {
           currentVignetteIndex = vIdx;
           applyVignette();
         }
       }
       if (cfg.crest && typeof cfg.crest === 'string') {
-        const cIdx = studioCrests.findIndex((c) => c.id === cfg.crest.toLowerCase());
+        const cId = cfg.crest.toLowerCase().trim();
+        const cIdx = studioCrests.findIndex((c) => c.id === cId);
         if (cIdx !== -1) {
           currentCrestIndex = cIdx;
           renderCrest();
         }
       }
       if (cfg.grain && typeof cfg.grain === 'string') {
-        const gIdx = filmGrainModes.findIndex((g) => g.id === cfg.grain.toLowerCase());
+        const gId = cfg.grain.toLowerCase().trim();
+        const gIdx = filmGrainModes.findIndex((g) => g.id === gId);
         if (gIdx !== -1) {
           currentFilmGrainIndex = gIdx;
           applyFilmGrain();
         }
       }
       if (typeof cfg.speed === 'number' && !isNaN(cfg.speed)) {
-        setPlaybackSpeed(cfg.speed, false);
+        const clampedSpeed = Math.max(0.2, Math.min(3.0, cfg.speed));
+        setPlaybackSpeed(clampedSpeed, false);
       }
       showDirectorToast('Cinema Project Applied Successfully', '🎬');
       spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 45, 1.0);
