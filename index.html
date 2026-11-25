@@ -245,6 +245,22 @@
       box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
     }
 
+    .ghost-5 {
+      width: 86px;
+      height: 86px;
+      background: radial-gradient(circle, rgba(255, 200, 225, 0.4) 0%, rgba(255, 42, 95, 0.15) 50%, transparent 80%);
+      border: 1px dashed rgba(255, 255, 255, 0.35);
+      clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+    }
+
+    .ghost-6 {
+      width: 210px;
+      height: 210px;
+      background: radial-gradient(circle, rgba(255, 42, 95, 0.18) 0%, rgba(255, 255, 255, 0.06) 45%, transparent 75%);
+      border: 1.5px solid rgba(255, 42, 95, 0.22);
+      clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+    }
+
     /* Transition Shockwave Pulse Ring */
     #shockwave-ring {
       position: absolute;
@@ -869,6 +885,8 @@
         <div id="flare-ghost-2" class="flare-ghost ghost-2"></div>
         <div id="flare-ghost-3" class="flare-ghost ghost-3"></div>
         <div id="flare-ghost-4" class="flare-ghost ghost-4"></div>
+        <div id="flare-ghost-5" class="flare-ghost ghost-5"></div>
+        <div id="flare-ghost-6" class="flare-ghost ghost-6"></div>
         <div class="flare-corona"></div>
       </div>
 
@@ -1049,6 +1067,12 @@
       <button id="btn-bokeh" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden md:inline-flex items-center gap-1.5" title="Toggle Anamorphic Lens Bokeh (K)">
         <span id="bokeh-dot" class="w-2 h-2 rounded-full bg-rose-400 shadow-[0_0_6px_#fb7185]"></span>
         <span id="bokeh-label">Bokeh: ON</span>
+      </button>
+
+      <!-- Anamorphic Lens Flare Optics Button -->
+      <button id="btn-flares" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden md:inline-flex items-center gap-1.5" title="Toggle Optical Lens Flares (;)">
+        <span id="flares-dot" class="w-2 h-2 rounded-full bg-rose-400 shadow-[0_0_6px_#fb7185]"></span>
+        <span id="flares-label">Flares: ON</span>
       </button>
 
       <button id="btn-cinema" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden sm:inline-flex items-center gap-1.5" title="Toggle Cinema Mode (H)">
@@ -3425,6 +3449,8 @@
         stepSpeed(-1);
       } else if (e.code === 'BracketRight') {
         stepSpeed(1);
+      } else if (e.code === 'Semicolon') {
+        toggleLensFlares();
       } else if (e.code === 'Digit1') {
         applyTheme('crimson');
       } else if (e.code === 'Digit2') {
@@ -3753,21 +3779,54 @@
     let currentTiltY = 0;
     let parallaxFrameId = null;
 
+    let isFlaresEnabled = true;
+
+    function toggleLensFlares() {
+      isFlaresEnabled = !isFlaresEnabled;
+      const flareLayer = document.getElementById('lens-flare-layer');
+      const dot = document.getElementById('flares-dot');
+      const label = document.getElementById('flares-label');
+
+      if (flareLayer) {
+        flareLayer.style.display = isFlaresEnabled ? 'block' : 'none';
+      }
+      if (dot) {
+        dot.className = isFlaresEnabled
+          ? 'w-2 h-2 rounded-full bg-rose-400 shadow-[0_0_6px_#fb7185]'
+          : 'w-2 h-2 rounded-full bg-neutral-600';
+      }
+      if (label) {
+        label.textContent = `Flares: ${isFlaresEnabled ? 'ON' : 'OFF'}`;
+      }
+      showDirectorToast(`Optical Lens Flares: ${isFlaresEnabled ? 'ON' : 'OFF'}`, '✨');
+      spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 24, 0.6);
+    }
+
+    const btnFlares = document.getElementById('btn-flares');
+    if (btnFlares) {
+      btnFlares.addEventListener('click', toggleLensFlares);
+    }
+
     function updateLensFlares(tiltX, tiltY) {
+      if (!isFlaresEnabled) return;
       const cx = window.innerWidth / 2;
       const cy = window.innerHeight / 2;
-      const offsetX = tiltY * 22;
-      const offsetY = -tiltX * 18;
+      const offsetX = tiltY * 26;
+      const offsetY = -tiltX * 22;
 
       const g1 = document.getElementById('flare-ghost-1');
       const g2 = document.getElementById('flare-ghost-2');
       const g3 = document.getElementById('flare-ghost-3');
       const g4 = document.getElementById('flare-ghost-4');
+      const g5 = document.getElementById('flare-ghost-5');
+      const g6 = document.getElementById('flare-ghost-6');
 
       if (g1) g1.style.transform = `translate(${cx - 55 - offsetX * 0.45}px, ${cy - 55 - offsetY * 0.45}px)`;
       if (g2) g2.style.transform = `translate(${cx - 29 + offsetX * 0.8}px, ${cy - 29 + offsetY * 0.8}px)`;
       if (g3) g3.style.transform = `translate(${cx - 85 - offsetX * 1.25}px, ${cy - 85 - offsetY * 1.25}px)`;
       if (g4) g4.style.transform = `translate(${cx - 16 + offsetX * 1.6}px, ${cy - 16 + offsetY * 1.6}px)`;
+      if (g5) g5.style.transform = `translate(${cx - 43 + offsetX * 0.35}px, ${cy - 43 + offsetY * 0.35}px) rotate(${offsetX * 1.5}deg)`;
+      if (g6) g6.style.transform = `translate(${cx - 105 - offsetX * 1.8}px, ${cy - 105 - offsetY * 1.8}px) rotate(${-offsetX * 2.2}deg)`;
     }
 
     /**
