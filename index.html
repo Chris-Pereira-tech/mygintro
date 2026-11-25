@@ -1096,6 +1096,12 @@
         <span>Share</span>
       </button>
 
+      <!-- Cinema Project Preset Studio Button -->
+      <button id="btn-project" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden sm:inline-flex items-center gap-1.5" title="Open Cinema Project Studio">
+        <span class="text-rose-400 text-xs">💾</span>
+        <span>Project</span>
+      </button>
+
       <!-- Cinema WebM Video Reel Recorder Button -->
       <button id="btn-record" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden xl:inline-flex items-center gap-1.5" title="Record WebM Cinema Reel (R)">
         <span id="record-dot" class="w-2 h-2 rounded-full bg-red-500"></span>
@@ -1373,6 +1379,50 @@
           <button id="btn-reset-palette" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-xs text-neutral-300 transition">
             Reset
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cinema Project Preset Studio Modal (Export / Import) -->
+    <div id="project-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+      <div class="bg-neutral-900 border border-white/15 rounded-2xl p-6 max-w-lg w-full shadow-2xl">
+        <div class="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
+          <h3 class="text-base font-semibold text-white flex items-center gap-2">
+            <span class="text-rose-400">💾</span>
+            Cinema Project Studio
+          </h3>
+          <button id="btn-close-project-modal" class="text-neutral-400 hover:text-white text-lg font-bold transition">&times;</button>
+        </div>
+        <p class="text-xs text-neutral-400 mb-3">Export and import your custom cinema masterpiece as portable JSON configurations.</p>
+        
+        <div class="flex gap-2 mb-3">
+          <button id="tab-export-btn" class="flex-1 py-1.5 rounded-lg text-xs font-semibold bg-white/20 text-white transition">Export JSON</button>
+          <button id="tab-import-btn" class="flex-1 py-1.5 rounded-lg text-xs font-semibold bg-white/5 text-neutral-400 hover:text-white transition">Import JSON</button>
+        </div>
+
+        <div id="project-export-panel" class="space-y-3">
+          <textarea id="project-json-output" readonly class="w-full h-36 bg-black/60 border border-white/10 rounded-xl p-3 font-mono text-[11px] text-rose-200 resize-none focus:outline-none"></textarea>
+          <div class="flex items-center gap-2">
+            <button id="btn-copy-project-json" class="flex-1 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 font-semibold text-xs text-white shadow-lg shadow-red-950/50 transition">
+              Copy JSON
+            </button>
+            <button id="btn-download-project-json" class="flex-1 py-2 rounded-xl bg-white/10 hover:bg-white/15 font-semibold text-xs text-neutral-200 transition">
+              Download .JSON
+            </button>
+          </div>
+        </div>
+
+        <div id="project-import-panel" class="space-y-3 hidden">
+          <textarea id="project-json-input" placeholder="Paste cinema project JSON configuration here..." class="w-full h-36 bg-black/60 border border-white/10 rounded-xl p-3 font-mono text-[11px] text-neutral-200 resize-none focus:outline-none focus:border-rose-500/50"></textarea>
+          <div class="flex items-center gap-2">
+            <button id="btn-apply-project-json" class="flex-1 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 font-semibold text-xs text-white shadow-lg shadow-teal-950/50 transition">
+              Apply Configuration
+            </button>
+            <input type="file" id="project-file-input" accept=".json" class="hidden" />
+            <button id="btn-upload-project-json" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 font-semibold text-xs text-neutral-200 transition">
+              Upload File
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -3536,6 +3586,7 @@
       } else if (e.code === 'Escape') {
         closeShortcutsModal();
         closePaletteModal();
+        closeProjectModal();
       }
     });
 
@@ -3648,6 +3699,233 @@
         if (pickerLight) pickerLight.value = '#ffe5ec';
         applyTheme('crimson');
         closePaletteModal();
+      });
+    }
+
+    /**
+     * ========================================================================
+     * CINEMA PROJECT PRESET STUDIO (JSON EXPORT & IMPORT)
+     * ========================================================================
+     */
+    const projectModal = document.getElementById('project-modal');
+    const btnProject = document.getElementById('btn-project');
+    const btnCloseProjectModal = document.getElementById('btn-close-project-modal');
+    const tabExportBtn = document.getElementById('tab-export-btn');
+    const tabImportBtn = document.getElementById('tab-import-btn');
+    const projectExportPanel = document.getElementById('project-export-panel');
+    const projectImportPanel = document.getElementById('project-import-panel');
+    const projectJsonOutput = document.getElementById('project-json-output');
+    const projectJsonInput = document.getElementById('project-json-input');
+    const btnCopyProjectJson = document.getElementById('btn-copy-project-json');
+    const btnDownloadProjectJson = document.getElementById('btn-download-project-json');
+    const btnApplyProjectJson = document.getElementById('btn-apply-project-json');
+    const btnUploadProjectJson = document.getElementById('btn-upload-project-json');
+    const projectFileInput = document.getElementById('project-file-input');
+
+    function serializeProjectConfig() {
+      const cfg = {
+        format: 'anand-melava-cinema-project',
+        version: '2.5.0',
+        exportedAt: new Date().toISOString(),
+        title: currentTitleText,
+        subtitle: presentsBadge ? presentsBadge.textContent.trim() : 'PRESENTS',
+        theme: activeThemeKey,
+        customPalette: themes.custom ? {
+          primary: themes.custom.primary,
+          glow: themes.custom.glow,
+          deep: themes.custom.deep,
+          light: themes.custom.light
+        } : null,
+        font: fontPresets[currentFontIndex] ? fontPresets[currentFontIndex].id : 'monumental',
+        stock: filmStocks[currentFilmStockIndex] ? filmStocks[currentFilmStockIndex].id : 'standard',
+        sound: soundscapes[currentSoundscapeIndex] ? soundscapes[currentSoundscapeIndex].id : 'epic',
+        vignette: vignetteModes[currentVignetteIndex] ? vignetteModes[currentVignetteIndex].id : 'deep',
+        crest: studioCrests[currentCrestIndex] ? studioCrests[currentCrestIndex].id : 'laurels',
+        grain: filmGrainModes[currentFilmGrainIndex] ? filmGrainModes[currentFilmGrainIndex].id : 'subtle',
+        speed: currentSpeed,
+        aspect: aspectRatios[currentAspectIndex] ? aspectRatios[currentAspectIndex].name : 'Full',
+        opticalFlares: isFlaresEnabled,
+        cameraShake: isScreenShakeEnabled
+      };
+      return JSON.stringify(cfg, null, 2);
+    }
+
+    function switchProjectTab(tab) {
+      if (tab === 'export') {
+        if (projectExportPanel) projectExportPanel.classList.remove('hidden');
+        if (projectImportPanel) projectImportPanel.classList.add('hidden');
+        if (tabExportBtn) tabExportBtn.className = 'flex-1 py-1.5 rounded-lg text-xs font-semibold bg-white/20 text-white transition';
+        if (tabImportBtn) tabImportBtn.className = 'flex-1 py-1.5 rounded-lg text-xs font-semibold bg-white/5 text-neutral-400 hover:text-white transition';
+      } else {
+        if (projectExportPanel) projectExportPanel.classList.add('hidden');
+        if (projectImportPanel) projectImportPanel.classList.remove('hidden');
+        if (tabExportBtn) tabExportBtn.className = 'flex-1 py-1.5 rounded-lg text-xs font-semibold bg-white/5 text-neutral-400 hover:text-white transition';
+        if (tabImportBtn) tabImportBtn.className = 'flex-1 py-1.5 rounded-lg text-xs font-semibold bg-white/20 text-white transition';
+      }
+    }
+
+    function openProjectModal(tab = 'export') {
+      if (!projectModal) return;
+      if (tab === 'export') {
+        if (projectJsonOutput) projectJsonOutput.value = serializeProjectConfig();
+        switchProjectTab('export');
+      } else {
+        switchProjectTab('import');
+      }
+      projectModal.classList.remove('opacity-0', 'pointer-events-none');
+      projectModal.classList.add('opacity-100', 'pointer-events-auto');
+    }
+
+    function closeProjectModal() {
+      if (!projectModal) return;
+      projectModal.classList.remove('opacity-100', 'pointer-events-auto');
+      projectModal.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    function applyProjectConfig(cfg) {
+      if (!cfg || typeof cfg !== 'object') throw new Error('Invalid project structure');
+      if (cfg.title && typeof cfg.title === 'string') {
+        const cleanTitle = sanitizeCinemaInput(cfg.title, 24);
+        if (cleanTitle) {
+          buildArchedWordmark(cleanTitle);
+          const badge = document.getElementById('current-title-badge');
+          if (badge) badge.textContent = currentTitleText;
+        }
+      }
+      if (cfg.subtitle && typeof cfg.subtitle === 'string' && presentsBadge) {
+        presentsBadge.textContent = sanitizeCinemaInput(cfg.subtitle, 28);
+      }
+      if (cfg.customPalette && typeof cfg.customPalette === 'object') {
+        const p = cfg.customPalette;
+        if (p.primary && p.glow && p.deep && p.light) {
+          applyCustomPalette(p.primary, p.glow, p.deep, p.light);
+        }
+      } else if (cfg.theme && typeof cfg.theme === 'string' && themes[cfg.theme]) {
+        applyTheme(cfg.theme);
+      }
+      if (cfg.font && typeof cfg.font === 'string') {
+        const fIdx = fontPresets.findIndex((f) => f.id === cfg.font.toLowerCase());
+        if (fIdx !== -1) {
+          currentFontIndex = fIdx;
+          const f = fontPresets[currentFontIndex];
+          document.documentElement.style.setProperty('--title-font', f.family);
+          document.documentElement.style.setProperty('--title-tracking', f.tracking);
+          document.documentElement.style.setProperty('--hero-scale', f.heroScale);
+          const fontLabel = document.getElementById('font-label');
+          if (fontLabel) fontLabel.textContent = `Font: ${f.name}`;
+          buildArchedWordmark();
+        }
+      }
+      if (cfg.stock && typeof cfg.stock === 'string') {
+        const sIdx = filmStocks.findIndex((s) => s.id === cfg.stock.toLowerCase());
+        if (sIdx !== -1) {
+          currentFilmStockIndex = sIdx;
+          applyFilmStock();
+        }
+      }
+      if (cfg.sound && typeof cfg.sound === 'string') {
+        const scIdx = soundscapes.findIndex((s) => s.id === cfg.sound.toLowerCase());
+        if (scIdx !== -1) {
+          currentSoundscapeIndex = scIdx;
+          const sc = soundscapes[currentSoundscapeIndex];
+          const soundscapeLabel = document.getElementById('soundscape-label');
+          if (soundscapeLabel) soundscapeLabel.textContent = `Score: ${sc.name.split(' ')[0]}`;
+        }
+      }
+      if (cfg.vignette && typeof cfg.vignette === 'string') {
+        const vIdx = vignetteModes.findIndex((v) => v.id === cfg.vignette.toLowerCase());
+        if (vIdx !== -1) {
+          currentVignetteIndex = vIdx;
+          applyVignette();
+        }
+      }
+      if (cfg.crest && typeof cfg.crest === 'string') {
+        const cIdx = studioCrests.findIndex((c) => c.id === cfg.crest.toLowerCase());
+        if (cIdx !== -1) {
+          currentCrestIndex = cIdx;
+          renderCrest();
+        }
+      }
+      if (cfg.grain && typeof cfg.grain === 'string') {
+        const gIdx = filmGrainModes.findIndex((g) => g.id === cfg.grain.toLowerCase());
+        if (gIdx !== -1) {
+          currentFilmGrainIndex = gIdx;
+          applyFilmGrain();
+        }
+      }
+      if (typeof cfg.speed === 'number' && !isNaN(cfg.speed)) {
+        setPlaybackSpeed(cfg.speed, false);
+      }
+      showDirectorToast('Cinema Project Applied Successfully', '🎬');
+      spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 45, 1.0);
+      restartAnimation(false);
+    }
+
+    if (btnProject) btnProject.addEventListener('click', () => openProjectModal('export'));
+    if (btnCloseProjectModal) btnCloseProjectModal.addEventListener('click', closeProjectModal);
+    if (projectModal) {
+      projectModal.addEventListener('click', (e) => {
+        if (e.target === projectModal) closeProjectModal();
+      });
+    }
+    if (tabExportBtn) tabExportBtn.addEventListener('click', () => switchProjectTab('export'));
+    if (tabImportBtn) tabImportBtn.addEventListener('click', () => switchProjectTab('import'));
+
+    if (btnCopyProjectJson) {
+      btnCopyProjectJson.addEventListener('click', () => {
+        const json = projectJsonOutput ? projectJsonOutput.value : serializeProjectConfig();
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(json).then(() => {
+            showDirectorToast('Project JSON Copied to Clipboard', '📋');
+          });
+        }
+      });
+    }
+
+    if (btnDownloadProjectJson) {
+      btnDownloadProjectJson.addEventListener('click', () => {
+        const json = projectJsonOutput ? projectJsonOutput.value : serializeProjectConfig();
+        const blob = new Blob([json], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `cinema-project-${currentTitleText.toLowerCase().replace(/[^a-z0-9]/g, '-')}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        showDirectorToast('Project File Downloaded', '💾');
+      });
+    }
+
+    if (btnApplyProjectJson) {
+      btnApplyProjectJson.addEventListener('click', () => {
+        try {
+          const raw = projectJsonInput ? projectJsonInput.value.trim() : '';
+          if (!raw) return;
+          const parsed = JSON.parse(raw);
+          applyProjectConfig(parsed);
+          closeProjectModal();
+        } catch (err) {
+          showDirectorToast('Failed to parse project JSON', '⚠️');
+        }
+      });
+    }
+
+    if (btnUploadProjectJson && projectFileInput) {
+      btnUploadProjectJson.addEventListener('click', () => projectFileInput.click());
+      projectFileInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          try {
+            const parsed = JSON.parse(evt.target.result);
+            if (projectJsonInput) projectJsonInput.value = JSON.stringify(parsed, null, 2);
+            applyProjectConfig(parsed);
+            closeProjectModal();
+          } catch (err) {
+            showDirectorToast('Invalid project JSON file', '⚠️');
+          }
+        };
+        reader.readAsText(file);
       });
     }
 
