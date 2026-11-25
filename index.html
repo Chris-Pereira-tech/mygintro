@@ -571,17 +571,37 @@
       filter: drop-shadow(0 0 28px rgba(255, 42, 95, 0.75));
     }
 
-    /* 35mm Hollywood Celluloid Film Grain */
+    /* 35mm Hollywood Celluloid Film Grain Engine */
+    @keyframes filmGrainJitter {
+      0%, 100% { transform: translate(0, 0); }
+      10% { transform: translate(-1%, -1%); }
+      20% { transform: translate(1%, 0.5%); }
+      30% { transform: translate(-0.5%, 1%); }
+      40% { transform: translate(1%, -0.5%); }
+      50% { transform: translate(-1%, 0.5%); }
+      60% { transform: translate(0.5%, -1%); }
+      70% { transform: translate(-0.5%, -0.5%); }
+      80% { transform: translate(1%, 1%); }
+      90% { transform: translate(0, -1%); }
+    }
+
     .film-grain {
       position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.045'/%3E%3C/svg%3E");
+      inset: -5%;
+      width: 110%;
+      height: 110%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.7'/%3E%3C/svg%3E");
       pointer-events: none;
       z-index: 30;
       mix-blend-mode: overlay;
+      animation: filmGrainJitter 0.4s steps(5) infinite;
+      transition: opacity 0.3s ease;
     }
+
+    .film-grain-off { display: none !important; opacity: 0 !important; }
+    .film-grain-subtle { opacity: 0.048; }
+    .film-grain-gritty { opacity: 0.098; }
+    .film-grain-vintage { opacity: 0.165; mix-blend-mode: hard-light; }
 
     /* ==========================================================================
        RETRO CRT SCANLINES & VHS TAPE TRACKING JITTER SYSTEM
@@ -826,7 +846,7 @@
     </div>
 
     <!-- 35mm Hollywood Film Grain Overlay -->
-    <div class="film-grain"></div>
+    <div id="film-grain" class="film-grain film-grain-subtle"></div>
 
     <!-- Retro CRT Scanlines & VHS Glow Overlay -->
     <div id="crt-scanlines" class="crt-scanlines"></div>
@@ -1132,6 +1152,12 @@
       <button id="btn-crt" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden lg:inline-flex items-center gap-1.5" title="Toggle Retro CRT Scanlines (I)">
         <span id="crt-dot" class="w-2 h-2 rounded-full bg-neutral-600"></span>
         <span id="crt-label">CRT: OFF</span>
+      </button>
+
+      <!-- 35mm Hollywood Film Grain Button -->
+      <button id="btn-grain" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden lg:inline-flex items-center gap-1.5" title="Cycle Film Grain Texture (\)">
+        <span class="text-rose-400 font-bold text-xs">🎞️</span>
+        <span id="grain-label">Grain: 35mm</span>
       </button>
 
       <div class="flex items-center gap-1 bg-black/60 border border-white/10 rounded-xl p-1">
@@ -1598,6 +1624,44 @@
     const btnCrt = document.getElementById('btn-crt');
     if (btnCrt) {
       btnCrt.addEventListener('click', toggleCrtMode);
+    }
+
+    /**
+     * ========================================================================
+     * 35MM CELLULOID FILM GRAIN ENGINE (KEY \)
+     * ========================================================================
+     */
+    const filmGrainModes = [
+      { id: 'subtle', name: '35mm Fine', className: 'film-grain-subtle' },
+      { id: 'gritty', name: '16mm Gritty', className: 'film-grain-gritty' },
+      { id: 'vintage', name: '8mm Vintage', className: 'film-grain-vintage' },
+      { id: 'off', name: 'Digital Clean', className: 'film-grain-off' }
+    ];
+    let currentFilmGrainIndex = 0;
+
+    function cycleFilmGrain() {
+      currentFilmGrainIndex = (currentFilmGrainIndex + 1) % filmGrainModes.length;
+      applyFilmGrain();
+      const m = filmGrainModes[currentFilmGrainIndex];
+      showDirectorToast(`Film Grain: ${m.name}`, '🎞️');
+      spawnSparkBurst(window.innerWidth / 2, window.innerHeight / 2, 22, 0.6);
+    }
+
+    function applyFilmGrain() {
+      const elem = document.getElementById('film-grain');
+      const label = document.getElementById('grain-label');
+      if (!elem) return;
+      filmGrainModes.forEach((mode) => elem.classList.remove(mode.className));
+      const m = filmGrainModes[currentFilmGrainIndex];
+      elem.classList.add(m.className);
+      if (label) {
+        label.textContent = `Grain: ${m.name.split(' ')[0]}`;
+      }
+    }
+
+    const btnGrain = document.getElementById('btn-grain');
+    if (btnGrain) {
+      btnGrain.addEventListener('click', cycleFilmGrain);
     }
 
     /**
@@ -3313,6 +3377,8 @@
         toggleScreenShake();
       } else if (e.code === 'KeyI') {
         toggleCrtMode();
+      } else if (e.code === 'Backslash') {
+        cycleFilmGrain();
       } else if (e.code === 'Digit1') {
         applyTheme('crimson');
       } else if (e.code === 'Digit2') {
@@ -4309,6 +4375,7 @@
       buildArchedWordmark();
       renderCrest();
       applyFilmStock();
+      applyFilmGrain();
       applyVignette();
       restoreStateFromUrl();
       schedulePhaseUpdates();
