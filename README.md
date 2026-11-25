@@ -175,8 +175,8 @@ Cycle between 5 authentic post-production cinema color grading profiles via key 
 - **Browser Autoplay Resilience**: Web Audio context initialization includes graceful catch handlers and viewport-wide user gesture un-suspension listeners.
 
 ### 🧪 26. Automated Smoke Test Suite (`npm test`)
-- **Built-in Verification Harness**: Native Node.js test script (`test/intro-smoke.test.js`) executing 8 automated test suites verifying:
-  - 22 vital cinema DOM fixture IDs.
+- **Built-in Verification Harness**: Native Node.js test script (`test/intro-smoke.test.js`) executing 10 automated test suites verifying:
+  - 28 vital cinema DOM fixture IDs.
   - Complete schema for all 10 universe palettes and required color channels.
   - Procedural soundscape synthesis routing and audio nodes.
   - All 5 typography presets and Google Fonts links.
@@ -184,6 +184,8 @@ Cycle between 5 authentic post-production cinema color grading profiles via key 
   - Parabolic arch and monogram anchor mathematical calculation accuracy.
   - Camera trauma quadratic formula and decay mechanics.
   - URL permalink state serialization and parameter sanitization.
+  - Playback speed gear stepping array and boundary clamp limits.
+  - Project JSON configuration schema validator, prototype pollution defense, and tanh saturation math.
 
 ### 💥 27. Dynamic Camera Impact Shake & Traumatic Shockwave Rumble (`Q`)
 - **Hollywood Trauma Physics**: Mathematically modeled quadratic impact camera shake (`shake = trauma^2 * scale`) simulating real cinema camera shudder during:
@@ -210,6 +212,41 @@ Cycle between 5 authentic post-production cinema color grading profiles via key 
 - **Instant Preset Sharing**: Click `Share` in the director bar to generate and copy a permalink carrying your entire custom cinema configuration:
   - `?title=...&theme=...&font=...&stock=...&sound=...&vignette=...`
 - Automatically loads, validates, and applies all parameters on page load with built-in XSS input sanitization.
+
+### 🎞️ 32. 35mm Hollywood Celluloid Film Grain Engine (`\`)
+- **Dynamic Organic Texture**: Multi-format authentic film grain generator with 24fps frame-by-frame projection jitter:
+  - `35mm Fine`: Subtle Kodak Vision3 5219 grain structure (`opacity: 0.048`).
+  - `16mm Gritty`: Raw indie celluloid grit with punchy micro-contrast (`opacity: 0.098`).
+  - `8mm Vintage`: Super 8 textured vintage grain with warm frame flutter (`opacity: 0.165`).
+  - `Digital Clean`: Pristine uncompressed digital master (grain off).
+- Toggle instantly via key `\` or the director HUD button.
+
+### ⏱️ 33. Multi-Gear Director Playback Speed Controller (`[` / `]`)
+- **Bullet-Time Slow Motion**: 6-gear precision playback engine allowing directors to evaluate choreography in cinematic slow motion or preview fast transitions:
+  - `0.25x` (Quarter-Speed Bullet Time)
+  - `0.5x` (Cinematic Half-Speed)
+  - `0.75x` (Dramatic Pace)
+  - `1.0x` (Standard 24FPS Master)
+  - `1.5x` (Fast Preview)
+  - `2.0x` (Double-Speed Hyper-Time)
+- Keyboard stepping via `[` (slow down) and `]` (speed up) with live HUD gear badge.
+
+### ✨ 34. Optical Anamorphic Lens Flare & Polygonal Aperture Ghosts (`;`)
+- **Cinematographic Lens Geometry**: 6-element optical anamorphic lens flare system rendered along the optical tilt axis:
+  - Multi-tier polygonal aperture iris ghosts (hexagon and octagon blade reflections).
+  - Anamorphic horizontal streak lines with chromatic prism edge dispersion.
+  - Live alignment and tracking following monogram positions.
+- Toggle instantly via key `;` or the director HUD button.
+
+### 🔊 35. Analog Tape Saturation Limiter & Sub-Harmonic Sonic Thump
+- **Studio Tape Compression**: Web Audio `WaveShaperNode` with sigmoid `tanh` soft-clipping curve delivering warm analog tape saturation and preventing digital transient clipping.
+- **Tension Riser & Shockwave Thump**: Dynamic exponential pitch tension sweep (`48Hz` → `760Hz`) leading into a resonant `28Hz` sub-harmonic sonic thump at the Phase 2 shockwave explosion.
+
+### 💾 36. Cinema Project Preset Studio (JSON Import / Export)
+- **Portable Cinema Projects**: Comprehensive JSON project management modal (`#project-modal`) allowing directors to:
+  - Export full cinema compositions as structured JSON or downloadable files.
+  - Import external project configurations with instant validation and dynamic stage reconstitution.
+  - Hardened with prototype pollution defense (`__proto__`, `constructor`, `prototype` shields) and strict hex color regex validation.
 
 ---
 
@@ -255,6 +292,10 @@ Cycle between 5 authentic post-production cinema color grading profiles via key 
 | `X` | **Meteor Shower** | Toggle high-velocity cosmic meteor streaks with plasma heads |
 | `Y` | **Orbit Camera** | Toggle Director Turntable Auto-Orbit Cinematic Camera |
 | `Z` | **Chromatic Split** | Toggle Chromatic Aberration RGB Lens Split |
+| `[` | **Speed Down** | Decrease playback speed gear (down to 0.25x bullet-time) |
+| `]` | **Speed Up** | Increase playback speed gear (up to 2.0x hyper-time) |
+| `\` | **Film Grain** | Cycle 35mm Celluloid Film Grain Texture (Fine, Gritty, Vintage, Off) |
+| `;` | **Optical Flares** | Toggle dynamic optical lens flare ghosts & anamorphic light streaks |
 | `←` / `→` | **Scrub Timeline** | Step forward / backward by 0.25 seconds |
 | `?` | **Shortcuts Modal** | Open interactive director shortcuts modal cheatsheet |
 | `Esc` | **Close Modal** | Close any open modal dialog |
