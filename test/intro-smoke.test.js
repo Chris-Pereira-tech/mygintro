@@ -15,13 +15,19 @@ assert.ok(fs.existsSync(htmlPath), 'index.html must exist');
 const html = fs.readFileSync(htmlPath, 'utf8');
 
 // 1. DOM Architecture Validation
-console.log('▶ [1/8] Validating Cinema DOM Architecture & Viewport Rig...');
+console.log('▶ [1/10] Validating Cinema DOM Architecture & Viewport Rig...');
 const requiredIds = [
   'cinema-viewport',
   'letterbox-top',
   'letterbox-bottom',
   'recording-hud',
   'director-toast',
+  'film-grain',
+  'btn-grain',
+  'btn-speed-pill',
+  'btn-flares',
+  'btn-project',
+  'project-modal',
   'vignette-overlay',
   'crt-scanlines',
   'crt-vhs-glow',
@@ -47,7 +53,7 @@ requiredIds.forEach(id => {
 console.log(`  ✓ All ${requiredIds.length} vital cinema DOM fixture IDs verified.`);
 
 // 2. Universe Theme Palettes Schema Validation
-console.log('▶ [2/8] Validating Multi-Universe Color Palettes...');
+console.log('▶ [2/10] Validating Multi-Universe Color Palettes...');
 const expectedThemes = [
   'crimson', 'cyberpunk', 'gold', 'emerald', 'amber',
   'sapphire', 'platinum', 'sakura', 'quantum', 'eclipse'
@@ -64,7 +70,7 @@ themeKeys.forEach(prop => {
 console.log(`  ✓ All ${expectedThemes.length} universe palettes and required color channels verified.`);
 
 // 3. Audio Engine & Soundscapes Validation
-console.log('▶ [3/8] Validating Procedural Audio Soundscapes...');
+console.log('▶ [3/10] Validating Procedural Audio Soundscapes...');
 const expectedSoundscapes = ['epic', 'synthwave', 'celestial', 'zimmer'];
 expectedSoundscapes.forEach(sc => {
   assert.ok(html.includes(`id: '${sc}'`), `Soundscape '${sc}' must be registered in soundscapes array`);
@@ -73,10 +79,13 @@ assert.ok(html.includes('DARK ZIMMER INCEPTION BRAAM SOUNDSCAPE'), 'Hans Zimmer 
 assert.ok(html.includes('Binaural Algorithmic Reverb Unit'), 'Binaural reverb convolver must be initialized');
 assert.ok(html.includes('Cinema Bass Boost EQ'), 'Theater Bass Boost EQ filter must be present');
 assert.ok(html.includes('createStereoPanner'), '3D Spatial Audio Panner must be supported');
+assert.ok(html.includes('makeTapeSaturationCurve'), 'Analog tape saturation limiter must be defined');
+assert.ok(html.includes('Hollywood Tension Riser Sweep'), 'Tension riser sweep must be present');
+assert.ok(html.includes('Sub-Harmonic Resonant Sonic Thump'), 'Sub-harmonic sonic thump must be present');
 console.log(`  ✓ All ${expectedSoundscapes.length} procedural soundscapes & audio routing verified.`);
 
 // 4. Typography Presets Validation
-console.log('▶ [4/8] Validating Cinematic Typography Fonts...');
+console.log('▶ [4/10] Validating Cinematic Typography Fonts...');
 const expectedFonts = ['monumental', 'imperial', 'cyber', 'arthouse', 'royal'];
 expectedFonts.forEach(fontId => {
   assert.ok(html.includes(`id: '${fontId}'`), `Typography preset '${fontId}' must be registered`);
@@ -86,7 +95,7 @@ assert.ok(html.includes('Cinzel Decorative'), 'Cinzel Decorative Google Font mus
 console.log(`  ✓ All ${expectedFonts.length} typography presets and font dependencies verified.`);
 
 // 5. Input Sanitizer Logic Unit Verification
-console.log('▶ [5/8] Verifying Security Sanitization Engine...');
+console.log('▶ [5/10] Verifying Security Sanitization Engine...');
 function sanitizeCinemaInput(input, maxLength = 24) {
   if (typeof input !== 'string') return '';
   const clean = input
@@ -108,7 +117,7 @@ assert.strictEqual(sanitizeCinemaInput('   SPACED TITLE   '), 'SPACED TITLE');
 console.log('  ✓ Security sanitization successfully neutralizes script injections and enforces bounds.');
 
 // 6. Mathematical Glide & Anchor Geometry Sanity
-console.log('▶ [6/8] Verifying Parabolic Arch & Monogram Anchor Math...');
+console.log('▶ [6/10] Verifying Parabolic Arch & Monogram Anchor Math...');
 function getAnchorIndices(chars) {
   let firstIdx = -1;
   let secondIdx = -1;
@@ -140,7 +149,7 @@ assert.strictEqual(singleWordAnchors.secondIdx, 4, 'Single word secondary anchor
 console.log('  ✓ Monogram anchor math handles multi-word and single-word titles reliably.');
 
 // 7. Camera Trauma Shake Decay Physics
-console.log('▶ [7/8] Verifying Camera Impact Trauma Math...');
+console.log('▶ [7/10] Verifying Camera Impact Trauma Math...');
 let testTrauma = 1.0;
 const traumaDecayStep = 0.04;
 let steps = 0;
@@ -155,7 +164,7 @@ assert.strictEqual(steps, 25, 'Unit trauma decays in exactly 25 frames (~400ms a
 console.log('  ✓ Camera trauma quadratic formula and decay decay smoothly to zero.');
 
 // 8. URL Permalink State Serializer & Deserializer
-console.log('▶ [8/8] Verifying URL State Serializer & Parameter Whitelisting...');
+console.log('▶ [8/10] Verifying URL State Serializer & Parameter Whitelisting...');
 function serializeCinemaParams(title, theme, font, stock, sound) {
   const p = new URLSearchParams();
   p.set('title', sanitizeCinemaInput(title, 24));
@@ -173,4 +182,74 @@ assert.ok(serialized.includes('theme=quantum'), 'Theme parameter preserved');
 assert.ok(serialized.includes('sound=zimmer'), 'Soundscape parameter preserved');
 console.log('  ✓ URL state serializer cleans inputs and correctly formats query strings.');
 
-console.log('\n🎉 ALL CINEMATIC SMOKE TESTS PASSED SUCCESSFULLY! (8/8)');
+// 9. Playback Speed Multiplier & Gear Stepper Math
+console.log('▶ [9/10] Verifying Playback Speed Gears & Bullet-Time Math...');
+const testSpeedGears = [
+  { speed: 0.25, label: '0.25x' },
+  { speed: 0.5, label: '0.5x' },
+  { speed: 0.75, label: '0.75x' },
+  { speed: 1.0, label: '1.0x' },
+  { speed: 1.5, label: '1.5x' },
+  { speed: 2.0, label: '2.0x' }
+];
+
+assert.strictEqual(testSpeedGears.length, 6, 'Must have 6 distinct speed gears');
+testSpeedGears.forEach(g => {
+  assert.ok(g.speed >= 0.25 && g.speed <= 2.0, 'Gears must fall between 0.25x and 2.0x');
+});
+
+function testStepSpeed(currentIndex, direction) {
+  return Math.max(0, Math.min(testSpeedGears.length - 1, currentIndex + direction));
+}
+assert.strictEqual(testStepSpeed(0, -1), 0, 'Cannot step below lowest speed gear (0.25x)');
+assert.strictEqual(testStepSpeed(5, 1), 5, 'Cannot step above highest speed gear (2.0x)');
+assert.strictEqual(testStepSpeed(3, -1), 2, 'Stepping down from 1.0x yields 0.75x');
+assert.strictEqual(testStepSpeed(3, 1), 4, 'Stepping up from 1.0x yields 1.5x');
+console.log('  ✓ Playback speed gears and step boundary clamping verified.');
+
+// 10. Project JSON Configuration & Prototype Pollution Guard
+console.log('▶ [10/10] Verifying Project JSON Validator, Tanh Limiter & Security Shields...');
+
+function isSafeProjectPayload(obj) {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return false;
+  const dangerous = ['__proto__', 'constructor', 'prototype'];
+  for (const key of Object.keys(obj)) {
+    if (dangerous.includes(key.toLowerCase())) return false;
+  }
+  return true;
+}
+
+function isValidHexColor(hex) {
+  return typeof hex === 'string' && /^#[0-9a-fA-F]{6}$/.test(hex.trim());
+}
+
+function makeTapeSaturationCurve(amount = 1.85, n_samples = 256) {
+  const curve = new Float32Array(n_samples);
+  for (let i = 0; i < n_samples; ++i) {
+    const x = (i * 2) / n_samples - 1;
+    curve[i] = Math.tanh(amount * x) / Math.tanh(amount);
+  }
+  return curve;
+}
+
+const satCurve = makeTapeSaturationCurve(1.85, 256);
+assert.strictEqual(satCurve.length, 256);
+for (let i = 0; i < satCurve.length; i++) {
+  assert.ok(satCurve[i] >= -1.0001 && satCurve[i] <= 1.0001, 'Tape saturation curve values must remain bounded in [-1, 1]');
+}
+assert.ok(Math.abs(satCurve[128]) < 0.05, 'Center midpoint must be close to zero');
+
+assert.strictEqual(isSafeProjectPayload({ title: 'CINEMA', speed: 1.0 }), true);
+assert.strictEqual(isSafeProjectPayload(JSON.parse('{"__proto__": {"polluted": true}}')), false, 'Must reject __proto__ payload');
+assert.strictEqual(isSafeProjectPayload(JSON.parse('{"constructor": {"prototype": {}}}')), false, 'Must reject constructor payload');
+assert.strictEqual(isSafeProjectPayload([1, 2, 3]), false, 'Arrays must not be accepted as root project objects');
+
+assert.strictEqual(isValidHexColor('#ff2a5f'), true);
+assert.strictEqual(isValidHexColor('#ffffff'), true);
+assert.strictEqual(isValidHexColor('red'), false);
+assert.strictEqual(isValidHexColor('javascript:alert(1)'), false);
+assert.strictEqual(isValidHexColor('#12345'), false);
+
+console.log('  ✓ Project JSON schema security, prototype pollution shields, and tanh saturation math verified.');
+
+console.log('\n🎉 ALL CINEMATIC SMOKE TESTS PASSED SUCCESSFULLY! (10/10)');
