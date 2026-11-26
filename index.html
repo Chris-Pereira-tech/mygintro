@@ -1486,6 +1486,18 @@
             </button>
           </div>
         </div>
+
+        <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between gap-2">
+          <span class="text-[11px] text-neutral-400">Browser Preset Vault</span>
+          <div class="flex items-center gap-2">
+            <button id="btn-save-local-preset" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-[11px] font-semibold text-emerald-300 transition">
+              Save as Default
+            </button>
+            <button id="btn-clear-local-preset" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-[11px] font-semibold text-neutral-400 hover:text-rose-300 transition">
+              Clear Saved
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -4087,6 +4099,46 @@
       });
     }
 
+    const LOCAL_PRESET_STORAGE_KEY = 'anandMelava.directorPreset.v1';
+    const btnSaveLocalPreset = document.getElementById('btn-save-local-preset');
+    const btnClearLocalPreset = document.getElementById('btn-clear-local-preset');
+
+    function saveLocalCinemaPreset() {
+      try {
+        const json = serializeProjectConfig();
+        localStorage.setItem(LOCAL_PRESET_STORAGE_KEY, json);
+        showDirectorToast('Default Cinema Preset Saved Locally', '💾');
+      } catch (err) {
+        showDirectorToast('Local storage unavailable', '⚠️');
+      }
+    }
+
+    function loadLocalCinemaPreset() {
+      try {
+        const raw = localStorage.getItem(LOCAL_PRESET_STORAGE_KEY);
+        if (!raw) return false;
+        const parsed = JSON.parse(raw);
+        if (!isSafeProjectPayload(parsed)) return false;
+        applyProjectConfig(parsed);
+        showDirectorToast('Loaded Saved Studio Default', '📂');
+        return true;
+      } catch (err) {
+        return false;
+      }
+    }
+
+    function clearLocalCinemaPreset() {
+      try {
+        localStorage.removeItem(LOCAL_PRESET_STORAGE_KEY);
+        showDirectorToast('Cleared Saved Studio Default', '🗑️');
+      } catch (err) {
+        showDirectorToast('Local storage unavailable', '⚠️');
+      }
+    }
+
+    if (btnSaveLocalPreset) btnSaveLocalPreset.addEventListener('click', saveLocalCinemaPreset);
+    if (btnClearLocalPreset) btnClearLocalPreset.addEventListener('click', clearLocalCinemaPreset);
+
     /**
      * ========================================================================
      * 6. MULTI-UNIVERSE STUDIO CINEMA THEME ENGINE
@@ -4857,8 +4909,10 @@
         if (restoredCount > 0) {
           showDirectorToast(`Loaded ${restoredCount} Director Settings from URL`, '🎬');
         }
+        return restoredCount;
       } catch (err) {
         console.warn('Could not parse URL query parameters:', err);
+        return 0;
       }
     }
 
@@ -5052,7 +5106,9 @@
       applyFilmStock();
       applyFilmGrain();
       applyVignette();
-      restoreStateFromUrl();
+      if (restoreStateFromUrl() === 0) {
+        loadLocalCinemaPreset();
+      }
       schedulePhaseUpdates();
       updateParallax();
       renderVisualizer();
