@@ -208,6 +208,37 @@
       55% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.6; }
     }
 
+    /* Anamorphic Iris Bloom Aura Ring */
+    .iris-bloom-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: min(68vw, 680px);
+      height: min(68vw, 680px);
+      transform: translate(-50%, -50%) scale(0.85);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 4;
+      mix-blend-mode: screen;
+      background: radial-gradient(circle, transparent 42%, color-mix(in srgb, var(--red-glow, #ff2a5f) 26%, transparent) 58%, transparent 74%);
+      box-shadow: inset 0 0 42px color-mix(in srgb, var(--red-glow, #ff2a5f) 22%, transparent);
+      opacity: 0.55;
+      transition: opacity 0.4s ease;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .iris-bloom-ring {
+        animation: iris-bloom-pulse calc(5.5s / var(--speed-mult)) cubic-bezier(0.22, 1, 0.36, 1) infinite;
+      }
+    }
+
+    @keyframes iris-bloom-pulse {
+      0%, 30% { transform: translate(-50%, -50%) scale(0.68); opacity: 0.25; }
+      40% { transform: translate(-50%, -50%) scale(1.12); opacity: 0.85; }
+      68% { transform: translate(-50%, -50%) scale(1.0); opacity: 0.58; }
+      100% { transform: translate(-50%, -50%) scale(0.92); opacity: 0.4; }
+    }
+
     .flare-ghost {
       position: absolute;
       border-radius: 50%;
@@ -878,6 +909,7 @@
       <div class="laser-flare-sweep"></div>
       <div class="crimson-nebula-core"></div>
       <div id="shockwave-ring"></div>
+      <div id="iris-bloom-ring" class="iris-bloom-ring"></div>
 
       <!-- Optical Lens Flare & Aperture Ghosts -->
       <div id="lens-flare-layer" class="lens-flare-layer">
@@ -1073,6 +1105,12 @@
       <button id="btn-flares" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden md:inline-flex items-center gap-1.5" title="Toggle Optical Lens Flares (;)">
         <span id="flares-dot" class="w-2 h-2 rounded-full bg-rose-400 shadow-[0_0_6px_#fb7185]"></span>
         <span id="flares-label">Flares: ON</span>
+      </button>
+
+      <!-- Anamorphic Iris Bloom Aura Button -->
+      <button id="btn-bloom" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden lg:inline-flex items-center gap-1.5" title="Toggle Iris Bloom Aura (,)">
+        <span id="bloom-dot" class="w-2 h-2 rounded-full bg-rose-400 shadow-[0_0_6px_#fb7185]"></span>
+        <span id="bloom-label">Bloom: ON</span>
       </button>
 
       <!-- Cinema Mode & Theater Fullscreen Buttons -->
@@ -1345,6 +1383,10 @@
           <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
             <span>Theater Fullscreen</span>
             <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">`</kbd>
+          </div>
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+            <span>Iris Bloom Aura</span>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">,</kbd>
           </div>
         </div>
         <div class="mt-4 pt-3 border-t border-white/10 text-[11px] text-neutral-400 text-center">
@@ -3589,6 +3631,8 @@
       } else if (e.code === 'Backquote') {
         e.preventDefault();
         toggleFullscreenTheater();
+      } else if (e.code === 'Comma') {
+        toggleIrisBloom();
       } else if (e.code === 'Digit1') {
         applyTheme('crimson');
       } else if (e.code === 'Digit2') {
@@ -4169,6 +4213,31 @@
     let parallaxFrameId = null;
 
     let isFlaresEnabled = true;
+    let isIrisBloomEnabled = true;
+
+    function toggleIrisBloom() {
+      isIrisBloomEnabled = !isIrisBloomEnabled;
+      const ring = document.getElementById('iris-bloom-ring');
+      const dot = document.getElementById('bloom-dot');
+      const label = document.getElementById('bloom-label');
+      if (ring) {
+        ring.style.display = isIrisBloomEnabled ? 'block' : 'none';
+      }
+      if (dot) {
+        dot.className = isIrisBloomEnabled
+          ? 'w-2 h-2 rounded-full bg-rose-400 shadow-[0_0_6px_#fb7185]'
+          : 'w-2 h-2 rounded-full bg-neutral-600';
+      }
+      if (label) {
+        label.textContent = `Bloom: ${isIrisBloomEnabled ? 'ON' : 'OFF'}`;
+      }
+      showDirectorToast(`Iris Bloom Aura: ${isIrisBloomEnabled ? 'ON' : 'OFF'}`, '🌸');
+    }
+
+    const btnBloom = document.getElementById('btn-bloom');
+    if (btnBloom) {
+      btnBloom.addEventListener('click', toggleIrisBloom);
+    }
 
     function toggleLensFlares() {
       isFlaresEnabled = !isFlaresEnabled;
