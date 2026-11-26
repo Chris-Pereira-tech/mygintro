@@ -144,10 +144,16 @@
         transparent 100%
       );
       filter: blur(1.2px) drop-shadow(0 0 18px var(--red-glow, #ff2a5f));
-      opacity: 0;
+      opacity: 0.35;
       pointer-events: none;
       z-index: 3;
-      animation: laser-sweep-cycle calc(5.5s / var(--speed-mult)) cubic-bezier(0.16, 1, 0.3, 1) infinite;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .laser-flare-sweep {
+        opacity: 0;
+        animation: laser-sweep-cycle calc(5.5s / var(--speed-mult)) cubic-bezier(0.16, 1, 0.3, 1) infinite;
+      }
     }
 
     @keyframes laser-sweep-cycle {
@@ -861,11 +867,21 @@
       animation-play-state: paused !important;
     }
 
+    :where(button, input, textarea, [contenteditable="true"]):focus-visible {
+      outline: 2px solid var(--red-glow, #ff2a5f);
+      outline-offset: 2px;
+    }
+
     @media (prefers-reduced-motion: reduce) {
-      *, ::before, ::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
+      .parallax-rig,
+      .flare-corona,
+      .spotlight-beam,
+      .crt-scanlines {
+        animation: none !important;
+        transition: none !important;
+      }
+      .flare-corona {
+        opacity: 0.55;
       }
     }
   </style>
@@ -1260,14 +1276,14 @@
     <div id="camera-flash-overlay"></div>
 
     <!-- Director Shortcuts Help Modal -->
-    <div id="shortcuts-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+    <div id="shortcuts-modal" role="dialog" aria-modal="true" aria-labelledby="shortcuts-modal-title" aria-hidden="true" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
       <div class="bg-neutral-900 border border-white/15 rounded-2xl p-6 max-w-md w-full shadow-2xl">
         <div class="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
-          <h3 class="text-base font-semibold text-white flex items-center gap-2">
+          <h3 id="shortcuts-modal-title" class="text-base font-semibold text-white flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_#ff2a5f]"></span>
             Director Suite Shortcuts
           </h3>
-          <button id="btn-close-modal" class="text-neutral-400 hover:text-white text-lg font-bold transition">&times;</button>
+          <button id="btn-close-modal" aria-label="Close shortcuts dialog" class="text-neutral-400 hover:text-white text-lg font-bold transition">&times;</button>
         </div>
         <div class="grid grid-cols-2 gap-2.5 text-xs text-neutral-300">
           <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
@@ -1406,14 +1422,14 @@
     </div>
 
     <!-- Studio Palette Lab Modal -->
-    <div id="palette-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+    <div id="palette-modal" role="dialog" aria-modal="true" aria-labelledby="palette-modal-title" aria-hidden="true" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
       <div class="bg-neutral-900 border border-white/15 rounded-2xl p-6 max-w-sm w-full shadow-2xl">
         <div class="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
-          <h3 class="text-base font-semibold text-white flex items-center gap-2">
+          <h3 id="palette-modal-title" class="text-base font-semibold text-white flex items-center gap-2">
             <span class="text-rose-400">🎨</span>
             Studio Palette Lab
           </h3>
-          <button id="btn-close-palette-modal" class="text-neutral-400 hover:text-white text-lg font-bold transition">&times;</button>
+          <button id="btn-close-palette-modal" aria-label="Close palette lab dialog" class="text-neutral-400 hover:text-white text-lg font-bold transition">&times;</button>
         </div>
         <p class="text-xs text-neutral-400 mb-4">Design your bespoke Hollywood universe color palette in real-time.</p>
         <div class="space-y-2.5 text-xs text-neutral-300">
@@ -1446,14 +1462,14 @@
     </div>
 
     <!-- Cinema Project Preset Studio Modal (Export / Import) -->
-    <div id="project-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+    <div id="project-modal" role="dialog" aria-modal="true" aria-labelledby="project-modal-title" aria-hidden="true" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
       <div class="bg-neutral-900 border border-white/15 rounded-2xl p-6 max-w-lg w-full shadow-2xl">
         <div class="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
-          <h3 class="text-base font-semibold text-white flex items-center gap-2">
+          <h3 id="project-modal-title" class="text-base font-semibold text-white flex items-center gap-2">
             <span class="text-rose-400">💾</span>
             Cinema Project Studio
           </h3>
-          <button id="btn-close-project-modal" class="text-neutral-400 hover:text-white text-lg font-bold transition">&times;</button>
+          <button id="btn-close-project-modal" aria-label="Close project studio dialog" class="text-neutral-400 hover:text-white text-lg font-bold transition">&times;</button>
         </div>
         <p class="text-xs text-neutral-400 mb-3">Export and import your custom cinema masterpiece as portable JSON configurations.</p>
         
@@ -3630,8 +3646,24 @@
     if (btnSpeedUp) btnSpeedUp.addEventListener('click', () => stepSpeed(1));
     if (btnSpeedPill) btnSpeedPill.addEventListener('click', cyclePlaybackSpeed);
 
+    function isEditableShortcutTarget(target) {
+      if (!target || typeof target !== 'object') return false;
+      const tag = target.tagName ? target.tagName.toUpperCase() : '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+      return Boolean(target.isContentEditable);
+    }
+
     // Keyboard Shortcuts
     window.addEventListener('keydown', (e) => {
+      if (isEditableShortcutTarget(e.target)) {
+        if (e.code === 'Escape') {
+          if (e.target && typeof e.target.blur === 'function') e.target.blur();
+          closeShortcutsModal();
+          closePaletteModal();
+          closeProjectModal();
+        }
+        return;
+      }
       if (e.code === 'Space') {
         e.preventDefault();
         restartAnimation(true);
@@ -3745,6 +3777,52 @@
     const shortcutsModal = document.getElementById('shortcuts-modal');
     const btnShortcuts = document.getElementById('btn-shortcuts');
     const btnCloseModal = document.getElementById('btn-close-modal');
+    let lastFocusedBeforeModal = null;
+
+    function syncModalAccessibilityState(activeModal) {
+      const backgroundNodes = [
+        document.getElementById('parallax-rig'),
+        document.getElementById('hud-top'),
+        document.getElementById('hud-bottom')
+      ];
+      const hasOpenModal = Boolean(activeModal);
+      backgroundNodes.forEach((node) => {
+        if (!node) return;
+        if (hasOpenModal) node.setAttribute('inert', '');
+        else node.removeAttribute('inert');
+      });
+    }
+
+    function openAccessibleModal(modalEl, focusTarget) {
+      if (!modalEl) return;
+      if (document.activeElement instanceof HTMLElement) {
+        lastFocusedBeforeModal = document.activeElement;
+      }
+      modalEl.classList.remove('opacity-0', 'pointer-events-none');
+      modalEl.classList.add('opacity-100', 'pointer-events-auto');
+      modalEl.setAttribute('aria-hidden', 'false');
+      syncModalAccessibilityState(modalEl);
+      if (focusTarget && typeof focusTarget.focus === 'function') {
+        requestAnimationFrame(() => focusTarget.focus());
+      }
+    }
+
+    function closeAccessibleModal(modalEl) {
+      if (!modalEl || modalEl.getAttribute('aria-hidden') === 'true') return;
+      modalEl.classList.remove('opacity-100', 'pointer-events-auto');
+      modalEl.classList.add('opacity-0', 'pointer-events-none');
+      modalEl.setAttribute('aria-hidden', 'true');
+      const anyStillOpen = [shortcutsModal, paletteModal, projectModal].some(
+        (m) => m && m.classList.contains('opacity-100')
+      );
+      if (!anyStillOpen) {
+        syncModalAccessibilityState(null);
+        if (lastFocusedBeforeModal && typeof lastFocusedBeforeModal.focus === 'function') {
+          lastFocusedBeforeModal.focus();
+          lastFocusedBeforeModal = null;
+        }
+      }
+    }
 
     function toggleShortcutsModal() {
       if (!shortcutsModal) return;
@@ -3752,15 +3830,12 @@
       if (isOpen) {
         closeShortcutsModal();
       } else {
-        shortcutsModal.classList.remove('opacity-0', 'pointer-events-none');
-        shortcutsModal.classList.add('opacity-100', 'pointer-events-auto');
+        openAccessibleModal(shortcutsModal, btnCloseModal);
       }
     }
 
     function closeShortcutsModal() {
-      if (!shortcutsModal) return;
-      shortcutsModal.classList.remove('opacity-100', 'pointer-events-auto');
-      shortcutsModal.classList.add('opacity-0', 'pointer-events-none');
+      closeAccessibleModal(shortcutsModal);
     }
 
     if (btnShortcuts) {
@@ -3791,15 +3866,11 @@
     const pickerLight = document.getElementById('picker-light');
 
     function openPaletteModal() {
-      if (!paletteModal) return;
-      paletteModal.classList.remove('opacity-0', 'pointer-events-none');
-      paletteModal.classList.add('opacity-100', 'pointer-events-auto');
+      openAccessibleModal(paletteModal, pickerPrimary || btnClosePaletteModal);
     }
 
     function closePaletteModal() {
-      if (!paletteModal) return;
-      paletteModal.classList.remove('opacity-100', 'pointer-events-auto');
-      paletteModal.classList.add('opacity-0', 'pointer-events-none');
+      closeAccessibleModal(paletteModal);
     }
 
     function applyCustomPalette(primary, glow, deep, light) {
@@ -3919,15 +3990,14 @@
       } else {
         switchProjectTab('import');
       }
-      projectModal.classList.remove('opacity-0', 'pointer-events-none');
-      projectModal.classList.add('opacity-100', 'pointer-events-auto');
+      openAccessibleModal(projectModal, tab === 'export' ? btnCloseProjectModal : projectJsonInput);
     }
 
     function closeProjectModal() {
-      if (!projectModal) return;
-      projectModal.classList.remove('opacity-100', 'pointer-events-auto');
-      projectModal.classList.add('opacity-0', 'pointer-events-none');
+      closeAccessibleModal(projectModal);
     }
+
+    const MAX_PROJECT_JSON_BYTES = 16384;
 
     function isSafeProjectPayload(obj) {
       if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return false;
@@ -4070,6 +4140,10 @@
         try {
           const raw = projectJsonInput ? projectJsonInput.value.trim() : '';
           if (!raw) return;
+          if (raw.length > MAX_PROJECT_JSON_BYTES) {
+            showDirectorToast('Project JSON exceeds 16KB limit', '⚠️');
+            return;
+          }
           const parsed = JSON.parse(raw);
           applyProjectConfig(parsed);
           closeProjectModal();
@@ -4084,6 +4158,10 @@
       projectFileInput.addEventListener('change', (e) => {
         const file = e.target.files && e.target.files[0];
         if (!file) return;
+        if (file.size > MAX_PROJECT_JSON_BYTES) {
+          showDirectorToast('Project file exceeds 16KB limit', '⚠️');
+          return;
+        }
         const reader = new FileReader();
         reader.onload = (evt) => {
           try {
