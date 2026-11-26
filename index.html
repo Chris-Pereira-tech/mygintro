@@ -1174,6 +1174,12 @@
         <span id="spatial-label">3D Audio: ON</span>
       </button>
 
+      <!-- Harmonic Shimmer Overtones Button -->
+      <button id="btn-shimmer" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden lg:inline-flex items-center gap-1.5" title="Toggle Phase-3 Harmonic Shimmer (.)">
+        <span id="shimmer-dot" class="w-2 h-2 rounded-full bg-violet-400 shadow-[0_0_6px_#a78bfa]"></span>
+        <span id="shimmer-label">Shimmer: ON</span>
+      </button>
+
       <!-- Cinematic Soundscape Preset Button -->
       <button id="btn-soundscape" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-neutral-300 transition hidden md:inline-flex items-center gap-1.5" title="Cycle Cinematic Soundscape Preset (N)">
         <span class="w-2 h-2 rounded-full bg-violet-400 shadow-[0_0_6px_#a78bfa]"></span>
@@ -1387,6 +1393,10 @@
           <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
             <span>Iris Bloom Aura</span>
             <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">,</kbd>
+          </div>
+          <div class="flex items-center justify-between bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+            <span>Harmonic Shimmer</span>
+            <kbd class="px-2 py-0.5 rounded bg-white/10 font-mono text-rose-300">.</kbd>
           </div>
         </div>
         <div class="mt-4 pt-3 border-t border-white/10 text-[11px] text-neutral-400 text-center">
@@ -2492,6 +2502,8 @@
     let spatialPanner = null;
     let bassBoostEnabled = true;
     let isSpatialAudioEnabled = true;
+    let isShimmerEnabled = true;
+    let masterCompressor = null;
     let analyser = null;
     let analyserData = null;
     let isAudioPlaying = false;
@@ -2574,16 +2586,27 @@
         analyser.smoothingTimeConstant = 0.78;
         analyserData = new Uint8Array(analyser.frequencyBinCount);
 
-        // 5. Analog Tape Saturation Limiter (Sigmoid Tanh Warmth Curve)
+        // 5. Analog Tape Saturation Limiter (Sigmoid Tanh Warmth Curve) + Master Dynamics Compressor
         let tapeWarmthNode = null;
+        let dynamicsTarget = analyser;
+        if (audioCtx.createDynamicsCompressor) {
+          masterCompressor = audioCtx.createDynamicsCompressor();
+          masterCompressor.threshold.setValueAtTime(-14, audioCtx.currentTime);
+          masterCompressor.knee.setValueAtTime(12, audioCtx.currentTime);
+          masterCompressor.ratio.setValueAtTime(4, audioCtx.currentTime);
+          masterCompressor.attack.setValueAtTime(0.003, audioCtx.currentTime);
+          masterCompressor.release.setValueAtTime(0.22, audioCtx.currentTime);
+          masterCompressor.connect(analyser);
+          dynamicsTarget = masterCompressor;
+        }
         if (audioCtx.createWaveShaper) {
           tapeWarmthNode = audioCtx.createWaveShaper();
           tapeWarmthNode.curve = makeTapeSaturationCurve(1.85, 4096);
           tapeWarmthNode.oversample = '2x';
           masterGain.connect(tapeWarmthNode);
-          tapeWarmthNode.connect(analyser);
+          tapeWarmthNode.connect(dynamicsTarget);
         } else {
-          masterGain.connect(analyser);
+          masterGain.connect(dynamicsTarget);
         }
         analyser.connect(audioCtx.destination);
       }
@@ -2643,6 +2666,26 @@
     const btnSpatial = document.getElementById('btn-spatial');
     if (btnSpatial) {
       btnSpatial.addEventListener('click', toggleSpatialAudio);
+    }
+
+    function toggleHarmonicShimmer() {
+      isShimmerEnabled = !isShimmerEnabled;
+      const dot = document.getElementById('shimmer-dot');
+      const label = document.getElementById('shimmer-label');
+      if (dot) {
+        dot.className = isShimmerEnabled
+          ? 'w-2 h-2 rounded-full bg-violet-400 shadow-[0_0_6px_#a78bfa]'
+          : 'w-2 h-2 rounded-full bg-neutral-600';
+      }
+      if (label) {
+        label.textContent = `Shimmer: ${isShimmerEnabled ? 'ON' : 'OFF'}`;
+      }
+      showDirectorToast(`Phase-3 Harmonic Shimmer: ${isShimmerEnabled ? 'ON' : 'OFF'}`, '✨');
+    }
+
+    const btnShimmer = document.getElementById('btn-shimmer');
+    if (btnShimmer) {
+      btnShimmer.addEventListener('click', toggleHarmonicShimmer);
     }
 
     const btnBassBoost = document.getElementById('btn-bass-boost');
@@ -3145,6 +3188,24 @@
           metalOsc.stop(hitTime + 0.4);
         }
 
+        // Phase 3 Optional Crystalline Harmonic Octave-Fifth Shimmer Tail
+        if (isShimmerEnabled) {
+          const shimmerStart = now + 3.55 * invSpeed;
+          const shimmerDur = 2.1 * invSpeed;
+          [587.33, 880.0, 1174.66].forEach((freq, i) => {
+            const sOsc = audioCtx.createOscillator();
+            const sGain = audioCtx.createGain();
+            sOsc.type = 'sine';
+            sOsc.frequency.setValueAtTime(freq, shimmerStart + i * 0.05 * invSpeed);
+            sGain.gain.setValueAtTime(0.0001, shimmerStart + i * 0.05 * invSpeed);
+            sGain.gain.linearRampToValueAtTime(0.045 / (i + 1), shimmerStart + (0.28 + i * 0.05) * invSpeed);
+            sGain.gain.exponentialRampToValueAtTime(0.0001, shimmerStart + shimmerDur);
+            sOsc.connect(sGain).connect(outBus);
+            sOsc.start(shimmerStart + i * 0.05 * invSpeed);
+            sOsc.stop(shimmerStart + shimmerDur + 0.08);
+          });
+        }
+
         setTimeout(() => {
           isAudioPlaying = false;
           if (soundBtnText) soundBtnText.textContent = 'Play Cinematic Audio';
@@ -3633,6 +3694,8 @@
         toggleFullscreenTheater();
       } else if (e.code === 'Comma') {
         toggleIrisBloom();
+      } else if (e.code === 'Period') {
+        toggleHarmonicShimmer();
       } else if (e.code === 'Digit1') {
         applyTheme('crimson');
       } else if (e.code === 'Digit2') {
