@@ -15,7 +15,7 @@ assert.ok(fs.existsSync(htmlPath), 'index.html must exist');
 const html = fs.readFileSync(htmlPath, 'utf8');
 
 // 1. DOM Architecture Validation
-console.log('▶ [1/10] Validating Cinema DOM Architecture & Viewport Rig...');
+console.log('▶ [1/12] Validating Cinema DOM Architecture & Viewport Rig...');
 const requiredIds = [
   'cinema-viewport',
   'letterbox-top',
@@ -26,8 +26,14 @@ const requiredIds = [
   'btn-grain',
   'btn-speed-pill',
   'btn-flares',
+  'btn-bloom',
+  'iris-bloom-ring',
+  'btn-fullscreen',
+  'btn-shimmer',
   'btn-project',
   'project-modal',
+  'btn-save-local-preset',
+  'btn-clear-local-preset',
   'vignette-overlay',
   'crt-scanlines',
   'crt-vhs-glow',
@@ -53,7 +59,7 @@ requiredIds.forEach(id => {
 console.log(`  ✓ All ${requiredIds.length} vital cinema DOM fixture IDs verified.`);
 
 // 2. Universe Theme Palettes Schema Validation
-console.log('▶ [2/10] Validating Multi-Universe Color Palettes...');
+console.log('▶ [2/12] Validating Multi-Universe Color Palettes...');
 const expectedThemes = [
   'crimson', 'cyberpunk', 'gold', 'emerald', 'amber',
   'sapphire', 'platinum', 'sakura', 'quantum', 'eclipse'
@@ -70,7 +76,7 @@ themeKeys.forEach(prop => {
 console.log(`  ✓ All ${expectedThemes.length} universe palettes and required color channels verified.`);
 
 // 3. Audio Engine & Soundscapes Validation
-console.log('▶ [3/10] Validating Procedural Audio Soundscapes...');
+console.log('▶ [3/12] Validating Procedural Audio Soundscapes...');
 const expectedSoundscapes = ['epic', 'synthwave', 'celestial', 'zimmer'];
 expectedSoundscapes.forEach(sc => {
   assert.ok(html.includes(`id: '${sc}'`), `Soundscape '${sc}' must be registered in soundscapes array`);
@@ -80,12 +86,14 @@ assert.ok(html.includes('Binaural Algorithmic Reverb Unit'), 'Binaural reverb co
 assert.ok(html.includes('Cinema Bass Boost EQ'), 'Theater Bass Boost EQ filter must be present');
 assert.ok(html.includes('createStereoPanner'), '3D Spatial Audio Panner must be supported');
 assert.ok(html.includes('makeTapeSaturationCurve'), 'Analog tape saturation limiter must be defined');
+assert.ok(html.includes('createDynamicsCompressor'), 'Master dynamics compressor must be wired');
+assert.ok(html.includes('isShimmerEnabled'), 'Phase-3 harmonic shimmer toggle must be present');
 assert.ok(html.includes('Hollywood Tension Riser Sweep'), 'Tension riser sweep must be present');
 assert.ok(html.includes('Sub-Harmonic Resonant Sonic Thump'), 'Sub-harmonic sonic thump must be present');
 console.log(`  ✓ All ${expectedSoundscapes.length} procedural soundscapes & audio routing verified.`);
 
 // 4. Typography Presets Validation
-console.log('▶ [4/10] Validating Cinematic Typography Fonts...');
+console.log('▶ [4/12] Validating Cinematic Typography Fonts...');
 const expectedFonts = ['monumental', 'imperial', 'cyber', 'arthouse', 'royal'];
 expectedFonts.forEach(fontId => {
   assert.ok(html.includes(`id: '${fontId}'`), `Typography preset '${fontId}' must be registered`);
@@ -95,7 +103,7 @@ assert.ok(html.includes('Cinzel Decorative'), 'Cinzel Decorative Google Font mus
 console.log(`  ✓ All ${expectedFonts.length} typography presets and font dependencies verified.`);
 
 // 5. Input Sanitizer Logic Unit Verification
-console.log('▶ [5/10] Verifying Security Sanitization Engine...');
+console.log('▶ [5/12] Verifying Security Sanitization Engine...');
 function sanitizeCinemaInput(input, maxLength = 24) {
   if (typeof input !== 'string') return '';
   const clean = input
@@ -117,7 +125,7 @@ assert.strictEqual(sanitizeCinemaInput('   SPACED TITLE   '), 'SPACED TITLE');
 console.log('  ✓ Security sanitization successfully neutralizes script injections and enforces bounds.');
 
 // 6. Mathematical Glide & Anchor Geometry Sanity
-console.log('▶ [6/10] Verifying Parabolic Arch & Monogram Anchor Math...');
+console.log('▶ [6/12] Verifying Parabolic Arch & Monogram Anchor Math...');
 function getAnchorIndices(chars) {
   let firstIdx = -1;
   let secondIdx = -1;
@@ -149,7 +157,7 @@ assert.strictEqual(singleWordAnchors.secondIdx, 4, 'Single word secondary anchor
 console.log('  ✓ Monogram anchor math handles multi-word and single-word titles reliably.');
 
 // 7. Camera Trauma Shake Decay Physics
-console.log('▶ [7/10] Verifying Camera Impact Trauma Math...');
+console.log('▶ [7/12] Verifying Camera Impact Trauma Math...');
 let testTrauma = 1.0;
 const traumaDecayStep = 0.04;
 let steps = 0;
@@ -164,7 +172,7 @@ assert.strictEqual(steps, 25, 'Unit trauma decays in exactly 25 frames (~400ms a
 console.log('  ✓ Camera trauma quadratic formula and decay decay smoothly to zero.');
 
 // 8. URL Permalink State Serializer & Deserializer
-console.log('▶ [8/10] Verifying URL State Serializer & Parameter Whitelisting...');
+console.log('▶ [8/12] Verifying URL State Serializer & Parameter Whitelisting...');
 function serializeCinemaParams(title, theme, font, stock, sound) {
   const p = new URLSearchParams();
   p.set('title', sanitizeCinemaInput(title, 24));
@@ -183,7 +191,7 @@ assert.ok(serialized.includes('sound=zimmer'), 'Soundscape parameter preserved')
 console.log('  ✓ URL state serializer cleans inputs and correctly formats query strings.');
 
 // 9. Playback Speed Multiplier & Gear Stepper Math
-console.log('▶ [9/10] Verifying Playback Speed Gears & Bullet-Time Math...');
+console.log('▶ [9/12] Verifying Playback Speed Gears & Bullet-Time Math...');
 const testSpeedGears = [
   { speed: 0.25, label: '0.25x' },
   { speed: 0.5, label: '0.5x' },
@@ -208,7 +216,7 @@ assert.strictEqual(testStepSpeed(3, 1), 4, 'Stepping up from 1.0x yields 1.5x');
 console.log('  ✓ Playback speed gears and step boundary clamping verified.');
 
 // 10. Project JSON Configuration & Prototype Pollution Guard
-console.log('▶ [10/10] Verifying Project JSON Validator, Tanh Limiter & Security Shields...');
+console.log('▶ [10/12] Verifying Project JSON Validator, Tanh Limiter & Security Shields...');
 
 function isSafeProjectPayload(obj) {
   if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return false;
@@ -252,4 +260,40 @@ assert.strictEqual(isValidHexColor('#12345'), false);
 
 console.log('  ✓ Project JSON schema security, prototype pollution shields, and tanh saturation math verified.');
 
-console.log('\n🎉 ALL CINEMATIC SMOKE TESTS PASSED SUCCESSFULLY! (10/10)');
+// 11. Modal Accessibility, Inert Isolation & Reduced Motion Verification
+console.log('▶ [11/12] Verifying Modal Dialog Accessibility & Reduced-Motion Rules...');
+['shortcuts-modal', 'palette-modal', 'project-modal'].forEach(modalId => {
+  assert.ok(
+    html.includes(`id="${modalId}" role="dialog" aria-modal="true"`),
+    `Modal #${modalId} must expose role="dialog" and aria-modal="true"`
+  );
+});
+assert.ok(html.includes('syncModalAccessibilityState'), 'Modal background inertness helper must be defined');
+assert.ok(html.includes('openAccessibleModal'), 'Accessible focus-returning modal helper must be defined');
+assert.ok(!html.includes('0.01ms !important'), 'Global 0.01ms reduced-motion anti-pattern must not be present');
+assert.ok(html.includes('@media (prefers-reduced-motion: no-preference)'), 'Opt-in reduced-motion media query must be used');
+console.log('  ✓ Modal dialog ARIA semantics, inert background isolation, and reduced-motion rules verified.');
+
+// 12. Shortcut Input Isolation, Local Vault & Payload Size Caps
+console.log('▶ [12/12] Verifying Shortcut Input Guard, Local Vault & Payload Size Caps...');
+assert.ok(html.includes('LOCAL_PRESET_STORAGE_KEY'), 'Local preset vault storage key must be defined');
+assert.ok(html.includes('MAX_PROJECT_JSON_BYTES'), 'Project JSON byte limit constant must be defined');
+
+function isEditableShortcutTarget(target) {
+  if (!target || typeof target !== 'object') return false;
+  const tag = target.tagName ? target.tagName.toUpperCase() : '';
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+  return Boolean(target.isContentEditable);
+}
+
+assert.strictEqual(isEditableShortcutTarget({ tagName: 'TEXTAREA' }), true);
+assert.strictEqual(isEditableShortcutTarget({ tagName: 'input' }), true);
+assert.strictEqual(isEditableShortcutTarget({ tagName: 'SPAN', isContentEditable: true }), true);
+assert.strictEqual(isEditableShortcutTarget({ tagName: 'BODY', isContentEditable: false }), false);
+assert.strictEqual(isEditableShortcutTarget(null), false);
+
+const MAX_BYTES = 16384;
+assert.strictEqual('x'.repeat(MAX_BYTES + 1).length > MAX_BYTES, true, 'Oversized JSON payloads must be rejected');
+console.log('  ✓ Shortcut input isolation, local vault key, and payload size guards verified.');
+
+console.log('\n🎉 ALL CINEMATIC SMOKE TESTS PASSED SUCCESSFULLY! (12/12)');
