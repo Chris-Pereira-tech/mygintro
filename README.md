@@ -175,10 +175,10 @@ Cycle between 5 authentic post-production cinema color grading profiles via key 
 - **Browser Autoplay Resilience**: Web Audio context initialization includes graceful catch handlers and viewport-wide user gesture un-suspension listeners.
 
 ### 🧪 26. Automated Smoke Test Suite (`npm test`)
-- **Built-in Verification Harness**: Native Node.js test script (`test/intro-smoke.test.js`) executing 10 automated test suites verifying:
-  - 28 vital cinema DOM fixture IDs.
+- **Built-in Verification Harness**: Native Node.js test script (`test/intro-smoke.test.js`) executing 12 automated test suites verifying:
+  - 34 vital cinema DOM fixture IDs.
   - Complete schema for all 10 universe palettes and required color channels.
-  - Procedural soundscape synthesis routing and audio nodes.
+  - Procedural soundscape synthesis routing, dynamics compressor, and shimmer audio nodes.
   - All 5 typography presets and Google Fonts links.
   - Security sanitizer injection neutralization and length capping.
   - Parabolic arch and monogram anchor mathematical calculation accuracy.
@@ -186,6 +186,8 @@ Cycle between 5 authentic post-production cinema color grading profiles via key 
   - URL permalink state serialization and parameter sanitization.
   - Playback speed gear stepping array and boundary clamp limits.
   - Project JSON configuration schema validator, prototype pollution defense, and tanh saturation math.
+  - Modal dialog ARIA semantics, background `inert` isolation, and reduced-motion CSS guards.
+  - Global shortcut input isolation, local preset vault persistence, and 16KB JSON payload caps.
 
 ### 💥 27. Dynamic Camera Impact Shake & Traumatic Shockwave Rumble (`Q`)
 - **Hollywood Trauma Physics**: Mathematically modeled quadratic impact camera shake (`shake = trauma^2 * scale`) simulating real cinema camera shudder during:
@@ -246,7 +248,25 @@ Cycle between 5 authentic post-production cinema color grading profiles via key 
 - **Portable Cinema Projects**: Comprehensive JSON project management modal (`#project-modal`) allowing directors to:
   - Export full cinema compositions as structured JSON or downloadable files.
   - Import external project configurations with instant validation and dynamic stage reconstitution.
-  - Hardened with prototype pollution defense (`__proto__`, `constructor`, `prototype` shields) and strict hex color regex validation.
+  - Hardened with prototype pollution defense (`__proto__`, `constructor`, `prototype` shields), 16KB import size limits, and strict hex color regex validation.
+
+### 🖥️ 37. Theater Fullscreen Presentation Mode (`` ` ``)
+- **Native Fullscreen API Integration**: Click **Fullscreen** or press `` ` `` to toggle edge-to-edge theater presentation with live `fullscreenchange` HUD synchronization.
+
+### 🌸 38. Anamorphic Iris Bloom Aura Ring (`,`)
+- **Synchronized Optical Halo**: Radial `mix-blend-mode: screen` bloom aura (`#iris-bloom-ring`) pulsing dynamically with the active theme glow and `--speed-mult`, respecting `prefers-reduced-motion` preferences. Toggle instantly via `,` or the director HUD button.
+
+### 🎚️ 39. Stereo Master Dynamics Compressor & Phase-3 Harmonic Shimmer (`.`)
+- **Broadcast-Safe Mastering**: Web Audio `DynamicsCompressorNode` (`-14dB` threshold, `4:1` ratio) sits after the analog tape saturation stage to protect against transient clipping during overlapping sub-bass drops and Zimmer Braams.
+- **Harmonic Shimmer Overtones (`.`)**: Optional crystalline octave-fifth sine tail layered onto the Phase 3 wordmark lock.
+
+### 📂 40. Local Director Preset Vault (`localStorage`)
+- **Persistent Browser Defaults**: Save your current studio composition directly inside `#project-modal` (**Save as Default** / **Clear Saved**), automatically restoring on load whenever no URL query permalink overrides are active.
+
+### ♿ 41. Modal Accessibility, Input Isolation & Reduced-Motion Hardening
+- **Shortcut Input Isolation**: Typing inside `#presents-badge`, `#project-json-input`, or any form control no longer triggers single-key hotkeys (`Escape` dismisses modals or blurs cleanly).
+- **Accessible Dialogs & `inert` Isolation**: All modals expose `role="dialog"`, `aria-modal="true"`, `aria-labelledby`, background `inert` state management, and automatic focus return on close.
+- **Targeted Reduced-Motion Support**: Opt-in `@media (prefers-reduced-motion: no-preference)` and targeted `@media (prefers-reduced-motion: reduce)` rules disable persistent stage motion cleanly without jarring `0.01ms` global transition overrides.
 
 ---
 
@@ -296,6 +316,9 @@ Cycle between 5 authentic post-production cinema color grading profiles via key 
 | `]` | **Speed Up** | Increase playback speed gear (up to 2.0x hyper-time) |
 | `\` | **Film Grain** | Cycle 35mm Celluloid Film Grain Texture (Fine, Gritty, Vintage, Off) |
 | `;` | **Optical Flares** | Toggle dynamic optical lens flare ghosts & anamorphic light streaks |
+| `` ` `` | **Theater Fullscreen** | Toggle edge-to-edge browser fullscreen presentation mode |
+| `,` | **Iris Bloom Aura** | Toggle dynamic anamorphic iris bloom halo ring |
+| `.` | **Harmonic Shimmer** | Toggle Phase-3 crystalline octave-fifth shimmer overtones |
 | `←` / `→` | **Scrub Timeline** | Step forward / backward by 0.25 seconds |
 | `?` | **Shortcuts Modal** | Open interactive director shortcuts modal cheatsheet |
 | `Esc` | **Close Modal** | Close any open modal dialog |
